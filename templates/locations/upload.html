@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload Location Data</title>
+    <style>
+        /* Universal box-sizing for consistency */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body { font-family: sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; }
+        .container { border: 1px solid #ddd; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; margin: 0; padding: 0; } /* Reset label margins */
+        select, input[type="file"] { width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; }
+        button { background-color: #4285F4; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        button:hover { background-color: #357ae8; }
+        .error { color: red; background: #ffe6e6; padding: 10px; border-radius: 4px; margin-bottom: 15px; }
+        .help-text { font-size: 0.9em; color: #666; margin-bottom: 20px; }
+        .back-link { display: inline-block; margin-top: 20px; color: #666; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Upload Google Data</h1>
+        
+        {% if error %}
+        <div class="error">
+            <strong>Error:</strong> {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="type">Data Source Type:</label>
+                <select name="type" id="type" required>
+                    <option value="timeline">Google Timeline (JSON)</option>
+                    <option value="saved">Google Saved Places (JSON)</option>
+                    <option value="labeled">Google Labeled Places (JSON)</option>
+                    <option value="mymaps">Google My Maps (KML/KMZ)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="file">Select File:</label>
+                <input type="file" name="file" id="file" required>
+            </div>
+
+            <div class="help-text">
+                <strong>For Timeline:</strong> Upload the JSON file from <code>Takeout/Location History/Semantic Location History/</code>.<br>
+                <strong>For Saved Places:</strong> Upload the <code>Saved Places.json</code> file from <code>Takeout/Maps (your places)/</code>.<br>
+                <strong>For Labeled Places:</strong> Upload the <code>Labeled places.json</code> file from <code>Takeout/Maps (your places)/</code>.<br>
+                <strong>For My Maps:</strong> Export your map as a KML file from Google My Maps and upload it.
+            </div>
+
+            <button type="submit">Upload and Process</button>
+        </form>
+
+        <a href="{% url 'locations:map_view' %}" class="back-link">← Back to Map</a>
+    </div>
+</body>
+</html>

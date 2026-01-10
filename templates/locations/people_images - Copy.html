@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load mahimsoft_tags %}
+{% block title %}
+  Masud's Location History
+{% endblock %}
+{% block extend_header %}
+  <style>
+    /* Smooth transitions for hover effects */
+    .img-card {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .img-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+{% endblock %}
+
+{% block navbar %}
+  {% include 'locations/navbar_person_images.html' %}
+{% endblock %}
+
+{% block content %}
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Header Section -->
+    <header class="text-center mb-16">
+      <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight sm:text-5xl">Our Community</h1>
+      <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">A showcase of the people who make our organization special.</p>
+      
+    </header>
+<form method="get" class="mx-auto grid grid-cols-3 gap-3">
+      <div class="flex justify-center my-2">
+        <label for="{{ form.people_name.id_for_label }}" class="block text-sm font-medium text-gray-700">Peoples Name:</label>
+        {{ form.people_name }}
+        <button type="submit" class="h-7 w-20 btn-sm rounded-md bg-indigo-600 mx-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">OK</button>
+      </div>
+    </form>
+    <!-- Image Grid -->
+    <!-- Responsive Grid: 1 col on mobile, 2 cols on Large (lg) screens -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+      {% for person in people_images %}
+        <!-- Card Container -->
+        <div class="img-card bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
+          <!-- Image Wrapper -->
+          <div class="aspect-w-16 aspect-h-9 relative overflow-hidden bg-gray-200">
+            {% if person.image %}
+              <a href="{{person.image.url|safe}}" title="View Image" target="_blank"><img src="{{ person.image.url }}" alt="{{ person.name }}" class="w-full h-[400px] object-cover" onerror="this.src='https://via.placeholder.com/800x600?text=Image+Not+Found'" /></a>
+            {% else %}
+              <div class="w-full h-[400px] flex items-center justify-center bg-gray-200 text-gray-400">
+                <span>No Image Available</span>
+              </div>
+            {% endif %}
+
+            <!-- Overlay with Name (Optional Gradient) -->
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end">
+              <div class="p-6">
+                <h3 class="text-2xl font-bold text-white">{{ person_name }}</h3>
+                <p class="text-gray-200 text-sm font-medium uppercase tracking-wider">{{ person.people|default:'Member' }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bio/Description Section -->
+          <div class="p-6">
+            <p class="text-gray-600 flex justify-start">
+              <svg viewBox="0 0 48 48" width="32" height="32" fill="red">
+                <path d="M18 12.5C15.5897 12.5 13.5849 14.5018 13.5849 17.0345C13.5849 19.5672 15.5897 21.569 18 21.569C20.4103 21.569 22.4151 19.5672 22.4151 17.0345C22.4151 14.5018 20.4103 12.5 18 12.5ZM10.5849 17.0345C10.5849 12.9017 13.8766 9.5 18 9.5C22.1234 9.5 25.4151 12.9017 25.4151 17.0345C25.4151 21.1673 22.1234 24.569 18 24.569C13.8766 24.569 10.5849 21.1673 10.5849 17.0345ZM18 29.8793C14.0801 29.8793 10.7403 32.5616 9.69697 36.2673C9.5473 36.7989 9.03833 37.1708 8.49337 37.0811L7.50662 36.9189C6.96166 36.8292 6.58837 36.3131 6.72325 35.7776C8.00732 30.6788 12.5509 26.8793 18 26.8793C23.449 26.8793 27.9927 30.6788 29.2767 35.7776C29.4116 36.3131 29.0383 36.8292 28.4934 36.9189L27.5066 37.0811C26.9617 37.1708 26.4527 36.7989 26.303 36.2673C25.2597 32.5616 21.9199 29.8793 18 29.8793Z"></path>
+                <path d="M33 31.5371C32.2445 31.5371 31.5198 31.668 30.8447 31.9093C30.3246 32.0951 29.7189 31.9243 29.4549 31.4392L28.9769 30.5608C28.713 30.0757 28.8907 29.463 29.4009 29.2516C30.513 28.791 31.7285 28.5371 33 28.5371C37.4554 28.5371 41.1594 31.6303 42.2706 35.7812C42.4135 36.3147 42.0386 36.8308 41.4935 36.9196L40.5065 37.0804C39.9614 37.1692 39.4546 36.7956 39.2894 36.2686C38.4217 33.5 35.91 31.5371 33 31.5371Z"></path>
+                <path d="M33 18.5C31.6193 18.5 30.5 19.6193 30.5 21C30.5 22.3807 31.6193 23.5 33 23.5C34.3807 23.5 35.5 22.3807 35.5 21C35.5 19.6193 34.3807 18.5 33 18.5ZM27.5 21C27.5 17.9624 29.9624 15.5 33 15.5C36.0376 15.5 38.5 17.9624 38.5 21C38.5 24.0376 36.0376 26.5 33 26.5C29.9624 26.5 27.5 24.0376 27.5 21Z"></path>
+              </svg> <span>{{ person.people|color_text|default:'No description available for this person.' }}</span>
+            </p>
+            <p class="text-gray-600 leading-relaxed">
+              Date: {{ person.photo_taken_time|default:"No 'Image Taken Date' of  available for this image." }}
+              {% if person.is_location %}
+                <small class="gps" style="color: red;"><a href="https://www.google.com/maps?q={{ person.latitude }},{{ person.longitude }}" title="Go to Google Maps: {{ person.latitude }}, {{ person.longitude }}" target="_blank">&#128279; GEO Location</a></small>
+              {% endif %}
+            </p>
+            <div class="mt-6 flex items-center justify-between">
+              <a href="#" class="text-indigo-600 font-semibold hover:text-indigo-800 transition-colors">View Profile &rarr;</a>
+              <span class="text-xs text-gray-400">ID: #{{ person.id }} (Image No. {{ forloop.counter }})</span>
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <!-- Empty State -->
+        <div class="col-span-full py-20 text-center bg-white rounded-2xl border-2 border-dashed border-gray-200">
+          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <h3 class="mt-2 text-sm font-medium text-gray-900">No people found</h3>
+          <p class="mt-1 text-sm text-gray-500">Get started by adding some members to your database.</p>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- Pagination (Optional Django Style) -->
+    {% if is_paginated %}
+      <nav class="mt-16 flex items-center justify-center space-x-2">
+        {% if page_obj.has_previous %}
+          <a href="?page={{ page_obj.previous_page_number }}" class="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">Previous</a>
+        {% endif %}
+        <span class="px-4 py-2 text-sm text-gray-500">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+          <a href="?page={{ page_obj.next_page_number }}" class="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">Next</a>
+        {% endif %}
+      </nav>
+    {% endif %}
+  </div>
+{% endblock %}

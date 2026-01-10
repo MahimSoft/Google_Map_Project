@@ -1,0 +1,34 @@
+<nav class="fixed top-0 left-0 right-0 z-[1000] flex items-center justify-between px-6 h-10 bg-white/20 backdrop-blur-md border-b border-white/10">
+  <div class="flex space-x-4 text-gray font-bold text-sm tracking-tight">
+    MAP<span class="text-blue-400">&nbsp; <a href="/">EXPLORE</a></span>
+    <button onclick="location.href='/timeline/'" class="text-xs text-gray hover:text-blue-300 transition-colors uppercase font-medium">
+      Timeline
+    </button>
+    <button onclick="location.href='/gallery/'" class="text-xs text-gray hover:text-blue-300 transition-colors uppercase font-medium">
+      Gallery
+    </button>
+    <button onclick="location.href='/google_photos/'" class="text-xs text-gray hover:text-blue-300 transition-colors uppercase font-medium">
+      Google Photos
+    </button>
+    <button onclick="location.href='/people_images/?person_id=0'" class="text-xs text-gray hover:text-blue-300 transition-colors uppercase font-medium">
+      People
+    </button>
+   <button 
+    onclick='location.href="{% url "locations:google_photos" %}?is_video=1"' 
+    class="text-xs text-gray hover:text-blue-300 transition-colors uppercase font-medium">
+    Videos
+</button>
+    <!--
+Source - https://stackoverflow.com/a/2906611
+Posted by Adam, modified by community. See post 'Timeline' for change history
+Retrieved 2026-01-05, License - CC BY-SA 4.0
+-->
+  </div>
+
+  <div class="flex space-x-4">
+    
+    {% block extranav %}
+    {% endblock extranav %}
+      
+  </div>
+</nav>

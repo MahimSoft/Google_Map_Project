@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="content-language" content="en" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Metro Route Map · Dhaka Metro Rail</title>
+    <meta name="title" content="Metro Route Map · Dhaka Metro Rail" />
+    <meta
+      name="description"
+      content="Interactive route map of Dhaka Metro Rail"
+    />
+    <link rel="canonical" href="https://dhakametrorail.org/route-map/" />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      href="https://dhakametrorail.org/route-map/index.xml"
+      title="Dhaka Metro Rail"
+    />
+    <link
+      type="text/css"
+      rel="stylesheet"
+      href="../../statics/Metro_Rail_Map_files/main.bundle.min.133052877df9d21fdb73a83305fe3236e29892633a76d8aa9ddf27d1f8efd65471dbd550fc2d2ead111894ad37b0d3b4a0d53c17cdee9a52ec21b73811933b8f.css"
+      integrity="sha512-EzBSh3350h/bc6gzBf4yNuKYkmM6dtiqnd8n0fjv1lRx29VQ/C0urREYlK03sNO0oNU8F83umlLsIbc4EZM7jw=="
+    />
+    <script
+      type="text/javascript"
+      src="../../statics/Metro_Rail_Map_files/appearance.min.d2141a93e5ba37a4750b20ca3e4358ce46dd489d2e0296d52937a0c2dbee8dc248af517dd06a7f7d580654b92c1d00d4fe219736c9903ad81f155aaf8400990f.js.download"
+      integrity="sha512-0hQak+W6N6R1CyDKPkNYzkbdSJ0uApbVKTegwtvujcJIr1F90Gp/fVgGVLksHQDU/iGXNsmQOtgfFVqvhACZDw=="
+    ></script>
+    <script
+      defer=""
+      type="text/javascript"
+      id="script-bundle"
+      src="../../statics/Metro_Rail_Map_files/main.bundle.min.c086c9fd5b8521565c37d4b3855c4f256e28e551565202c537dbaad6fce47dde3bdf043a3194e3da235b58b73ac5f0c288c0a6ef63ab11c662e780b6b35867a9.js.download"
+      integrity="sha512-wIbJ/VuFIVZcN9SzhVxPJW4o5VFWUgLFN9uq1vzkfd473wQ6MZTj2iNbWLc6xfDCiMCm72OrEcZi54C2s1hnqQ=="
+      data-copy="Copy"
+      data-copied="Copied"
+    ></script>
+    <script
+      src="../../statics/Metro_Rail_Map_files/zoom.min.f592a181a15d2a5b042daa7f746c3721acf9063f8b6acd175d989129865a37d400ae0e85b640f9ad42cd98d1f8ad30931718cf8811abdcc5fcb264400d1a2b0c.js.download"
+      integrity="sha512-9ZKhgaFdKlsELap/dGw3Iaz5Bj+Las0XXZiRKYZaN9QArg6FtkD5rULNmNH4rTCTFxjPiBGr3MX8smRADRorDA=="
+    ></script>
+    <style type="text/css">
+      .medium-zoom-overlay {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        opacity: 0;
+        transition: opacity 0.3s;
+        will-change: opacity;
+      }
+      .medium-zoom--opened .medium-zoom-overlay {
+        cursor: pointer;
+        cursor: zoom-out;
+        opacity: 1;
+      }
+      .medium-zoom-image {
+        cursor: pointer;
+        cursor: zoom-in;
+        transition: transform 0.3s cubic-bezier(0.2, 0, 0.2, 1) !important;
+      }
+      .medium-zoom-image--hidden {
+        visibility: hidden;
+      }
+      .medium-zoom-image--opened {
+        position: relative;
+        cursor: pointer;
+        cursor: zoom-out;
+        will-change: transform;
+      }
+    </style>
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="https://dhakametrorail.org/apple-touch-icon.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="48x48"
+      href="https://dhakametrorail.org/favicon-48x48.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="https://dhakametrorail.org/favicon-32x32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="https://dhakametrorail.org/favicon-16x16.png"
+    />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="https://dhakametrorail.org/favicon.svg"
+    />
+    <link rel="manifest" href="https://dhakametrorail.org/site.webmanifest" />
+    <meta property="og:url" content="https://dhakametrorail.org/route-map/" />
+    <meta property="og:site_name" content="Dhaka Metro Rail" />
+    <meta property="og:title" content="Metro Route Map" />
+    <meta
+      property="og:description"
+      content="Interactive route map of Dhaka Metro Rail"
+    />
+    <meta property="og:locale" content="en" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Metro Route Map" />
+    <meta
+      name="twitter:description"
+      content="Interactive route map of Dhaka Metro Rail"
+    />
+    <script
+      src="../../statics/Metro_Rail_Map_files/jquery.slim.min.b0dca576e87d7eaa5850ae4e61759c065786cdb6489d68fcc82240539eebd5da522bdb4fda085ffd245808c8fe2acb2516408eb774ef26b5f6015fc6737c0ea8.js.download"
+      integrity="sha512-sNylduh9fqpYUK5OYXWcBleGzbZInWj8yCJAU57r1dpSK9tP2ghf/SRYCMj+KsslFkCOt3TvJrX2AV/Gc3wOqA=="
+    ></script>
+    <meta name="google-adsense-account" content="ca-pub-2907100931212625" />
+    <meta name="theme-color" content="rgb(255, 255, 255)" />
+  </head>
+  <body>
+    <div style="width:90%; margin: auto; display: flex; justify-content: left; align-items: center;">
+      <a href="https://dhakametrorail.org/" target="_blank"
+      >
+      <img
+      src="../../statics/Metro_Rail_Map_files/logo.png"
+      width="150"
+      height="150"
+      alt="Dhaka Metro Rail 3"
+      /></a><h1 style="margin-left: 10px; font-size: 36px!important;">Dhaka Metro Rail</h1>
+    </div>
+    <div
+      id="metro-map"
+      style="
+        height: 600px;
+        width: 90%;
+        margin: 20px auto;
+        border-radius: 8px;
+        position: relative;
+        outline-style: none;
+      "
+      class="leaflet-container leaflet-touch leaflet-retina leaflet-fade-anim leaflet-grab leaflet-touch-drag leaflet-touch-zoom"
+      tabindex="0"
+    >
+      <div
+        class="leaflet-pane leaflet-map-pane"
+        style="transform: translate3d(21.0064px, 1130px, 0px)"
+      >
+        <div class="leaflet-pane leaflet-tile-pane">
+          <div class="leaflet-layer" style="z-index: 1; opacity: 1">
+            <div
+              class="leaflet-tile-container leaflet-zoom-animated"
+              style="
+                z-index: 17;
+                transform: translate3d(298px, -704px, 0px) scale(0.5);
+              "
+            ></div>
+            <div
+              class="leaflet-tile-container leaflet-zoom-animated"
+              style="
+                z-index: 18;
+                transform: translate3d(206px, -494px, 0px) scale(1);
+              "
+            >
+              <img
+                alt=""
+                src="https://c.tile.openstreetmap.org/11/1537/883.png"
+                class="leaflet-tile leaflet-tile-loaded"
+                style="
+                  width: 256px;
+                  height: 256px;
+                  transform: translate3d(-116px, -730px, 0px);
+                  opacity: 1;
+                "
+              /><img
+                alt=""
+                src="https://a.tile.openstreetmap.org/11/1538/883.png"
+                class="leaflet-tile leaflet-tile-loaded"
+                style="
+                  width: 256px;
+                  height: 256px;
+                  transform: translate3d(140px, -730px, 0px);
+                  opacity: 1;
+                "
+              /><img
+                alt=""
+                src="https://a.tile.openstreetmap.org/11/1537/884.png"
+                class="leaflet-tile leaflet-tile-loaded"
+                style="
+                  width: 256px;
+                  height: 256px;
+                  transform: translate3d(-116px, -474px, 0px);
+                  opacity: 1;
+                "
+              /><img
+                alt=""
+                src="https://b.tile.openstreetmap.org/11/1538/884.png"
+                class="leaflet-tile leaflet-tile-loaded"
+                style="
+                  width: 256px;
+                  height: 256px;
+                  transform: translate3d(140px, -474px, 0px);
+                  opacity: 1;
+                "
+              /><img
+                alt=""
+                src="https://b.tile.openstreetmap.org/11/1537/885.png"
+                class="leaflet-tile leaflet-tile-loaded"
+                style="
+                  width: 256px;
+                  height: 256px;
+                  transform: translate3d(-116px, -218px, 0px);
+                  opacity: 1;
+                "
+              /><img
+                alt=""
+                src="https://c.tile.openstreetmap.org/11/1538/885.png"
+                class="leaflet-tile leaflet-tile-loaded"
+                style="
+                  width: 256px;
+                  height: 256px;
+                  transform: translate3d(140px, -218px, 0px);
+                  opacity: 1;
+                "
+              /><img
+                alt=""
+                src="https://c.tile.openstreetmap.org/11/1536/884.png"
+                class="leaflet-tile leaflet-tile-loaded"
+                style="
+                  width: 256px;
+                  height: 256px;
+                  transform: translate3d(-372px, -474px, 0px);
+                  opacity: 1;
+                "
+              /><img
+                alt=""
+                src="https://c.tile.openstreetmap.org/11/1539/884.png"
+                class="leaflet-tile leaflet-tile-loaded"
+                style="
+                  width: 256px;
+                  height: 256px;
+                  transform: translate3d(396px, -474px, 0px);
+                  opacity: 1;
+                "
+              /><img
+                alt=""
+                src="https://b.tile.openstreetmap.org/11/1536/883.png"
+                class="leaflet-tile leaflet-tile-loaded"
+                style="
+                  width: 256px;
+                  height: 256px;
+                  transform: translate3d(-372px, -730px, 0px);
+                  opacity: 1;
+                "
+              /><img
+                alt=""
+                src="https://b.tile.openstreetmap.org/11/1539/883.png"
+                class="leaflet-tile leaflet-tile-loaded"
+                style="
+                  width: 256px;
+                  height: 256px;
+                  transform: translate3d(396px, -730px, 0px);
+                  opacity: 1;
+                "
+              /><img
+                alt=""
+                src="https://a.tile.openstreetmap.org/11/1536/885.png"
+                class="leaflet-tile leaflet-tile-loaded"
+                style="
+                  width: 256px;
+                  height: 256px;
+                  transform: translate3d(-372px, -218px, 0px);
+                  opacity: 1;
+                "
+              /><img
+                alt=""
+                src="https://a.tile.openstreetmap.org/11/1539/885.png"
+                class="leaflet-tile leaflet-tile-loaded"
+                style="
+                  width: 256px;
+                  height: 256px;
+                  transform: translate3d(396px, -218px, 0px);
+                  opacity: 1;
+                "
+              />
+            </div>
+          </div>
+        </div>
+        <div class="leaflet-pane leaflet-overlay-pane">
+          <svg
+            pointer-events="none"
+            class="leaflet-zoom-animated"
+            width="827"
+            height="720"
+            viewBox="-90 -1190 827 720"
+            style="transform: translate3d(-90px, -1190px, 0px)"
+          >
+            <g>
+              <path
+                class="leaflet-interactive"
+                stroke="#0066cc"
+                stroke-opacity="0.8"
+                stroke-width="4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                fill="none"
+                d="M369 -941L363 -904L364 -873L370 -845L381 -817L387 -797L392 -778L392 -768L393 -766L402 -765L410 -740L410 -726L414 -720L420 -717L425 -720L439 -720L444 -717"
+              ></path>
+            </g>
+          </svg>
+        </div>
+        <div class="leaflet-pane leaflet-shadow-pane"></div>
+        <div class="leaflet-pane leaflet-marker-pane">
+          <div
+            class="leaflet-marker-icon metro-station-icon leaflet-zoom-animated leaflet-interactive"
+            tabindex="0"
+            role="button"
+            style="
+              margin-left: -9px;
+              margin-top: -9px;
+              width: 18px;
+              height: 18px;
+              transform: translate3d(369px, -941px, 0px);
+              z-index: -941;
+            "
+          >
+            <div class="station-marker"></div>
+          </div>
+          <div
+            class="leaflet-marker-icon metro-station-icon leaflet-zoom-animated leaflet-interactive"
+            tabindex="0"
+            role="button"
+            style="
+              margin-left: -9px;
+              margin-top: -9px;
+              width: 18px;
+              height: 18px;
+              transform: translate3d(366px, -926px, 0px);
+              z-index: -926;
+            "
+          >
+            <div class="station-marker"></div>
+          </div>
+          <div
+            class="leaflet-marker-icon metro-station-icon leaflet-zoom-animated leaflet-interactive"
+            tabindex="0"
+            role="button"
+            style="
+              margin-left: -9px;
+              margin-top: -9px;
+              width: 18px;
+              height: 18px;
+              transform: translate3d(363px, -904px, 0px);
+              z-index: -904;
+            "
+          >
+            <div class="station-marker"></div>
+          </div>
+          <div
+            class="leaflet-marker-icon metro-station-icon leaflet-zoom-animated leaflet-interactive"
+            tabindex="0"
+            role="button"
+            style="
+              margin-left: -9px;
+              margin-top: -9px;
+              width: 18px;
+              height: 18px;
+              transform: translate3d(364px, -873px, 0px);
+              z-index: -873;
+            "
+          >
+            <div class="station-marker"></div>
+          </div>
+          <div
+            class="leaflet-marker-icon metro-station-icon leaflet-zoom-animated leaflet-interactive"
+            tabindex="0"
+            role="button"
+            style="
+              margin-left: -9px;
+              margin-top: -9px;
+              width: 18px;
+              height: 18px;
+              transform: translate3d(366px, -862px, 0px);
+              z-index: -862;
+            "
+          >
+            <div class="station-marker"></div>
+          </div>
+          <div
+            class="leaflet-marker-icon metro-station-icon leaflet-zoom-animated leaflet-interactive"
+            tabindex="0"
+            role="button"
+            style="
+              margin-left: -9px;
+              margin-top: -9px;
+              width: 18px;
+              height: 18px;
+              transform: translate3d(370px, -845px, 0px);
+              z-index: -845;
+            "
+          >
+            <div class="station-marker"></div>
+          </div>
+          <div
+            class="leaflet-marker-icon metro-station-icon leaflet-zoom-animated leaflet-interactive"
+            tabindex="0"
+            role="button"
+            style="
+              margin-left: -9px;
+              margin-top: -9px;
+              width: 18px;
+              height: 18px;
+              transform: translate3d(376px, -830px, 0px);
+              z-index: -830;
+            "
+          >
+            <div class="station-marker"></div>
+          </div>
+          <div
+            class="leaflet-marker-icon metro-station-icon leaflet-zoom-animated leaflet-interactive"
+            tabindex="0"
+            role="button"
+            style="
+              margin-left: -9px;
+              margin-top: -9px;
+              width: 18px;
+              height: 18px;
+              transform: translate3d(381px, -817px, 0px);
+              z-index: -817;
+            "
+          >
+            <div class="station-marker"></div>
+          </div>
+          <div
+            class="leaflet-marker-icon metro-station-icon leaflet-zoom-animated leaflet-interactive"
+            tabindex="0"
+            role="button"
+            style="
+              margin-left: -9px;
+              margin-top: -9px;
+              width: 18px;
+              height: 18px;
+              transform: translate3d(387px, -797px, 0px);
+              z-index: -797;
+            "
+          >
+            <div class="station-marker"></div>
+          </div>
+          <div
+            class="leaflet-marker-icon metro-station-icon leaflet-zoom-animated leaflet-interactive"
+            tabindex="0"
+            role="button"
+            style="
+              margin-left: -9px;
+              margin-top: -9px;
+              width: 18px;
+              height: 18px;
+              transform: translate3d(392px, -778px, 0px);
+              z-index: -778;
+            "
+          >
+            <div class="station-marker"></div>
+          </div>
+          <div
+            class="leaflet-marker-icon metro-station-icon leaflet-zoom-animated leaflet-interactive"
+            tabindex="0"
+            role="button"
+            style="
+              margin-left: -9px;
+              margin-top: -9px;
+              width: 18px;
+              height: 18px;
+              transform: translate3d(398px, -766px, 0px);
+              z-index: -766;
+            "
+          >
+            <div class="station-marker"></div>
+          </div>
+          <div
+            class="leaflet-marker-icon metro-station-icon leaflet-zoom-animated leaflet-interactive"
+            tabindex="0"
+            role="button"
+            style="
+              margin-left: -9px;
+              margin-top: -9px;
+              width: 18px;
+              height: 18px;
+              transform: translate3d(406px, -754px, 0px);
+              z-index: -754;
+            "
+          >
+            <div class="station-marker"></div>
+          </div>
+          <div
+            class="leaflet-marker-icon metro-station-icon leaflet-zoom-animated leaflet-interactive"
+            tabindex="0"
+            role="button"
+            style="
+              margin-left: -9px;
+              margin-top: -9px;
+              width: 18px;
+              height: 18px;
+              transform: translate3d(411px, -735px, 0px);
+              z-index: -735;
+            "
+          >
+            <div class="station-marker"></div>
+          </div>
+          <div
+            class="leaflet-marker-icon metro-station-icon leaflet-zoom-animated leaflet-interactive"
+            tabindex="0"
+            role="button"
+            style="
+              margin-left: -9px;
+              margin-top: -9px;
+              width: 18px;
+              height: 18px;
+              transform: translate3d(412px, -723px, 0px);
+              z-index: -723;
+            "
+          >
+            <div class="station-marker"></div>
+          </div>
+          <div
+            class="leaflet-marker-icon metro-station-icon leaflet-zoom-animated leaflet-interactive"
+            tabindex="0"
+            role="button"
+            style="
+              margin-left: -9px;
+              margin-top: -9px;
+              width: 18px;
+              height: 18px;
+              transform: translate3d(427px, -720px, 0px);
+              z-index: -720;
+            "
+          >
+            <div class="station-marker"></div>
+          </div>
+          <div
+            class="leaflet-marker-icon metro-station-icon leaflet-zoom-animated leaflet-interactive"
+            tabindex="0"
+            role="button"
+            style="
+              margin-left: -9px;
+              margin-top: -9px;
+              width: 18px;
+              height: 18px;
+              transform: translate3d(444px, -717px, 0px);
+              z-index: -717;
+            "
+          >
+            <div class="station-marker"></div>
+          </div>
+        </div>
+        <div class="leaflet-pane leaflet-tooltip-pane"></div>
+        <div class="leaflet-pane leaflet-popup-pane"></div>
+        <div
+          class="leaflet-proxy leaflet-zoom-animated"
+          style="transform: translate3d(393705px, 226442px, 0px) scale(1024)"
+        ></div>
+      </div>
+      <div class="leaflet-control-container">
+        <div class="leaflet-top leaflet-left">
+          <div class="leaflet-control-zoom leaflet-bar leaflet-control">
+            <a
+              class="leaflet-control-zoom-in"
+              href="#"
+              title="Zoom in"
+              role="button"
+              aria-label="Zoom in"
+              aria-disabled="false"
+              ><span aria-hidden="true">+</span></a
+            ><a
+              class="leaflet-control-zoom-out"
+              href="#"
+              title="Zoom out"
+              role="button"
+              aria-label="Zoom out"
+              aria-disabled="false"
+              ><span aria-hidden="true">−</span></a
+            >
+          </div>
+        </div>
+        <div class="leaflet-top leaflet-right"></div>
+        <div class="leaflet-bottom leaflet-left"></div>
+        <div class="leaflet-bottom leaflet-right">
+          <div class="leaflet-control-attribution leaflet-control">
+            <a
+              href="https://leafletjs.com"
+              title="A JavaScript library for interactive maps"
+              ><svg
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                width="12"
+                height="8"
+                viewBox="0 0 12 8"
+                class="leaflet-attribution-flag"
+              >
+                <path fill="#4C7BE1" d="M0 0h12v4H0z"></path>
+                <path fill="#FFD500" d="M0 4h12v3H0z"></path>
+                <path fill="#E0BC00" d="M0 7h12v1H0z"></path>
+              </svg>
+              Leaflet</a
+            >
+            <span aria-hidden="true">|</span> ©
+            <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>
+            contributors
+          </div>
+        </div>
+      </div>
+    </div>
+    <link
+      rel="stylesheet"
+      href="../../statics/Metro_Rail_Map_files/leaflet.min.css"
+    />
+    <script src="../../statics/Metro_Rail_Map_files/leaflet.min.js.download"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const r = L.map("metro-map").setView([23.8103, 90.4125], 12);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        }).addTo(r);
+        const e = [
+            {
+              name: "Uttara North",
+              coords: [23.8691067, 90.3675303],
+              info: "Terminal Station",
+            },
+            {
+              name: "Uttara Center",
+              coords: [23.8597207, 90.3651833],
+              info: "Regular Station",
+            },
+            {
+              name: "Uttara South",
+              coords: [23.8459103, 90.363247],
+              info: "Regular Station",
+            },
+            {
+              name: "Pallabi",
+              coords: [23.8261574, 90.3641863],
+              info: "Regular Station",
+            },
+            {
+              name: "Mirpur 11",
+              coords: [23.8190959, 90.3652809],
+              info: "Major Station",
+            },
+            {
+              name: "Mirpur 10",
+              coords: [23.8083649, 90.3682614],
+              info: "Regular Station",
+            },
+            {
+              name: "Kazipara",
+              coords: [23.7992408, 90.3719878],
+              info: "Regular Station",
+            },
+            {
+              name: "Shewrapara",
+              coords: [23.7909631, 90.3755087],
+              info: "Regular Station",
+            },
+            {
+              name: "Agargaon",
+              coords: [23.7784275, 90.3800503],
+              info: "Major Station",
+            },
+            {
+              name: "Bijoy Sarani",
+              coords: [23.7663936, 90.3830971],
+              info: "Regular Station",
+            },
+            {
+              name: "Farmgate",
+              coords: [23.759070994051868, 90.38705156632943],
+              info: "Major Station",
+            },
+            {
+              name: "Karwan Bazar",
+              coords: [23.7512656, 90.3927762],
+              info: "Commercial Hub",
+            },
+            {
+              name: "Shahbag",
+              coords: [23.7395404, 90.3961576],
+              info: "Cultural Center",
+            },
+            {
+              name: "Dhaka University",
+              coords: [23.7319228, 90.3966615],
+              info: "Educational Hub",
+            },
+            {
+              name: "Bangladesh Secretariat",
+              coords: [23.7300126, 90.4074836],
+              info: "Government Hub",
+            },
+            {
+              name: "Motijheel",
+              coords: [23.7280587, 90.4190551],
+              info: "Terminal Station",
+            },
+          ],
+          l = L.divIcon({
+            className: "metro-station-icon",
+            html: '<div class="station-marker"></div>',
+            iconSize: [18, 18],
+            iconAnchor: [9, 9],
+          });
+        e.forEach((e) => {
+          L.marker(e.coords, { icon: l })
+            .bindPopup(`<b>${e.name}</b><br>${e.info}`)
+            .addTo(r);
+        });
+        const t = e.map((e) => e.coords),
+          c = e.findIndex((e) => e.name === "Bijoy Sarani"),
+          n = e.findIndex((e) => e.name === "Farmgate"),
+          s = e.findIndex((e) => e.name === "Karwan Bazar"),
+          o = e.findIndex((e) => e.name === "Shahbag"),
+          i = e.findIndex((e) => e.name === "Dhaka University"),
+          a = e.findIndex((e) => e.name === "Bangladesh Secretariat"),
+          d = e.findIndex((e) => e.name === "Motijheel");
+        a !== -1 &&
+          d === a + 1 &&
+          t.splice(a + 1, 0, [23.73028362175544, 90.41520615978317]),
+          i !== -1 &&
+            a === i + 1 &&
+            t.splice(
+              i + 1,
+              0,
+              [23.729989078451634, 90.39842268413115],
+              [23.728500285719544, 90.40001971750716],
+              [23.728178961300312, 90.4021022958852],
+              [23.728928716999754, 90.40440717197768],
+              [23.730021210455757, 90.40592815614535]
+            ),
+          o !== -1 &&
+            i === o + 1 &&
+            t.splice(
+              o + 1,
+              0,
+              [23.737293175789265, 90.3955836738826],
+              [23.73378976907144, 90.39543609809789]
+            ),
+          s !== -1 &&
+            o === s + 1 &&
+            t.splice(s + 1, 0, [23.74282278301553, 90.3957214112611]),
+          n !== -1 &&
+            s === n + 1 &&
+            t.splice(
+              n + 1,
+              0,
+              [23.75915339110095, 90.38867394832113],
+              [23.75837899713689, 90.38995293845537]
+            ),
+          c !== -1 &&
+            n === c + 1 &&
+            t.splice(
+              c + 1,
+              0,
+              [23.761727786310054, 90.38313913218948],
+              [23.759924863789102, 90.38318509653253],
+              [23.759209697545664, 90.38396649037922]
+            ),
+          L.polyline(t, {
+            color: "#0066cc",
+            weight: 4,
+            opacity: 0.8,
+          }).addTo(r);
+      });
+    </script>
+    <style>
+      .metro-station-icon {
+        background: 0 0;
+      }
+      .station-marker {
+        width: 12px;
+        height: 12px;
+        background-color: #fff;
+        border: 3px solid #06c;
+        border-radius: 50%;
+      }
+      .leaflet-popup-content {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, segoe ui,
+          Roboto, Oxygen, Ubuntu, Cantarell, open sans, helvetica neue,
+          sans-serif;
+      }
+      .leaflet-popup-content b {
+        color: #06c;
+        display: block;
+        margin-bottom: 4px;
+      }
+    </style>
+
+    <figure>
+      <img
+        class="my-0 rounded-md medium-zoom-image"
+        loading="lazy"
+        width="90%"
+        height="90%"
+        style="margin: auto"
+        alt=""
+        src="../../statics/Metro_Rail_Map_files/Dhaka_MRT_Network_(en).svg.png"
+      />
+    </figure>
+  </body>
+</html>

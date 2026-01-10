@@ -1,0 +1,331 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}
+  Masud's Location History
+{% endblock %}
+{% block extend_header %}
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <!-- Leaflet MarkerCluster CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+
+  <!-- Leaflet AwesomeMarkers CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+  <!-- Metro Map 
+  <link rel="alternate" type="application/rss+xml" href="https://dhakametrorail.org/route-map/index.xml" title="Dhaka Metro Rail" />
+  <link type="text/css" rel="stylesheet" href="{% static 'MetroFiles/main.bundle.min.133052877df9d21fdb73a83305fe3236e29892633a76d8aa9ddf27d1f8efd65471dbd550fc2d2ead111894ad37b0d3b4a0d53c17cdee9a52ec21b73811933b8f.css' %}" integrity="sha512-EzBSh3350h/bc6gzBf4yNuKYkmM6dtiqnd8n0fjv1lRx29VQ/C0urREYlK03sNO0oNU8F83umlLsIbc4EZM7jw==" />
+  <script type="text/javascript" src="{% static 'MetroFiles/appearance.min.d2141a93e5ba37a4750b20ca3e4358ce46dd489d2e0296d52937a0c2dbee8dc248af517dd06a7f7d580654b92c1d00d4fe219736c9903ad81f155aaf8400990f.js.download' %}" integrity="sha512-0hQak+W6N6R1CyDKPkNYzkbdSJ0uApbVKTegwtvujcJIr1F90Gp/fVgGVLksHQDU/iGXNsmQOtgfFVqvhACZDw=="></script>
+  <script defer="" type="text/javascript" id="script-bundle" src="{% static 'MetroFiles/main.bundle.min.c086c9fd5b8521565c37d4b3855c4f256e28e551565202c537dbaad6fce47dde3bdf043a3194e3da235b58b73ac5f0c288c0a6ef63ab11c662e780b6b35867a9.js.download' %}" integrity="sha512-wIbJ/VuFIVZcN9SzhVxPJW4o5VFWUgLFN9uq1vzkfd473wQ6MZTj2iNbWLc6xfDCiMCm72OrEcZi54C2s1hnqQ==" data-copy="Copy" data-copied="Copied"></script>
+  <script src="{% static 'MetroFiles/zoom.min.f592a181a15d2a5b042daa7f746c3721acf9063f8b6acd175d989129865a37d400ae0e85b640f9ad42cd98d1f8ad30931718cf8811abdcc5fcb264400d1a2b0c.js.download' %}" integrity="sha512-9ZKhgaFdKlsELap/dGw3Iaz5Bj+Las0XXZiRKYZaN9QArg6FtkD5rULNmNH4rTCTFxjPiBGr3MX8smRADRorDA=="></script>
+  Metro Map  -->
+
+  <style>
+    html,
+    body {
+      height: 80%;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: sans-serif;
+    }
+    #map {
+      height: 88%;
+      width: 99%;
+      margin: auto;
+      z-index: 1;
+    }
+    .controls {
+      position: absolute;
+      top: 50px;
+      right: 10px;
+      z-index: 10;
+      background: white;
+      padding: 18px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    }
+    .btn_map {
+      display: block;
+      width: 100%;
+      padding: 5px 1px;
+      background: #4285f4;
+      color: white;
+      text-decoration: none;
+      text-align: center;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+    #side-nav {
+      position: absolute;
+      top: 100;
+      left: 20;
+      width: 300px;
+      height: 100%;
+      background: white;
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+      z-index: 1001;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease-in-out;
+      overflow-y: auto;
+      padding: 10px;
+    }
+    #side-nav.open {
+      transform: translateX(0);
+    }
+    #nav-toggle {
+      position: absolute;
+      top: 50px;
+      left: 7px;
+      z-index: 1002;
+      background: white;
+      padding: 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    }
+    .place-label {
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      font-weight: bold;
+      font-size: 10px;
+    }
+    #side-nav h3 {
+      margin-top: 20px;
+      margin-bottom: 10px;
+      font-size: 1.2em;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 5px;
+    }
+    #side-nav ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    #side-nav li a {
+      display: block;
+      padding: 8px 12px;
+      text-decoration: none;
+      color: #333;
+      border-radius: 4px;
+    }
+    #side-nav li a:hover {
+      background-color: #f0f0f0;
+    }
+
+    /* Metro Maps
+    .metro-station-icon {
+      background: 0 0;
+    }
+    .station-marker {
+      width: 12px;
+      height: 12px;
+      background-color: #fff;
+      border: 3px solid #06c;
+      border-radius: 50%;
+    }
+    .leaflet-popup-content {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, segoe ui, Roboto, Oxygen, Ubuntu, Cantarell, open sans, helvetica neue, sans-serif;
+    }
+    .leaflet-popup-content b {
+      color: #06c;
+      display: block;
+      margin-bottom: 4px;
+    }*/
+  </style>
+{% endblock %}
+
+{% block content %}
+
+  {% if messages %}
+      <ul class="messages">
+          {% for message in messages %}
+              <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+          {% endfor %}
+      </ul>
+  {% endif %}
+  {% block navbar %} {% include 'gallery/navbar_gallery.html' %}{% endblock navbar %}
+  <div id="nav-toggle">
+    <i class="fa fa-bars"></i>
+  </div>
+
+  <div id="side-nav">
+    <!-- Navigation content will be dynamically generated -->
+  </div>
+
+  <p id="customAlert"></p>
+  <div class="controls">
+    <h3>Map Image Visualizer</h3>
+    <a href="/upload" class="btn_map">Upload New Data</a>
+  </div>
+  <div id="map"></div>
+<!-- Metro Map -->
+{% comment %} <link rel="stylesheet" href="{% static 'MetroFiles/leaflet.min.css' %}" /> {% endcomment %}
+{% comment %} <script src="{% static 'MetroFiles/leaflet.min.js.download' %}"></script> {% endcomment %}
+<!-- Metro Map -->
+  <!-- Scripts -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+  <!-- Data passed from Django View -->
+  <script>
+        const placesByType = {{ places_by_type_json|safe }};
+        const placesData = {{ places_json|safe }};
+        // Initialize Map
+        var map = L.map('map', {zoomControl: false}).setView([20, 0], 2);
+
+        // Add custom zoom control to bottomright
+        L.control.zoom({
+            position: 'bottomright'
+        }).addTo(map);
+
+        // Define Base Layers
+        var streetMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        });
+
+        var satelliteMap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+        });
+
+        var baseMaps = {
+            "Street Map": streetMap,
+            "Satellite": satelliteMap
+        };
+
+        // Add Layer Control
+        // L.control.layers(baseMaps, null, { position: 'bottomleft' }).addTo(map);
+
+        // Add default layer
+        streetMap.addTo(map);
+
+        // Initialize Marker Cluster Group
+        var markers = L.markerClusterGroup();
+        var markerRefs = {}; // To store references to markers
+        const date_options = {
+            dateStyle: 'full',
+            timeStyle: 'full',
+            // timeZone: 'Asia/Dhaka' // Ensures the time is correct for Bangladesh Standard Time
+        };
+
+        const formatter = new Intl.DateTimeFormat('bn-BD', {
+        dateStyle: 'full', // Options: 'full', 'long', 'medium', 'short'
+        timeStyle: 'medium', // Options: 'full', 'long', 'medium', 'short'
+        hour12: true, // Use 24-hour format
+        timeZone: 'Asia/Dhaka' // Specify the timezone for Bangladesh
+        });
+        // Loop through Django data and add markers
+        placesData.forEach(function(place, index) {
+            if (place.latitude && place.longitude) {
+                
+                var icon = L.AwesomeMarkers.icon({
+                    icon: place.icon || 'info-circle',
+                    markerColor: place.color || 'blue',
+                    prefix: 'fa'
+                });
+
+                var marker = L.marker([place.latitude, place.longitude], {icon: icon});
+                
+                var popupContent = `<b>${place.name || "Unknown Location"}</b><br>`;
+                if (place.timestamp) {
+                    new_dt = new Date(place.timestamp);
+                    popupContent += `<i>${formatter.format(new_dt)}</i><br>`;
+                }
+                if (place.address) {
+                    popupContent += `<small>${place.address}</small><br>`;
+                }
+                // Add image to popup
+                if (place.image_url) {
+                    popupContent += `<a href="${place.image_url}" title="View Image" target="_blank"><img src="${place.image_url}" style="margin: auto; display: block; max-width: 100%;" width="300px"></a><br>`;
+                }
+                // <a href="https://www.google.com/maps?q=23.8516144,90.3860722">View Location on Google Maps</a>
+                
+                popupContent += `<small class="gps" style="color: red;"><a href="https://www.google.com/maps?q=${place.latitude},${place.longitude}" title="Go to Google Maps" target="_blank">&#128279; ${place.latitude}, ${place.longitude}</a></small>`;
+                if (place.comments) {
+                    popupContent += `<br><hr><small class="text-amber-700">${place.comments||"No Comments"}</small><br>`;
+                }
+                marker.bindPopup(popupContent);
+
+                // Add a permanent tooltip for the name
+                if (place.name) {
+                    marker.bindTooltip(place.name, {
+                        permanent: true, 
+                        direction: 'top',
+                        offset: [0, -10],
+                        className: 'place-label'
+                    });
+                }
+
+                markers.addLayer(marker);
+                // Use a unique key for each marker
+                markerRefs[place.name + '_' + index] = marker; 
+            }
+        });
+
+        // Add clusters to map
+        map.addLayer(markers);
+        
+        // Update stats
+        const countElement = document.getElementById('count');
+        if (countElement) {
+            countElement.innerText = placesData.length;
+            console.log("Element found: " + countElement.innerText);
+        } else {
+            console.error("Element with id 'count' not found.");
+        }
+        // document.getElementById('count').innerText = placesData.length;
+        // console.log("Total:" + placesData.length);
+
+
+        // Fit bounds to show all markers
+        if (placesData.length > 0) {
+            map.fitBounds(markers.getBounds());
+        }
+
+        // Side Navigation Logic
+        const sideNav = document.getElementById('side-nav');
+        const navToggle = document.getElementById('nav-toggle');
+        
+        navToggle.addEventListener('click', function() {
+            sideNav.classList.toggle('open');
+        });
+/*
+        let overallPlaceIndex = 0;
+        for (const type in placesByType) {
+            const group = placesByType[type];
+            const groupDiv = document.createElement('div');
+            groupDiv.innerHTML = `<h3>${type}</h3>`;
+            const placeList = document.createElement('ul');
+
+            group.places.forEach(function(place) {
+                const placeName = place.name;
+                const currentIndex = overallPlaceIndex;
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `<a href="#">${placeName}</a>`;
+                
+                listItem.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const markerKey = placeName + '_' + currentIndex;
+                    const marker = markerRefs[markerKey];
+                    if (marker) {
+                        markers.zoomToShowLayer(marker, function() {
+                            map.setView(marker.getLatLng());
+                            marker.openPopup();
+                        });
+                    }
+                });
+                
+                placeList.appendChild(listItem);
+                overallPlaceIndex++;
+            });
+            groupDiv.appendChild(placeList);
+            sideNav.appendChild(groupDiv);
+        }
+            */
+    </script>
+    
+{% endblock %}

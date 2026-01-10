@@ -1,0 +1,819 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}
+  Metro Route Map · Dhaka Metro Rail
+{% endblock %}
+{% block extend_header %}
+
+    <link rel="alternate" type="application/rss+xml" href="https://dhakametrorail.org/route-map/index.xml" title="Dhaka Metro Rail" />
+    <link type="text/css" rel="stylesheet" href="{% static 'Metro Route Map · Dhaka Metro Rail_files/main.bundle.min.133052877df9d21fdb73a83305fe3236e29892633a76d8aa9ddf27d1f8efd65471dbd550fc2d2ead111894ad37b0d3b4a0d53c17cdee9a52ec21b73811933b8f.css' %}" integrity="sha512-EzBSh3350h/bc6gzBf4yNuKYkmM6dtiqnd8n0fjv1lRx29VQ/C0urREYlK03sNO0oNU8F83umlLsIbc4EZM7jw==" />
+    <script type="text/javascript" src="{% static 'Metro Route Map · Dhaka Metro Rail_files/appearance.min.d2141a93e5ba37a4750b20ca3e4358ce46dd489d2e0296d52937a0c2dbee8dc248af517dd06a7f7d580654b92c1d00d4fe219736c9903ad81f155aaf8400990f.js.download' %}" integrity="sha512-0hQak+W6N6R1CyDKPkNYzkbdSJ0uApbVKTegwtvujcJIr1F90Gp/fVgGVLksHQDU/iGXNsmQOtgfFVqvhACZDw=="></script> 
+    <script defer="" type="text/javascript" id="script-bundle" src="{% static 'Metro Route Map · Dhaka Metro Rail_files/main.bundle.min.c086c9fd5b8521565c37d4b3855c4f256e28e551565202c537dbaad6fce47dde3bdf043a3194e3da235b58b73ac5f0c288c0a6ef63ab11c662e780b6b35867a9.js.download' %}" integrity="sha512-wIbJ/VuFIVZcN9SzhVxPJW4o5VFWUgLFN9uq1vzkfd473wQ6MZTj2iNbWLc6xfDCiMCm72OrEcZi54C2s1hnqQ==" data-copy="Copy" data-copied="Copied"></script> 
+    <script src="{% static 'Metro Route Map · Dhaka Metro Rail_files/zoom.min.f592a181a15d2a5b042daa7f746c3721acf9063f8b6acd175d989129865a37d400ae0e85b640f9ad42cd98d1f8ad30931718cf8811abdcc5fcb264400d1a2b0c.js.download' %}" integrity="sha512-9ZKhgaFdKlsELap/dGw3Iaz5Bj+Las0XXZiRKYZaN9QArg6FtkD5rULNmNH4rTCTFxjPiBGr3MX8smRADRorDA=="></script> 
+    <style type="text/css">
+      .medium-zoom-overlay {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        opacity: 0;
+        transition: opacity 0.3s;
+        will-change: opacity;
+      }
+      .medium-zoom--opened .medium-zoom-overlay {
+        cursor: pointer;
+        cursor: zoom-out;
+        opacity: 1;
+      }
+      .medium-zoom-image {
+        cursor: pointer;
+        cursor: zoom-in;
+        transition: transform 0.3s cubic-bezier(0.2, 0, 0.2, 1) !important;
+      }
+      .medium-zoom-image--hidden {
+        visibility: hidden;
+      }
+      .medium-zoom-image--opened {
+        position: relative;
+        cursor: pointer;
+        cursor: zoom-out;
+        will-change: transform;
+      }
+    </style>
+    <link rel="apple-touch-icon" sizes="180x180"    href= "https://dhakametrorail.org/apple-touch-icon.png"  />
+    <link rel="icon" type="image/png" sizes="48x48" href= "https://dhakametrorail.org/favicon-48x48.png"  />
+    <link rel="icon" type="image/png" sizes="32x32" href= "https://dhakametrorail.org/favicon-32x32.png"  />
+    <link rel="icon" type="image/png" sizes="16x16" href= "https://dhakametrorail.org/favicon-16x16.png"  />
+    <link rel="icon" type="image/svg+xml" href="https://dhakametrorail.org/favicon.svg" />
+    <link rel="manifest" href="https://dhakametrorail.org/site.webmanifest" />
+    <meta property="og:url" content="https://dhakametrorail.org/route-map/" />
+    <meta property="og:site_name" content="Dhaka Metro Rail" />
+    <meta property="og:title" content="Metro Route Map" />
+    <meta property="og:description" content="Interactive route map of Dhaka Metro Rail" />
+    <meta property="og:locale" content="en" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Metro Route Map" />
+    <meta name="twitter:description" content="Interactive route map of Dhaka Metro Rail" />
+    <script src="{% static 'Metro Route Map · Dhaka Metro Rail_files/jquery.slim.min.b0dca576e87d7eaa5850ae4e61759c065786cdb6489d68fcc82240539eebd5da522bdb4fda085ffd245808c8fe2acb2516408eb774ef26b5f6015fc6737c0ea8.js.download' %}" integrity="sha512-sNylduh9fqpYUK5OYXWcBleGzbZInWj8yCJAU57r1dpSK9tP2ghf/SRYCMj+KsslFkCOt3TvJrX2AV/Gc3wOqA=="></script> 
+    <meta name="google-adsense-account" content="ca-pub-2907100931212625" />
+    <meta name="theme-color" content="rgb(255, 255, 255)" />
+{% endblock %}
+
+{% block navbar %} {% include 'locations/navbar_googlephotos.html' %}{% endblock navbar %}
+
+{% block content %}
+    <div id="the-top" class="absolute flex self-center">
+      <a class="px-3 py-1 text-sm -translate-y-8 rounded-b-lg bg-primary-200 focus:translate-y-0 dark:bg-neutral-600" href="https://dhakametrorail.org/route-map/#main-content"><span class="font-bold text-primary-600 ltr:pr-2 rtl:pl-2 dark:text-primary-400">↓</span>Skip to main content</a>
+    </div>
+    <div class="min-h-[148px]"></div>
+    <div class="fixed inset-x-0 pl-[24px] pr-[24px] bg-neutral dark:bg-neutral-800 z-index-100">
+      <div class="relative max-w-[64rem] ml-auto mr-auto">
+        <div class="main-menu flex items-center justify-between px-4 py-6 sm:px-6 md:justify-start gap-x-3 padding-main-menu">
+          <div>
+            <a href="https://dhakametrorail.org/" class="flex">
+              <span class="sr-only">Dhaka Metro Rail</span>
+              <img src="{% static 'Metro Route Map · Dhaka Metro Rail_files/logo.png' %}" width="313" height="313" class="logo max-h-[5rem] max-w-[5rem] object-scale-down object-left nozoom" alt="Dhaka Metro Rail" /> 
+            </a>
+          </div>
+          <div class="flex flex-1 items-center justify-between">
+            <nav class="flex space-x-3">
+              <a href="https://dhakametrorail.org/" class="text-base font-medium text-gray-500 hover:text-gray-900">Dhaka Metro Rail</a>
+            </nav>
+            <nav class="hidden md:flex items-center gap-x-5 md:ml-12 h-12">
+              <a href="https://dhakametrorail.org/" class="flex items-center text-gray-500 hover:text-primary-600 dark:hover:text-primary-400"><p class="text-base font-medium" title="Dhaka Metro Rail: Unofficial Guide to Routes, Fares &amp; Schedules">Home</p></a>
+              <div>
+                <div class="cursor-pointer flex items-center nested-menu">
+                  <a class="text-base font-medium text-gray-500 hover:text-primary-600 dark:hover:text-primary-400" title="">Stations</a><span>
+                    <span class="relative block icon">
+                      <svg viewBox="0 0 20 20" fill="currentcolor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M5.23 7.21a.75.75.0 011.06.02L10 11.168l3.71-3.938a.75.75.0 111.08 1.04l-4.25 4.5a.75.75.0 01-1.08.0l-4.25-4.5a.75.75.0 01.02-1.06z" clip-rule="evenodd"></path>
+                      </svg>
+                    </span>
+                  </span>
+                </div>
+                <div class="absolute menuhide">
+                  <div class="pt-2 p-5 mt-2 rounded-xl backdrop-blur shadow-2xl">
+                    <div class="flex flex-col space-y-3">
+                      <a href="https://dhakametrorail.org/stations/" class="flex items-center text-gray-500 hover:text-primary-600 dark:hover:text-primary-400"><p class="text-sm font-sm" title="Dhaka Metro Rail MRT Line 6 Stations">All Stations</p></a><a href="https://dhakametrorail.org/route-map/" class="flex items-center text-gray-500 hover:text-primary-600 dark:hover:text-primary-400"><p class="text-sm font-sm" title="Metro Route Map">Route Map</p></a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <a href="https://dhakametrorail.org/schedule/" class="flex items-center text-gray-500 hover:text-primary-600 dark:hover:text-primary-400"><p class="text-base font-medium" title="Dhaka Metro Rail Schedule &amp; Timings">Schedule</p></a><a href="https://dhakametrorail.org/fares/" class="flex items-center text-gray-500 hover:text-primary-600 dark:hover:text-primary-400"><p class="text-base font-medium" title="Dhaka Metro Fare Calculator &amp; Ticket Prices">Fares</p></a>
+              <div>
+                <div class="cursor-pointer flex items-center nested-menu">
+                  <a class="text-base font-medium text-gray-500 hover:text-primary-600 dark:hover:text-primary-400" title="">Rules</a><span>
+                    <span class="relative block icon">
+                      <svg viewBox="0 0 20 20" fill="currentcolor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M5.23 7.21a.75.75.0 011.06.02L10 11.168l3.71-3.938a.75.75.0 111.08 1.04l-4.25 4.5a.75.75.0 01-1.08.0l-4.25-4.5a.75.75.0 01.02-1.06z" clip-rule="evenodd"></path>
+                      </svg>
+                    </span>
+                  </span>
+                </div>
+                <div class="absolute menuhide">
+                  <div class="pt-2 p-5 mt-2 rounded-xl backdrop-blur shadow-2xl">
+                    <div class="flex flex-col space-y-3">
+                      <a href="https://dhakametrorail.org/do-dont/" class="flex items-center text-gray-500 hover:text-primary-600 dark:hover:text-primary-400"><p class="text-sm font-sm" title="Do and Don&#39;t at the Metro Rail Station">Do &amp; Don’t</p></a><a href="https://dhakametrorail.org/prohibited/" class="flex items-center text-gray-500 hover:text-primary-600 dark:hover:text-primary-400"><p class="text-sm font-sm" title="Prohibited Items &amp; Luggage Rules for Dhaka Metro Rail">Prohibited</p></a><a href="https://dhakametrorail.org/laws/" class="flex items-center text-gray-500 hover:text-primary-600 dark:hover:text-primary-400"><p class="text-sm font-sm" title="Dhaka Metro Rail Laws and Regulations">Laws</p></a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <a href="https://dhakametrorail.org/news/" class="flex items-center text-gray-500 hover:text-primary-600 dark:hover:text-primary-400"><p class="text-base font-medium" title="Latest News">News</p></a>
+              <div>
+                <div class="cursor-pointer flex items-center nested-menu">
+                  <span class="ltr:mr-1 rtl:ml-1">
+                    <span class="relative block icon">
+                      <svg viewBox="0 0 640 512">
+                        <path fill="currentcolor" d="M0 128C0 92.7 28.7 64 64 64H256h48 16H576c35.3.0 64 28.7 64 64V384c0 35.3-28.7 64-64 64H320 304 256 64c-35.3.0-64-28.7-64-64V128zm320 0V384H576V128H320zM178.3 175.9c-3.2-7.2-10.4-11.9-18.3-11.9s-15.1 4.7-18.3 11.9l-64 144c-4.5 10.1.1 21.9 10.2 26.4s21.9-.1 26.4-10.2l8.9-20.1h73.6l8.9 20.1c4.5 10.1 16.3 14.6 26.4 10.2s14.6-16.3 10.2-26.4l-64-144zM160 233.2 179 276H141l19-42.8zM448 164c11 0 20 9 20 20v4h44 16c11 0 20 9 20 20s-9 20-20 20h-2l-1.6 4.5c-8.9 24.4-22.4 46.6-39.6 65.4.9.6 1.8 1.1 2.7 1.6l18.9 11.3c9.5 5.7 12.5 18 6.9 27.4s-18 12.5-27.4 6.9L467 333.8c-4.5-2.7-8.8-5.5-13.1-8.5-10.6 7.5-21.9 14-34 19.4l-3.6 1.6c-10.1 4.5-21.9-.1-26.4-10.2s.1-21.9 10.2-26.4l3.6-1.6c6.4-2.9 12.6-6.1 18.5-9.8L410 286.1c-7.8-7.8-7.8-20.5.0-28.3s20.5-7.8 28.3.0l14.6 14.6.5.5c12.4-13.1 22.5-28.3 29.8-45H448 376c-11 0-20-9-20-20s9-20 20-20h52v-4c0-11 9-20 20-20z"></path>
+                      </svg>
+                    </span>
+                  </span>
+                  <div class="text-sm font-medium text-gray-500 hover:text-primary-600 dark:hover:text-primary-400" title="Metro Route Map">English</div>
+                </div>
+                <div class="absolute menuhide">
+                  <div class="pt-2 p-5 mt-2 rounded-xl backdrop-blur shadow-2xl">
+                    <div class="flex flex-col space-y-3">
+                      <a href="https://dhakametrorail.org/route-map/" class="flex items-center"><p class="text-sm font-sm text-gray-500 hover:text-primary-600 dark:hover:text-primary-400" title="Metro Route Map">EN</p></a><a href="https://dhakametrorail.org/bn/route-map/" class="flex items-center"><p class="text-sm font-sm text-gray-500 hover:text-primary-600 dark:hover:text-primary-400" title="ঢাকা মেট্রো রুট ম্যাপ">BN</p></a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button id="search-button" aria-label="Search" class="text-base hover:text-primary-600 dark:hover:text-primary-400" title="">
+                <span class="relative block icon">
+                  <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="search" class="svg-inline--fa fa-search fa-w-16" role="img" viewBox="0 0 512 512">
+                    <path fill="currentcolor" d="M505 442.7 405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9.0 208 0S0 93.1.0 208s93.1 208 208 208c48.3.0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9.0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7.0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7.0 128 57.2 128 128 0 70.7-57.2 128-128 128z"></path>
+                  </svg>
+                </span>
+              </button>
+              <div class="flex items-center">
+                <button id="appearance-switcher" aria-label="Dark mode switcher" type="button" class="text-base hover:text-primary-600 dark:hover:text-primary-400">
+                  <div class="flex items-center justify-center dark:hidden">
+                    <span class="relative block icon">
+                      <svg viewBox="0 0 512 512">
+                        <path fill="currentcolor" d="M32 256C32 132.2 132.3 32 255.8 32c11.36.0 29.7 1.668 40.9 3.746 9.616 1.777 11.75 14.63 3.279 19.44C245 86.5 211.2 144.6 211.2 207.8c0 109.7 99.71 193 208.3 172.3 9.561-1.805 16.28 9.324 10.11 16.95C387.9 448.6 324.8 480 255.8 480 132.1 480 32 379.6 32 256z"></path>
+                      </svg>
+                    </span>
+                  </div>
+                  <div class="items-center justify-center hidden dark:flex">
+                    <span class="relative block icon">
+                      <svg viewBox="0 0 512 512">
+                        <path fill="currentcolor" d="M256 159.1c-53.02.0-95.1 42.98-95.1 95.1s41.2 96.9 95.1 96.9 95.1-42.98 95.1-95.1S309 159.1 256 159.1zM509.3 347l-63.2-91.9 63.15-91.01c6.332-9.125 1.104-21.74-9.826-23.72l-109-19.7-19.7-109c-1.975-10.93-14.59-16.16-23.72-9.824L256 65.89 164.1 2.736c-9.125-6.332-21.74-1.107-23.72 9.824L121.6 121.6 12.56 141.3C1.633 143.2-3.596 155.9 2.736 164.1L65.89 256 2.74 347.01c-6.332 9.125-1.105 21.74 9.824 23.72l109 19.7 19.7 109c1.975 10.93 14.59 16.16 23.72 9.824L256 446.1l91.01 63.15c9.127 6.334 21.75 1.107 23.72-9.822l19.7-109 109-19.7C510.4 368.8 515.6 356.1 509.3 347zM256 383.1c-70.69.0-127.1-57.31-127.1-127.1.0-70.69 57.31-127.1 127.1-127.1S383.1 186.2 383.1 256c0 70.7-56.4 127.1-127.1 127.1z"></path>
+                      </svg>
+                    </span>
+                  </div>
+                </button>
+              </div>
+            </nav>
+            <div class="flex md:hidden items-center gap-x-5 md:ml-12 h-12">
+              <span></span>
+              <div>
+                <div class="cursor-pointer flex items-center nested-menu">
+                  <span class="ltr:mr-1 rtl:ml-1">
+                    <span class="relative block icon">
+                      <svg viewBox="0 0 640 512">
+                        <path fill="currentcolor" d="M0 128C0 92.7 28.7 64 64 64H256h48 16H576c35.3.0 64 28.7 64 64V384c0 35.3-28.7 64-64 64H320 304 256 64c-35.3.0-64-28.7-64-64V128zm320 0V384H576V128H320zM178.3 175.9c-3.2-7.2-10.4-11.9-18.3-11.9s-15.1 4.7-18.3 11.9l-64 144c-4.5 10.1.1 21.9 10.2 26.4s21.9-.1 26.4-10.2l8.9-20.1h73.6l8.9 20.1c4.5 10.1 16.3 14.6 26.4 10.2s14.6-16.3 10.2-26.4l-64-144zM160 233.2 179 276H141l19-42.8zM448 164c11 0 20 9 20 20v4h44 16c11 0 20 9 20 20s-9 20-20 20h-2l-1.6 4.5c-8.9 24.4-22.4 46.6-39.6 65.4.9.6 1.8 1.1 2.7 1.6l18.9 11.3c9.5 5.7 12.5 18 6.9 27.4s-18 12.5-27.4 6.9L467 333.8c-4.5-2.7-8.8-5.5-13.1-8.5-10.6 7.5-21.9 14-34 19.4l-3.6 1.6c-10.1 4.5-21.9-.1-26.4-10.2s.1-21.9 10.2-26.4l3.6-1.6c6.4-2.9 12.6-6.1 18.5-9.8L410 286.1c-7.8-7.8-7.8-20.5.0-28.3s20.5-7.8 28.3.0l14.6 14.6.5.5c12.4-13.1 22.5-28.3 29.8-45H448 376c-11 0-20-9-20-20s9-20 20-20h52v-4c0-11 9-20 20-20z"></path>
+                      </svg>
+                    </span>
+                  </span>
+                  <div class="text-sm font-medium text-gray-500 hover:text-primary-600 dark:hover:text-primary-400" title="Metro Route Map">English</div>
+                </div>
+                <div class="absolute menuhide">
+                  <div class="pt-2 p-5 mt-2 rounded-xl backdrop-blur shadow-2xl">
+                    <div class="flex flex-col space-y-3">
+                      <a href="https://dhakametrorail.org/route-map/" class="flex items-center"><p class="text-sm font-sm text-gray-500 hover:text-primary-600 dark:hover:text-primary-400" title="Metro Route Map">EN</p></a><a href="https://dhakametrorail.org/bn/route-map/" class="flex items-center"><p class="text-sm font-sm text-gray-500 hover:text-primary-600 dark:hover:text-primary-400" title="ঢাকা মেট্রো রুট ম্যাপ">BN</p></a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button id="search-button-mobile" aria-label="Search" class="text-base hover:text-primary-600 dark:hover:text-primary-400" title="">
+                <span class="relative block icon">
+                  <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="search" class="svg-inline--fa fa-search fa-w-16" role="img" viewBox="0 0 512 512">
+                    <path fill="currentcolor" d="M505 442.7 405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9.0 208 0S0 93.1.0 208s93.1 208 208 208c48.3.0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9.0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7.0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7.0 128 57.2 128 128 0 70.7-57.2 128-128 128z"></path>
+                  </svg>
+                </span>
+              </button>
+              <button id="appearance-switcher-mobile" aria-label="Dark mode switcher" type="button" class="text-base hover:text-primary-600 dark:hover:text-primary-400 ltr:mr-1 rtl:ml-1">
+                <div class="flex items-center justify-center dark:hidden">
+                  <span class="relative block icon">
+                    <svg viewBox="0 0 512 512">
+                      <path fill="currentcolor" d="M32 256C32 132.2 132.3 32 255.8 32c11.36.0 29.7 1.668 40.9 3.746 9.616 1.777 11.75 14.63 3.279 19.44C245 86.5 211.2 144.6 211.2 207.8c0 109.7 99.71 193 208.3 172.3 9.561-1.805 16.28 9.324 10.11 16.95C387.9 448.6 324.8 480 255.8 480 132.1 480 32 379.6 32 256z"></path>
+                    </svg>
+                  </span>
+                </div>
+                <div class="items-center justify-center hidden dark:flex">
+                  <span class="relative block icon">
+                    <svg viewBox="0 0 512 512">
+                      <path fill="currentcolor" d="M256 159.1c-53.02.0-95.1 42.98-95.1 95.1s41.2 96.9 95.1 96.9 95.1-42.98 95.1-95.1S309 159.1 256 159.1zM509.3 347l-63.2-91.9 63.15-91.01c6.332-9.125 1.104-21.74-9.826-23.72l-109-19.7-19.7-109c-1.975-10.93-14.59-16.16-23.72-9.824L256 65.89 164.1 2.736c-9.125-6.332-21.74-1.107-23.72 9.824L121.6 121.6 12.56 141.3C1.633 143.2-3.596 155.9 2.736 164.1L65.89 256 2.74 347.01c-6.332 9.125-1.105 21.74 9.824 23.72l109 19.7 19.7 109c1.975 10.93 14.59 16.16 23.72 9.824L256 446.1l91.01 63.15c9.127 6.334 21.75 1.107 23.72-9.822l19.7-109 109-19.7C510.4 368.8 515.6 356.1 509.3 347zM256 383.1c-70.69.0-127.1-57.31-127.1-127.1.0-70.69 57.31-127.1 127.1-127.1S383.1 186.2 383.1 256c0 70.7-56.4 127.1-127.1 127.1z"></path>
+                    </svg>
+                  </span>
+                </div>
+              </button>
+            </div>
+          </div>
+          <div class="-my-2 md:hidden">
+            <label id="menu-button" class="block">
+              <div class="cursor-pointer hover:text-primary-600 dark:hover:text-primary-400">
+                <span class="relative block icon">
+                  <svg viewBox="0 0 448 512">
+                    <path fill="currentcolor" d="M0 96C0 78.33 14.33 64 32 64H416c17.7.0 32 14.33 32 32 0 17.7-14.3 32-32 32H32C14.33 128 0 113.7.0 96zM0 256c0-17.7 14.33-32 32-32H416c17.7.0 32 14.3 32 32s-14.3 32-32 32H32c-17.67.0-32-14.3-32-32zM416 448H32c-17.67.0-32-14.3-32-32s14.33-32 32-32H416c17.7.0 32 14.3 32 32s-14.3 32-32 32z"></path>
+                  </svg>
+                </span>
+              </div>
+              <div id="menu-wrapper" class="fixed inset-0 z-30 invisible w-screen h-screen m-0 overflow-auto transition-opacity opacity-0 cursor-default bg-neutral-100/50 backdrop-blur-sm dark:bg-neutral-900/50 padding-top-[5px]">
+                <ul class="flex space-y-2 mt-3 flex-col items-end w-full px-6 py-6 mx-auto overflow-visible list-none ltr:text-right rtl:text-left max-w-7xl">
+                  <li id="menu-close-button">
+                    <span class="cursor-pointer inline-block align-text-bottom hover:text-primary-600 dark:hover:text-primary-400">
+                      <span class="relative block icon">
+                        <svg viewBox="0 0 320 512">
+                          <path fill="currentcolor" d="M310.6 361.4c12.5 12.5 12.5 32.75.0 45.25C304.4 412.9 296.2 416 288 416s-16.38-3.125-22.62-9.375L160 301.3 54.63 406.6C48.38 412.9 40.19 416 32 416S15.63 412.9 9.375 406.6c-12.5-12.5-12.5-32.75.0-45.25l105.4-105.4L9.375 150.6c-12.5-12.5-12.5-32.75.0-45.25s32.75-12.5 45.25.0L160 210.8l105.4-105.4c12.5-12.5 32.75-12.5 45.25.0s12.5 32.75.0 45.25l-105.4 105.4L310.6 361.4z"></path>
+                        </svg>
+                      </span>
+                    </span>
+                  </li>
+                  <li class="mt-1">
+                    <a href="https://dhakametrorail.org/" class="flex items-center text-gray-500 hover:text-primary-600 dark:hover:text-primary-400"><p class="text-bg font-bg" title="Dhaka Metro Rail: Unofficial Guide to Routes, Fares &amp; Schedules">Home</p></a>
+                  </li>
+                  <li class="mt-1">
+                    <a href="https://dhakametrorail.org/route-map/" class="flex items-center text-gray-500 hover:text-primary-600 dark:hover:text-primary-400">
+                      <p class="text-bg font-bg" title="">Stations</p>
+                      <span>
+                        <span class="relative block icon">
+                          <svg viewBox="0 0 20 20" fill="currentcolor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M5.23 7.21a.75.75.0 011.06.02L10 11.168l3.71-3.938a.75.75.0 111.08 1.04l-4.25 4.5a.75.75.0 01-1.08.0l-4.25-4.5a.75.75.0 01.02-1.06z" clip-rule="evenodd"></path>
+                          </svg>
+                        </span>
+                      </span>
+                    </a>
+                  </li>
+                  <li class="mt-1">
+                    <a href="https://dhakametrorail.org/stations/" class="flex items-center text-gray-500 hover:text-primary-600 dark:hover:text-primary-400"><p class="text-sm font-small" title="Dhaka Metro Rail MRT Line 6 Stations">All Stations</p></a>
+                  </li>
+                  <li class="mt-1">
+                    <a href="https://dhakametrorail.org/route-map/" class="flex items-center text-gray-500 hover:text-primary-600 dark:hover:text-primary-400"><p class="text-sm font-small" title="Metro Route Map">Route Map</p></a>
+                  </li>
+                  <li class="mb-2"></li>
+                  <li class="mt-1">
+                    <a href="https://dhakametrorail.org/schedule/" class="flex items-center text-gray-500 hover:text-primary-600 dark:hover:text-primary-400"><p class="text-bg font-bg" title="Dhaka Metro Rail Schedule &amp; Timings">Schedule</p></a>
+                  </li>
+                  <li class="mt-1">
+                    <a href="https://dhakametrorail.org/fares/" class="flex items-center text-gray-500 hover:text-primary-600 dark:hover:text-primary-400"><p class="text-bg font-bg" title="Dhaka Metro Fare Calculator &amp; Ticket Prices">Fares</p></a>
+                  </li>
+                  <li class="mt-1">
+                    <a href="https://dhakametrorail.org/route-map/" class="flex items-center text-gray-500 hover:text-primary-600 dark:hover:text-primary-400">
+                      <p class="text-bg font-bg" title="">Rules</p>
+                      <span>
+                        <span class="relative block icon">
+                          <svg viewBox="0 0 20 20" fill="currentcolor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M5.23 7.21a.75.75.0 011.06.02L10 11.168l3.71-3.938a.75.75.0 111.08 1.04l-4.25 4.5a.75.75.0 01-1.08.0l-4.25-4.5a.75.75.0 01.02-1.06z" clip-rule="evenodd"></path>
+                          </svg>
+                        </span>
+                      </span>
+                    </a>
+                  </li>
+                  <li class="mt-1">
+                    <a href="https://dhakametrorail.org/do-dont/" class="flex items-center text-gray-500 hover:text-primary-600 dark:hover:text-primary-400"><p class="text-sm font-small" title="Do and Don&#39;t at the Metro Rail Station">Do &amp; Don’t</p></a>
+                  </li>
+                  <li class="mt-1">
+                    <a href="https://dhakametrorail.org/prohibited/" class="flex items-center text-gray-500 hover:text-primary-600 dark:hover:text-primary-400"><p class="text-sm font-small" title="Prohibited Items &amp; Luggage Rules for Dhaka Metro Rail">Prohibited</p></a>
+                  </li>
+                  <li class="mt-1">
+                    <a href="https://dhakametrorail.org/laws/" class="flex items-center text-gray-500 hover:text-primary-600 dark:hover:text-primary-400"><p class="text-sm font-small" title="Dhaka Metro Rail Laws and Regulations">Laws</p></a>
+                  </li>
+                  <li class="mb-2"></li>
+                  <li class="mt-1">
+                    <a href="https://dhakametrorail.org/news/" class="flex items-center text-gray-500 hover:text-primary-600 dark:hover:text-primary-400"><p class="text-bg font-bg" title="Latest News">News</p></a>
+                  </li>
+                </ul>
+              </div>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="relative flex flex-col grow">
+      <main id="main-content" class="grow">
+        <header>
+          <h1 class="mt-5 text-4xl font-extrabold text-neutral-900 dark:text-neutral">Metro Route Map</h1>
+          <div class="mt-1 mb-2 text-base text-neutral-500 dark:text-neutral-400 print:hidden">
+            <div class="flex flex-row flex-wrap items-center"></div>
+          </div>
+          <script type="text/javascript" src="{% static 'Metro Route Map · Dhaka Metro Rail_files/page.min.407e5b2727c1f241c95d53db24c776bea71bfc18e09511b815d669ad8caca6e9e18a53864ad364b1ccccfa2f2956768d33cfe193bfb64d3406f3b5ece354ba57.js.download' %}" integrity="sha512-QH5bJyfB8kHJXVPbJMd2vqcb/BjglRG4FdZprYyspunhilOGStNksczM+i8pVnaNM8/hk7+2TTQG87Xs41S6Vw==" data-oid="views_route-map/_index.md" data-oid-likes="likes_route-map/_index.md"></script> 
+        </header>
+        <section class="mt-0 prose flex max-w-full flex-col dark:prose-invert lg:flex-row">
+          <div class="min-w-0 min-h-0 max-w-prose">
+            <p>
+              <a href="https://dhakametrorail.org/stations/">View All Metro Stations →</a>
+            </p>
+            <h2 class="relative group">
+              Dhaka Metro Route Map (currently running)<div id="dhaka-metro-route-map-currently-running" class="anchor"></div>
+              <span class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700 !no-underline" href="https://dhakametrorail.org/route-map/#dhaka-metro-route-map-currently-running" aria-label="Anchor">#</a></span>
+            </h2>
+            <p>The Metro Rail Line-6 (MRT-6) connects Uttara North to Motijheel, serving major locations across Dhaka city. Use this interactive map to explore stations and plan your journey.</p>
+            <div id="metro-map" style="
+                height: 600px;
+                width: 100%;
+                margin: 20px 0px;
+                border-radius: 8px;
+                position: relative;
+              " class="leaflet-container leaflet-touch leaflet-retina leaflet-fade-anim leaflet-grab leaflet-touch-drag leaflet-touch-zoom" tabindex="0">
+              <div class="leaflet-pane leaflet-map-pane" style="transform: translate3d(170.926px, 98px, 0px)">
+                <div class="leaflet-pane leaflet-tile-pane">
+                  <div class="leaflet-layer" style="z-index: 1; opacity: 1">
+                    <div class="leaflet-tile-container leaflet-zoom-animated" style="
+                        z-index: 18;
+                        transform: translate3d(60px, 62px, 0px) scale(1);
+                      ">
+                      <img alt="" src={% static "Metro Route Map · Dhaka Metro Rail_files/1767.png" class="leaflet-tile leaflet-tile-loaded" style=" 
+                          width: 256px;
+                          height: 256px;
+                          transform: translate3d(24px, -197px, 0px);
+                          opacity: 1;
+                        " /><img alt="" src={% static "Metro Route Map · Dhaka Metro Rail_files/1768.png" class="leaflet-tile leaflet-tile-loaded" style=" 
+                          width: 256px;
+                          height: 256px;
+                          transform: translate3d(24px, 59px, 0px);
+                          opacity: 1;
+                        " /><img alt="" src={% static "Metro Route Map · Dhaka Metro Rail_files/1767(1).png" class="leaflet-tile leaflet-tile-loaded" style=" 
+                          width: 256px;
+                          height: 256px;
+                          transform: translate3d(-232px, -197px, 0px);
+                          opacity: 1;
+                        " /><img alt="" src={% static "Metro Route Map · Dhaka Metro Rail_files/1767(2).png" class="leaflet-tile leaflet-tile-loaded" style=" 
+                          width: 256px;
+                          height: 256px;
+                          transform: translate3d(280px, -197px, 0px);
+                          opacity: 1;
+                        " /><img alt="" src={% static "Metro Route Map · Dhaka Metro Rail_files/1768(1).png" class="leaflet-tile leaflet-tile-loaded" style=" 
+                          width: 256px;
+                          height: 256px;
+                          transform: translate3d(-232px, 59px, 0px);
+                          opacity: 1;
+                        " /><img alt="" src={% static "Metro Route Map · Dhaka Metro Rail_files/1768(2).png" class="leaflet-tile leaflet-tile-loaded" style=" 
+                          width: 256px;
+                          height: 256px;
+                          transform: translate3d(280px, 59px, 0px);
+                          opacity: 1;
+                        " /><img alt="" src={% static "Metro Route Map · Dhaka Metro Rail_files/1769.png" class="leaflet-tile leaflet-tile-loaded" style=" 
+                          width: 256px;
+                          height: 256px;
+                          transform: translate3d(24px, 315px, 0px);
+                          opacity: 1;
+                        " /><img alt="" src={% static "Metro Route Map · Dhaka Metro Rail_files/1769(1).png" class="leaflet-tile leaflet-tile-loaded" style=" 
+                          width: 256px;
+                          height: 256px;
+                          transform: translate3d(280px, 315px, 0px);
+                          opacity: 1;
+                        " /><img alt="" src={% static "Metro Route Map · Dhaka Metro Rail_files/1768(3).png" class="leaflet-tile leaflet-tile-loaded" style=" 
+                          width: 256px;
+                          height: 256px;
+                          transform: translate3d(536px, 59px, 0px);
+                          opacity: 1;
+                        " /><img alt="" src={% static "Metro Route Map · Dhaka Metro Rail_files/1767(3).png" class="leaflet-tile leaflet-tile-loaded" style=" 
+                          width: 256px;
+                          height: 256px;
+                          transform: translate3d(536px, -197px, 0px);
+                          opacity: 1;
+                        " /><img alt="" src={% static "Metro Route Map · Dhaka Metro Rail_files/1769(2).png' " class="leaflet-tile leaflet-tile-loaded" style=" 
+                          width: 256px;
+                          height: 256px;
+                          transform: translate3d(-232px, 315px, 0px);
+                          opacity: 1;
+                        " /><img alt="" src="{% static 'Metro Route Map · Dhaka Metro Rail_files/1769(3).png' %}" class="leaflet-tile leaflet-tile-loaded" style=" 
+                          width: 256px;
+                          height: 256px;
+                          transform: translate3d(536px, 315px, 0px);
+                          opacity: 1;
+                        " />
+                    </div>
+                    <div class="leaflet-tile-container leaflet-zoom-animated" style="
+                        z-index: 17;
+                        transform: translate3d(226px, 140px, 0px) scale(0.5);
+                      "></div>
+                  </div>
+                </div>
+                <div class="leaflet-pane leaflet-overlay-pane">
+                  <svg pointer-events="none" class="leaflet-zoom-animated" width="1097" height="720" viewBox="-262 -158 1097 720" style="transform: translate3d(-262px, -158px, 0px)">
+                    <g>
+                      <path class="leaflet-interactive" stroke="#0066cc" stroke-opacity="0.8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none" d="M387 174L380 204L374 248L377 311L380 334L389 368L399 397L410 423L423 463L432 501L432 522L434 524L448 524L452 527L464 562"></path>
+                    </g>
+                  </svg>
+                </div>
+                <div class="leaflet-pane leaflet-shadow-pane"></div>
+                <div class="leaflet-pane leaflet-marker-pane">
+                  <div class="leaflet-marker-icon metro-station-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="
+                      margin-left: -9px;
+                      margin-top: -9px;
+                      width: 18px;
+                      height: 18px;
+                      transform: translate3d(387px, 174px, 0px);
+                      z-index: 174;
+                    ">
+                    <div class="station-marker"></div>
+                  </div>
+                  <div class="leaflet-marker-icon metro-station-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="
+                      margin-left: -9px;
+                      margin-top: -9px;
+                      width: 18px;
+                      height: 18px;
+                      transform: translate3d(380px, 204px, 0px);
+                      z-index: 204;
+                    ">
+                    <div class="station-marker"></div>
+                  </div>
+                  <div class="leaflet-marker-icon metro-station-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="
+                      margin-left: -9px;
+                      margin-top: -9px;
+                      width: 18px;
+                      height: 18px;
+                      transform: translate3d(374px, 248px, 0px);
+                      z-index: 248;
+                    ">
+                    <div class="station-marker"></div>
+                  </div>
+                  <div class="leaflet-marker-icon metro-station-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="
+                      margin-left: -9px;
+                      margin-top: -9px;
+                      width: 18px;
+                      height: 18px;
+                      transform: translate3d(377px, 311px, 0px);
+                      z-index: 311;
+                    ">
+                    <div class="station-marker"></div>
+                  </div>
+                  <div class="leaflet-marker-icon metro-station-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="
+                      margin-left: -9px;
+                      margin-top: -9px;
+                      width: 18px;
+                      height: 18px;
+                      transform: translate3d(380px, 334px, 0px);
+                      z-index: 334;
+                    ">
+                    <div class="station-marker"></div>
+                  </div>
+                  <div class="leaflet-marker-icon metro-station-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="
+                      margin-left: -9px;
+                      margin-top: -9px;
+                      width: 18px;
+                      height: 18px;
+                      transform: translate3d(389px, 368px, 0px);
+                      z-index: 368;
+                    ">
+                    <div class="station-marker"></div>
+                  </div>
+                  <div class="leaflet-marker-icon metro-station-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="
+                      margin-left: -9px;
+                      margin-top: -9px;
+                      width: 18px;
+                      height: 18px;
+                      transform: translate3d(399px, 397px, 0px);
+                      z-index: 397;
+                    ">
+                    <div class="station-marker"></div>
+                  </div>
+                  <div class="leaflet-marker-icon metro-station-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="
+                      margin-left: -9px;
+                      margin-top: -9px;
+                      width: 18px;
+                      height: 18px;
+                      transform: translate3d(410px, 423px, 0px);
+                      z-index: 423;
+                    ">
+                    <div class="station-marker"></div>
+                  </div>
+                  <div class="leaflet-marker-icon metro-station-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="
+                      margin-left: -9px;
+                      margin-top: -9px;
+                      width: 18px;
+                      height: 18px;
+                      transform: translate3d(423px, 463px, 0px);
+                      z-index: 463;
+                    ">
+                    <div class="station-marker"></div>
+                  </div>
+                  <div class="leaflet-marker-icon metro-station-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="
+                      margin-left: -9px;
+                      margin-top: -9px;
+                      width: 18px;
+                      height: 18px;
+                      transform: translate3d(432px, 501px, 0px);
+                      z-index: 501;
+                    ">
+                    <div class="station-marker"></div>
+                  </div>
+                  <div class="leaflet-marker-icon metro-station-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="
+                      margin-left: -9px;
+                      margin-top: -9px;
+                      width: 18px;
+                      height: 18px;
+                      transform: translate3d(443px, 525px, 0px);
+                      z-index: 525;
+                    ">
+                    <div class="station-marker"></div>
+                  </div>
+                  <div class="leaflet-marker-icon metro-station-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="
+                      margin-left: -9px;
+                      margin-top: -9px;
+                      width: 18px;
+                      height: 18px;
+                      transform: translate3d(460px, 549px, 0px);
+                      z-index: 549;
+                    ">
+                    <div class="station-marker"></div>
+                  </div>
+                  <div class="leaflet-marker-icon metro-station-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="
+                      margin-left: -9px;
+                      margin-top: -9px;
+                      width: 18px;
+                      height: 18px;
+                      transform: translate3d(470px, 587px, 0px);
+                      z-index: 587;
+                    ">
+                    <div class="station-marker"></div>
+                  </div>
+                  <div class="leaflet-marker-icon metro-station-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="
+                      margin-left: -9px;
+                      margin-top: -9px;
+                      width: 18px;
+                      height: 18px;
+                      transform: translate3d(471px, 611px, 0px);
+                      z-index: 611;
+                    ">
+                    <div class="station-marker"></div>
+                  </div>
+                  <div class="leaflet-marker-icon metro-station-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="
+                      margin-left: -9px;
+                      margin-top: -9px;
+                      width: 18px;
+                      height: 18px;
+                      transform: translate3d(503px, 617px, 0px);
+                      z-index: 617;
+                    ">
+                    <div class="station-marker"></div>
+                  </div>
+                  <div class="leaflet-marker-icon metro-station-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="
+                      margin-left: -9px;
+                      margin-top: -9px;
+                      width: 18px;
+                      height: 18px;
+                      transform: translate3d(537px, 623px, 0px);
+                      z-index: 623;
+                    ">
+                    <div class="station-marker"></div>
+                  </div>
+                </div>
+                <div class="leaflet-pane leaflet-tooltip-pane"></div>
+                <div class="leaflet-pane leaflet-popup-pane"></div>
+                <div class="leaflet-proxy leaflet-zoom-animated" style="
+                    transform: translate3d(787402px, 452689px, 0px) scale(2048);
+                  "></div>
+              </div>
+              <div class="leaflet-control-container">
+                <div class="leaflet-top leaflet-left">
+                  <div class="leaflet-control-zoom leaflet-bar leaflet-control">
+                    <a class="leaflet-control-zoom-in" href="https://dhakametrorail.org/route-map/#" title="Zoom in" role="button" aria-label="Zoom in" aria-disabled="false"><span aria-hidden="true">+</span></a><a class="leaflet-control-zoom-out" href="https://dhakametrorail.org/route-map/#" title="Zoom out" role="button" aria-label="Zoom out" aria-disabled="false"><span aria-hidden="true">−</span></a>
+                  </div>
+                </div>
+                <div class="leaflet-top leaflet-right"></div>
+                <div class="leaflet-bottom leaflet-left"></div>
+                <div class="leaflet-bottom leaflet-right">
+                  <div class="leaflet-control-attribution leaflet-control">
+                    <a href="https://leafletjs.com/" title="A JavaScript library for interactive maps">
+                      <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8" class="leaflet-attribution-flag">
+                        <path fill="#4C7BE1" d="M0 0h12v4H0z"></path>
+                        <path fill="#FFD500" d="M0 4h12v3H0z"></path>
+                        <path fill="#E0BC00" d="M0 7h12v1H0z"></path>
+                      </svg>Leaflet
+                    </a>
+                    <span aria-hidden="true">|</span> ©
+                    <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>
+                    contributors
+                  </div>
+                </div>
+              </div>
+            </div>
+            <link rel="stylesheet" href="Metro Route Map · Dhaka Metro Rail_files/leaflet.min.css" />
+            <script src="{% static 'Metro Route Map · Dhaka Metro Rail_files/leaflet.min.js.download' %}"></script> 
+            <script>
+              document.addEventListener('DOMContentLoaded', function () {
+                const r = L.map('metro-map').setView([23.8103, 90.4125], 12)
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(r)
+                const e = [
+                    {
+                      name: 'Uttara North',
+                      coords: [23.8691067, 90.3675303],
+                      info: 'Terminal Station'
+                    },
+                    {
+                      name: 'Uttara Center',
+                      coords: [23.8597207, 90.3651833],
+                      info: 'Regular Station'
+                    },
+                    {
+                      name: 'Uttara South',
+                      coords: [23.8459103, 90.363247],
+                      info: 'Regular Station'
+                    },
+                    {
+                      name: 'Pallabi',
+                      coords: [23.8261574, 90.3641863],
+                      info: 'Regular Station'
+                    },
+                    {
+                      name: 'Mirpur 11',
+                      coords: [23.8190959, 90.3652809],
+                      info: 'Major Station'
+                    },
+                    {
+                      name: 'Mirpur 10',
+                      coords: [23.8083649, 90.3682614],
+                      info: 'Regular Station'
+                    },
+                    {
+                      name: 'Kazipara',
+                      coords: [23.7992408, 90.3719878],
+                      info: 'Regular Station'
+                    },
+                    {
+                      name: 'Shewrapara',
+                      coords: [23.7909631, 90.3755087],
+                      info: 'Regular Station'
+                    },
+                    {
+                      name: 'Agargaon',
+                      coords: [23.7784275, 90.3800503],
+                      info: 'Major Station'
+                    },
+                    {
+                      name: 'Bijoy Sarani',
+                      coords: [23.7663936, 90.3830971],
+                      info: 'Regular Station'
+                    },
+                    {
+                      name: 'Farmgate',
+                      coords: [23.759070994051868, 90.38705156632943],
+                      info: 'Major Station'
+                    },
+                    {
+                      name: 'Karwan Bazar',
+                      coords: [23.7512656, 90.3927762],
+                      info: 'Commercial Hub'
+                    },
+                    {
+                      name: 'Shahbag',
+                      coords: [23.7395404, 90.3961576],
+                      info: 'Cultural Center'
+                    },
+                    {
+                      name: 'Dhaka University',
+                      coords: [23.7319228, 90.3966615],
+                      info: 'Educational Hub'
+                    },
+                    {
+                      name: 'Bangladesh Secretariat',
+                      coords: [23.7300126, 90.4074836],
+                      info: 'Government Hub'
+                    },
+                    {
+                      name: 'Motijheel',
+                      coords: [23.7280587, 90.4190551],
+                      info: 'Terminal Station'
+                    }
+                  ],
+                  l = L.divIcon({
+                    className: 'metro-station-icon',
+                    html: '<div class="station-marker"></div>',
+                    iconSize: [18, 18],
+                    iconAnchor: [9, 9]
+                  })
+                e.forEach((e) => {
+                  L.marker(e.coords, { icon: l }).bindPopup(`<b>${e.name}</b><br>${e.info}`).addTo(r)
+                })
+                const t = e.map((e) => e.coords),
+                  c = e.findIndex((e) => e.name === 'Bijoy Sarani'),
+                  n = e.findIndex((e) => e.name === 'Farmgate'),
+                  s = e.findIndex((e) => e.name === 'Karwan Bazar'),
+                  o = e.findIndex((e) => e.name === 'Shahbag'),
+                  i = e.findIndex((e) => e.name === 'Dhaka University'),
+                  a = e.findIndex((e) => e.name === 'Bangladesh Secretariat'),
+                  d = e.findIndex((e) => e.name === 'Motijheel')
+                a !== -1 && d === a + 1 && t.splice(a + 1, 0, [23.73028362175544, 90.41520615978317]),
+                  i !== -1 && a === i + 1 && t.splice(i + 1, 0, [23.729989078451634, 90.39842268413115], [23.728500285719544, 90.40001971750716], [23.728178961300312, 90.4021022958852], [23.728928716999754, 90.40440717197768], [23.730021210455757, 90.40592815614535]),
+                  o !== -1 && i === o + 1 && t.splice(o + 1, 0, [23.737293175789265, 90.3955836738826], [23.73378976907144, 90.39543609809789]),
+                  s !== -1 && o === s + 1 && t.splice(s + 1, 0, [23.74282278301553, 90.3957214112611]),
+                  n !== -1 && s === n + 1 && t.splice(n + 1, 0, [23.75915339110095, 90.38867394832113], [23.75837899713689, 90.38995293845537]),
+                  c !== -1 && n === c + 1 && t.splice(c + 1, 0, [23.761727786310054, 90.38313913218948], [23.759924863789102, 90.38318509653253], [23.759209697545664, 90.38396649037922]),
+                  L.polyline(t, {
+                    color: '#0066cc',
+                    weight: 4,
+                    opacity: 0.8
+                  }).addTo(r)
+              })
+            </script>
+            <style>
+              .metro-station-icon {
+                background: 0 0;
+              }
+              .station-marker {
+                width: 12px;
+                height: 12px;
+                background-color: #fff;
+                border: 3px solid #06c;
+                border-radius: 50%;
+              }
+              .leaflet-popup-content {
+                font-family: system-ui, -apple-system, BlinkMacSystemFont, segoe ui, Roboto, Oxygen, Ubuntu, Cantarell, open sans, helvetica neue, sans-serif;
+              }
+              .leaflet-popup-content b {
+                color: #06c;
+                display: block;
+                margin-bottom: 4px;
+              }
+            </style>
+            <h2 class="relative group">
+              Dhaka Metro Route Map (as planned)<div id="dhaka-metro-route-map-as-planned" class="anchor"></div>
+              <span class="absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700 !no-underline" href="https://dhakametrorail.org/route-map/#dhaka-metro-route-map-as-planned" aria-label="Anchor">#</a></span>
+            </h2>
+            <p></p>
+            <figure>
+              <img class="my-0 rounded-md medium-zoom-image" loading="lazy" alt="" src="{% static 'Metro Route Map · Dhaka Metro Rail_files/Dhaka_MRT_Network_(en).svg.png' %}" /> 
+            </figure>
+            <p></p>
+          </div>
+        </section>
+        <section class="mt-10 prose dark:prose-invert">
+          <p class="py-8 border-t">
+            <em></em>
+          </p>
+        </section>
+        <div id="top-scroller" class="pointer-events-none absolute top-[110vh] bottom-0 w-12 ltr:right-0 rtl:left-0">
+          <a href="https://dhakametrorail.org/route-map/#the-top" class="pointer-events-auto sticky top-[calc(100vh-5.5rem)] flex h-12 w-12 mb-16 items-center justify-center rounded-full bg-neutral/50 text-xl text-neutral-700 hover:text-primary-600 dark:bg-neutral-800/50 dark:text-neutral dark:hover:text-primary-400" aria-label="Scroll to top" title="Scroll to top">↑</a>
+        </div>
+      </main>
+      <footer id="site-footer" class="py-10 print:hidden">
+        <nav class="flex flex-row pb-4 text-base font-medium text-neutral-500 dark:text-neutral-400">
+          <ul class="flex flex-col list-none sm:flex-row">
+            <li class="flex mb-1 ltr:text-right rtl:text-left sm:mb-0 ltr:sm:mr-7 ltr:sm:last:mr-0 rtl:sm:ml-7 rtl:sm:last:ml-0">
+              <a class="decoration-primary-500 hover:underline hover:decoration-2 hover:underline-offset-2" href="https://dhakametrorail.org/about/" title="About">About</a>
+            </li>
+            <li class="flex mb-1 ltr:text-right rtl:text-left sm:mb-0 ltr:sm:mr-7 ltr:sm:last:mr-0 rtl:sm:ml-7 rtl:sm:last:ml-0">
+              <a class="decoration-primary-500 hover:underline hover:decoration-2 hover:underline-offset-2" href="https://dhakametrorail.org/contact/" title="Contact">Contact</a>
+            </li>
+          </ul>
+        </nav>
+        <div class="flex items-center justify-between">
+          <p class="text-sm text-neutral-500 dark:text-neutral-400">
+            © 2025 Dhaka Metro Rail
+            <a href="https://dhakametrorail.org/terms" class="text-sm text-neutral-500 dark:text-neutral-400" target="_blank">// Terms</a>
+            //
+            <a href="https://dhakametrorail.org/privacy" class="text-sm text-neutral-500 dark:text-neutral-400" target="_blank">Privacy</a>
+          </p>
+        </div>
+        <script>
+          mediumZoom(document.querySelectorAll('img:not(.nozoom)'), {
+            margin: 24,
+            background: 'rgba(0,0,0,0.5)',
+            scrollOffset: 0
+          })
+        </script>
+        <script type="text/javascript" src={% static "Metro Route Map · Dhaka Metro Rail_files/process.min.ee03488f19c93c2efb199e2e3014ea5f3cb2ce7d45154adb3399a158cac27ca52831db249ede5bb602700ef87eb02434139de0858af1818ab0fb4182472204a4.js.download" integrity="sha512-7gNIjxnJPC77GZ4uMBTqXzyyzn1FFUrbM5mhWMrCfKUoMdsknt5btgJwDvh+sCQ0E53ghYrxgYqw+0GCRyIEpA=="></script> 
+        <script async="" src="{% static 'Metro Route Map · Dhaka Metro Rail_files/js' %}"></script> 
+        <script>
+          window.dataLayer = window.dataLayer || []
+          function gtag() {
+            dataLayer.push(arguments)
+          }
+          gtag('js', new Date()), gtag('config', 'G-5F7BEPW8QF')
+        </script>
+      </footer>
+      <div id="search-wrapper" class="invisible fixed inset-0 flex h-screen w-screen cursor-default flex-col bg-neutral-500/50 p-4 backdrop-blur-sm dark:bg-neutral-900/50 sm:p-6 md:p-[10vh] lg:p-[12vh] z-index-500" data-url="https://dhakametrorail.org/">
+        <div id="search-modal" class="flex flex-col w-full max-w-3xl min-h-0 mx-auto border rounded-md shadow-lg top-20 border-neutral-200 bg-neutral dark:border-neutral-700 dark:bg-neutral-800">
+          <header class="relative z-10 flex items-center justify-between flex-none px-2">
+            <form class="flex items-center flex-auto min-w-0">
+              <div class="flex items-center justify-center w-8 h-8 text-neutral-400">
+                <span class="relative block icon">
+                  <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="search" class="svg-inline--fa fa-search fa-w-16" role="img" viewBox="0 0 512 512">
+                    <path fill="currentcolor" d="M505 442.7 405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9.0 208 0S0 93.1.0 208s93.1 208 208 208c48.3.0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9.0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7.0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7.0 128 57.2 128 128 0 70.7-57.2 128-128 128z"></path>
+                  </svg>
+                </span>
+              </div>
+              <input type="search" id="search-query" class="flex flex-auto h-12 mx-1 bg-transparent appearance-none focus:outline-dotted focus:outline-2 focus:outline-transparent" placeholder="Search" tabindex="0" />
+            </form>
+            <button id="close-search-button" class="flex items-center justify-center w-8 h-8 text-neutral-700 hover:text-primary-600 dark:text-neutral dark:hover:text-primary-400" title="Close (Esc)">
+              <span class="relative block icon">
+                <svg viewBox="0 0 320 512">
+                  <path fill="currentcolor" d="M310.6 361.4c12.5 12.5 12.5 32.75.0 45.25C304.4 412.9 296.2 416 288 416s-16.38-3.125-22.62-9.375L160 301.3 54.63 406.6C48.38 412.9 40.19 416 32 416S15.63 412.9 9.375 406.6c-12.5-12.5-12.5-32.75.0-45.25l105.4-105.4L9.375 150.6c-12.5-12.5-12.5-32.75.0-45.25s32.75-12.5 45.25.0L160 210.8l105.4-105.4c12.5-12.5 32.75-12.5 45.25.0s12.5 32.75.0 45.25l-105.4 105.4L310.6 361.4z"></path>
+                </svg>
+              </span>
+            </button>
+          </header>
+          <section class="flex-auto px-2 overflow-auto">
+            <ul id="search-results"></ul>
+          </section>
+        </div>
+      </div>
+    </div>
+{% endblock %}

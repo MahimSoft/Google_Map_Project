@@ -1,0 +1,75 @@
+{% load static %}
+{% load static tailwind_tags %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>
+      {% block title %}
+        Masud Self Help
+      {% endblock %}
+    </title>
+    {% block favicon_icon %}
+<link rel="shortcut icon" type="image/x-icon" href="{% static 'images/MS_1.svg' %}">
+    {% endblock %}
+    <meta name="author" content="Mahim Soft" />
+    {% tailwind_css %}
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <style type="text/tailwindcss">
+      @theme {
+        --color-clifford: #da373d;
+      }
+    </style>
+    <style>
+      body {
+        min-height: 100dvh; /* or 100vh */
+      }
+    </style>
+    {% block extend_header %}
+    {% endblock %}
+  </head>
+  <body>
+    {% block navbar %}
+    {% endblock %}
+    <p id="customAlert"></p>
+    {% block content %}
+
+    {% endblock %}
+    <br />
+
+    {% block extend_footer %}
+
+    {% endblock %}
+    <script>
+      // Define your locations
+      const locations = {
+        london: { coords: [51.5074, -0.1278], zoom: 12 },
+        nyc: { coords: [40.7128, -74.006], zoom: 12 },
+        tokyo: { coords: [35.6895, 139.6917], zoom: 12 },
+        Dhaka: { coords: [23.845329339591203, 90.39303854554095], zoom: 12 },
+        Thakurgaon: { coords: [26.030456, 88.482602], zoom: 12 },
+        Makkah: { coords: [21.4223, 39.8262], zoom: 12 },
+        Madina: { coords: [24.468793, 39.611083], zoom: 12 },
+        Taif: { coords: [21.2583333, 40.3955556], zoom: 12 },
+        Sylhet: { coords: [24.90701, 91.871405], zoom: 12 },
+        vietnam: { coords: [21.1319053, 106.44063539999999], zoom: 12 }
+      }
+      
+      function zoomTo(city) {
+        const loc = locations[city]
+        if (loc) {
+          // .flyTo creates a smooth "flight" animation
+          map.flyTo(loc.coords, loc.zoom, {
+            duration: 2,
+            easeLinearity: 0.25
+          })
+        }
+      }
+    </script>
+
+    {% block script %}
+
+    {% endblock %}
+  </body>
+</html>

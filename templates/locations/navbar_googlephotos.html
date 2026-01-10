@@ -1,0 +1,30 @@
+{% extends 'navbar.html' %}
+    {% block extranav %}
+<button onclick="zoomTo('Dhaka')" class="text-xs text-gray hover:text-blue-300 transition-colors uppercase font-medium">
+      Dhaka
+    </button>
+    <button onclick="zoomTo('Sylhet')" class="text-xs text-gray hover:text-blue-300 transition-colors uppercase font-medium">
+      Sylhet
+    </button>
+    <button onclick="zoomTo('Thakurgaon')" class="text-xs text-gray hover:text-blue-300 transition-colors uppercase font-medium">
+      Thakurgaon
+    </button>
+    <button onclick="zoomTo('Madina')" class="text-xs text-gray hover:text-blue-300 transition-colors uppercase font-medium">
+      Madina
+    </button>
+    <button onclick="zoomTo('Makkah')" class="text-xs text-gray hover:text-blue-300 transition-colors uppercase font-medium">
+      Makkah
+    </button>
+    <button onclick="zoomTo('Taif')" class="text-xs text-gray hover:text-blue-300 transition-colors uppercase font-medium">
+      Taif
+    </button>
+    <div class="badge badge-soft badge-success">
+      Nos. of 
+      {% if is_video %}
+        Videos :
+        {% else %}
+        Images : 
+        {% endif %}
+         <span id="count" class="text-red-300">{{total_place}}</span>
+    </div>
+    {% endblock extranav %}

@@ -1,0 +1,286 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}
+  Masud's Location History
+{% endblock %}
+{% block extend_header %}
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <!-- Leaflet MarkerCluster CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+
+  <!-- Leaflet AwesomeMarkers CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+
+  <style>
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: sans-serif;
+    }
+    #map {
+      height: 100%;
+      width: 100%;
+      margin: auto;
+      z-index: 1;
+    }
+    .controls {
+      position: absolute;
+      top: 50px;
+      right: 10px;
+      z-index: 10;
+      background: white;
+      padding: 8px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    }
+    .btn_map {
+      display: block;
+      width: 100%;
+      padding: 5px 1px;
+      background: #4285f4;
+      color: white;
+      text-decoration: none;
+      text-align: center;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+    #side-nav {
+      position: absolute;
+      top: 100;
+      left: 20;
+      width: 300px;
+      height: 100%;
+      background: white;
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+      z-index: 1001;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease-in-out;
+      overflow-y: auto;
+      padding: 10px;
+    }
+    #side-nav.open {
+      transform: translateX(0);
+    }
+    #nav-toggle {
+      position: absolute;
+      top: 50px;
+      left: 7px;
+      z-index: 1002;
+      background: white;
+      padding: 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    }
+    .place-label {
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      font-weight: bold;
+      font-size: 10px;
+    }
+    #side-nav h3 {
+      margin-top: 20px;
+      margin-bottom: 10px;
+      font-size: 1.2em;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 5px;
+    }
+    #side-nav ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    #side-nav li a {
+      display: block;
+      padding: 8px 12px;
+      text-decoration: none;
+      color: #333;
+      border-radius: 4px;
+    }
+    #side-nav li a:hover {
+      background-color: #f0f0f0;
+    }
+  </style>
+{% endblock %}
+{% block navbar %} {% include 'locations/navbar_googlephotos.html' %}{% endblock navbar %}
+{% block content %}
+  <div id="nav-toggle">
+    <i class="fa fa-bars"></i>
+  </div>
+
+  <div id="side-nav">
+    <!-- Navigation content will be dynamically generated -->
+  </div>
+  <div class="controls opacity-70">
+    <p id="customAlert"></p>
+    <h3 class="text-center text-xl text-gray-500">Masud's Timeline Visualizer</h3>
+    <h5 class="text-center text-gray-500">Current Month: <span class="text-red-500">{{ display_month }}</span></h5>
+    <hr>
+    <form method="get" class="mx-auto max-w-xl grid grid-cols-1 gap-3 sm:grid-cols-3 items-center mt-3">
+      <div class="flex justify-between">
+        <label for="{{ form.year.id_for_label }}" class="block text-sm font-medium text-gray-700">Year:</label>
+        {{ form.year }}
+      </div>
+      <div class="flex justify-between">
+        <label for="{{ form.month.id_for_label }}" class="block text-sm font-medium text-gray-700">Month:</label>
+        {{ form.month }}
+      </div>
+      <button type="submit" class="h-7 w-20 btn-sm rounded-md bg-indigo-600 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">OK</button>
+    </form>
+  </div>
+
+  <div id="map"></div>
+  <!-- Scripts -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+  <!-- Data passed from Django View -->
+  <script>
+        const placesByType = {{ places_by_type_json|safe }};
+        const placesData = {{ places_json|safe }};
+    </script>
+
+  <script>
+        // Initialize Map
+        var map = L.map('map', {zoomControl: false}).setView([20, 0], 2);
+
+        // Add custom zoom control to bottomright
+        L.control.zoom({
+            position: 'bottomright'
+        }).addTo(map);
+
+        // Define Base Layers
+        var streetMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        });
+
+        var satelliteMap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+        });
+
+        var baseMaps = {
+            "Street Map": streetMap,
+            "Satellite": satelliteMap
+        };
+
+        // Add Layer Control
+        L.control.layers(baseMaps, null, { position: 'bottomleft' }).addTo(map);
+
+        // Add default layer
+        streetMap.addTo(map);
+
+        // Initialize Marker Cluster Group
+        var markers = L.markerClusterGroup();
+        var markerRefs = {}; // To store references to markers
+        const date_options = {
+            dateStyle: 'full',
+            timeStyle: 'full',
+            // timeZone: 'Asia/Dhaka' // Ensures the time is correct for Bangladesh Standard Time
+        };
+
+        const formatter = new Intl.DateTimeFormat('bn-BD', {
+        dateStyle: 'full', // Options: 'full', 'long', 'medium', 'short'
+        timeStyle: 'medium', // Options: 'full', 'long', 'medium', 'short'
+        hour12: true, // Use 24-hour format
+        timeZone: 'Asia/Dhaka' // Specify the timezone for Bangladesh
+        });
+        // Loop through Django data and add markers
+        placesData.forEach(function(place, index) {
+            if (place.latitude && place.longitude) {
+                
+                var icon = L.AwesomeMarkers.icon({
+                    icon: place.icon || 'info-circle',
+                    markerColor: place.color || 'blue',
+                    prefix: 'fa'
+                });
+
+                var marker = L.marker([place.latitude, place.longitude], {icon: icon});
+                
+                var popupContent = `<b>${place.name || "Unknown Location"}</b><br>`;
+                if (place.timestamp) {
+                    new_dt = new Date(place.timestamp);
+                    popupContent += `<i>${formatter.format(new_dt)}</i><br>`;
+                }
+                if (place.address) {
+                    popupContent += `<small>${place.address}</small><br>`;
+                }
+                  popupContent += `<small class="gps" style="color: red;"><a href="https://www.google.com/maps?q=${place.latitude},${place.longitude}" title="Go to Google Maps" target="_blank">&#128279; ${place.latitude}, ${place.longitude}</a></small>`;
+                marker.bindPopup(popupContent);
+
+                // Add a permanent tooltip for the name
+                if (place.name) {
+                    marker.bindTooltip(place.name, {
+                        permanent: true, 
+                        direction: 'top',
+                        offset: [0, -10],
+                        className: 'place-label'
+                    });
+                }
+
+                markers.addLayer(marker);
+                // Use a unique key for each marker
+                markerRefs[place.name + '_' + index] = marker; 
+            }
+        });
+
+        // Add clusters to map
+        map.addLayer(markers);
+        
+        // Update stats
+        document.getElementById('count').innerText = placesData.length;
+
+        // Fit bounds to show all markers
+        if (placesData.length > 0) {
+            map.fitBounds(markers.getBounds());
+        }
+
+        // Side Navigation Logic
+        const sideNav = document.getElementById('side-nav');
+        const navToggle = document.getElementById('nav-toggle');
+        
+        navToggle.addEventListener('click', function() {
+            sideNav.classList.toggle('open');
+        });
+
+        let overallPlaceIndex = 0;
+        for (const type in placesByType) {
+            const group = placesByType[type];
+            const groupDiv = document.createElement('div');
+            groupDiv.innerHTML = `<h3>${type}</h3>`;
+            const placeList = document.createElement('ul');
+
+            group.places.forEach(function(place) {
+                const placeName = place.name;
+                const currentIndex = overallPlaceIndex;
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `<a href="#">${placeName}</a>`;
+                
+                listItem.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const markerKey = placeName + '_' + currentIndex;
+                    const marker = markerRefs[markerKey];
+                    if (marker) {
+                        markers.zoomToShowLayer(marker, function() {
+                            map.setView(marker.getLatLng());
+                            marker.openPopup();
+                        });
+                    }
+                });
+                
+                placeList.appendChild(listItem);
+                overallPlaceIndex++;
+            });
+            groupDiv.appendChild(placeList);
+            sideNav.appendChild(groupDiv);
+        }
+    </script>
+{% endblock %}
