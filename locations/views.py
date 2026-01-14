@@ -5,9 +5,9 @@ from django.http import JsonResponse
 from django.core.serializers import serialize
 import json
 from django.core.serializers.json import DjangoJSONEncoder
-from django.db.models.functions import Substr, Concat, RowNumber, Replace, Cast, TruncMonth, Round, ExtractYear, ExtractMonth
+from django.db.models.functions import Substr, Concat, RowNumber, Replace, Cast, TruncMonth, Round, ExtractYear, ExtractMonth, Length
 from django.db.models import F, Q, Case, When, Subquery, OuterRef, Value,CharField, BooleanField, IntegerField, ExpressionWrapper, Window
-from .models import LocationBatch, Place, GooglePhotos, PeopleNames
+from .models import LocationBatch, Place, GooglePhotos, PeopleNames, PeopleNamesVideos
 from .utils import parse_timeline_json, parse_kml, parse_saved_places_json, parse_labeled_places_json
 from django.views.generic import (
     TemplateView,
@@ -126,12 +126,19 @@ def google_photos_map(request):
     try:
         is_video = int(request.GET.get('is_video'))
         if is_video:
-            media_items = GooglePhotos.objects.filter(Q(title__endswith='.mp4')|Q(title__endswith='.MOV'))
+            media_items = GooglePhotos.objects.filter(Q(image__icontains='.mp4')
+                                                      |Q(image__icontains='.mov')
+                                                      |Q(image__icontains='.mpo')
+                                                      |Q(image__icontains='.wmv')
+                                                      |Q(image__icontains='.3gp')
+                                                      |Q(image__icontains='.avi')
+                                                      |Q(image__icontains='.mts')
+                                                      )
     except:
         media_items = GooglePhotos.objects.all()
         is_video = False
         
-    
+
     media_items = media_items.annotate(
         row_number=Window(
             expression=RowNumber(),
@@ -145,6 +152,7 @@ def google_photos_map(request):
     # print(media_items.count())
     # print(media_items.values()[1])
 
+    target_extensions = ('.mts','.mp4', '.3gp', '.mov', '.mpo', '.wmv', '.avi')
     places_data = []
     for item in media_items:
         if item.latitude and item.longitude: # Only include items with location data
@@ -158,11 +166,13 @@ def google_photos_map(request):
                 'address': '',    # MediaItem does not have an address field
                 'comments': f"User: {item.remarks}",   # MediaItem does not have an comments field
                 'image_url': item.image.url, # URL to display image in popup
-                'is_video': 1 if (item.title.endswith('.mp4') or item.title.endswith('.MOV')) else 0,
-                'is_heic': 1 if (item.title.endswith('.heic') or item.title.endswith('.HEIC')) else 0,
+                'is_video': 1 if item.title.lower().endswith(target_extensions) else 0,
+                'is_heic': 1 if item.title.lower().endswith('.heic') else 0,
                 'people': item.people if item.people else None,
                 'url': item.url
             })
+    # target_extensions = ('.mts', '.3gp', '.mov', '.mpo', '.wmv', '.avi')
+    # file.lower().endswith(target_extensions)
     
     # For now, places_by_type will be empty as MediaItem doesn't have a type field
     # If type categorization is needed later, this needs to be extended.
@@ -213,8 +223,15 @@ class PeopleImages(ListView):
         qs = super().get_queryset()
         try:
             person_id = self.request.GET.get("person_id")
-            people_name = PeopleNames.objects.get(id=person_id).name
-            qs = qs.filter(people__icontains=people_name)
+            print(int(person_id))
+            if int(person_id) == 10000:
+                qs = qs.annotate(
+                    people_len=Length(F("people"))
+                ).filter(people_len=0)
+                people_name = None
+            else:
+                people_name = PeopleNames.objects.get(id=person_id).name
+                qs = qs.filter(people__icontains=people_name)
         except:
             people_name = None
             
@@ -269,4 +286,150 @@ class PeopleImages(ListView):
         context["people"] = PeopleNames.objects.all()
         context["years_list"] = GooglePhotos.objects.annotate(year=Substr("photo_taken_time", 1, 4)
                                                         ).values_list("year", flat=True).distinct().order_by("-year")
+        return context
+
+    
+class PeopleVideos(ListView):
+    model = GooglePhotos
+    template_name = 'locations/people_images.html'
+    context_object_name = "people_images"
+    paginate_by = 20
+
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        qs= qs.filter((Q(title__endswith='.MTS')
+             |Q(title__endswith='.mp4')
+             |Q(title__endswith='.3gp')
+             |Q(title__endswith='.MOV')
+             |Q(title__endswith='.MP4')
+             |Q(title__endswith='.3GP')
+             |Q(title__endswith='.MPO')
+             |Q(title__endswith='.wmv')
+             |Q(title__endswith='.AVI')
+             ))
+        try:
+            person_id = self.request.GET.get("person_id")
+            if int(person_id) == 10000:
+                qs = qs.annotate(
+                    people_len=Length(F("people"))
+                ).filter(people_len=0)
+                people_name = None
+            else:
+                people_name = PeopleNamesVideos.objects.get(id=person_id).name
+                qs = qs.filter(people__icontains=people_name)
+        except:
+            people_name = None
+            
+        try:
+            year = int(self.request.GET.get("year"))
+            if year>0:
+                qs = qs.annotate(
+                    photo_year=ExtractYear("photo_taken_time"),
+                             ).filter(photo_year=year)
+        except:
+            year = None
+            
+        try:
+            month = int(self.request.GET.get("month"))
+            if month>0:
+                qs = qs.annotate(photo_month=ExtractMonth("photo_taken_time")
+                             ).filter(photo_month=month)
+        except:
+            month = None
+            
+        qs = qs.annotate(
+                row_number=Window(
+                expression=RowNumber(),
+                partition_by=[F("title")],
+                order_by=[F("title").asc(), F("title")]
+                ),
+                person_name= Value(people_name, output_field=CharField()),
+                is_location = Case(
+                When(longitude__gt=0, then=Value(True)),
+                default=Value(False),
+                output_field=BooleanField()), # MTS, mp4, 3gp, MOV, MP4, 3GP, MPO, wmv, AVI
+                is_video = Value(True, output_field=BooleanField()),
+                ).filter(row_number=1).order_by('-photo_taken_time')
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["total_images"] = self.get_queryset().count()
+        context["people"] = PeopleNamesVideos.objects.all()
+        context["years_list"] = GooglePhotos.objects.filter((Q(title__endswith='.MTS')
+             |Q(title__endswith='.mp4')
+             |Q(title__endswith='.3gp')
+             |Q(title__endswith='.MOV')
+             |Q(title__endswith='.MP4')
+             |Q(title__endswith='.3GP')
+             |Q(title__endswith='.MPO')
+             |Q(title__endswith='.wmv')
+             |Q(title__endswith='.AVI')
+             )).annotate(
+                 year=Substr("photo_taken_time", 1, 4)
+            ).values_list("year", flat=True).distinct().order_by("-year")
+        return context
+    
+    
+class PeopleVideos_short(ListView):
+    model = GooglePhotos
+    template_name = 'locations/people_images.html'
+    context_object_name = "people_images"
+    paginate_by = 20
+
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        qs= qs.filter((Q(title__endswith='.MP4')
+             & Q(device_type='IOS_PHONE')
+             ))
+        try:
+            person_id = self.request.GET.get("person_id")
+            people_name = PeopleNamesVideos.objects.get(id=person_id).name
+            qs = qs.filter(people__icontains=people_name)
+        except:
+            people_name = None
+            
+        try:
+            year = int(self.request.GET.get("year"))
+            if year>0:
+                qs = qs.annotate(
+                    photo_year=ExtractYear("photo_taken_time"),
+                             ).filter(photo_year=year)
+        except:
+            year = None
+            
+        try:
+            month = int(self.request.GET.get("month"))
+            if month>0:
+                qs = qs.annotate(photo_month=ExtractMonth("photo_taken_time")
+                             ).filter(photo_month=month)
+        except:
+            month = None
+            
+        qs = qs.annotate(
+                row_number=Window(
+                expression=RowNumber(),
+                partition_by=[F("title")],
+                order_by=[F("title").asc(), F("title")]
+                ),
+                person_name= Value(people_name, output_field=CharField()),
+                is_location = Case(
+                When(longitude__gt=0, then=Value(True)),
+                default=Value(False),
+                output_field=BooleanField()), # MTS, mp4, 3gp, MOV, MP4, 3GP, MPO, wmv, AVI
+                is_video = Value(True, output_field=BooleanField()),
+                ).filter(row_number=1).order_by('-photo_taken_time')
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["total_images"] = self.get_queryset().count()
+        context["people"] = PeopleNamesVideos.objects.all()
+        context["years_list"] = GooglePhotos.objects.filter((Q(title__endswith='.MP4')
+             & Q(device_type='IOS_PHONE')
+             )).annotate(
+                 year=Substr("photo_taken_time", 1, 4)
+            ).values_list("year", flat=True).distinct().order_by("-year")
         return context

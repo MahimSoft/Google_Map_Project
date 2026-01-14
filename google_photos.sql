@@ -4,6 +4,15 @@ WHERE (title like "%.mp4%" OR title like "%.MOV%")
   and latitude > 0;
 
 --! Extension Check ----------
+SELECT * FROM locations_googlephotos WHERE (
+lower(image) like "%.mts" 
+or lower(image) like "%.mov" 
+or lower(image) like "%.3gp"  
+or lower(image) like "%.mpo"  
+or lower(image) like "%.wmv"  
+or lower(image) like "%.avi"
+);
+
 SELECT extension,
   count(extension) as No_of_file
 FROM (
@@ -45,6 +54,35 @@ GROUP BY extension
 ORDER BY No_of_file DESC;
 
 -- Video Files: MTS, mp4, 3gp, MOV, MP4, 3GP, MPO, wmv, AVI
+-- jpg	24859
+-- JPG	9752
+-- HEIC	1247
+-- mp4	1074
+-- png	1044
+-- jpeg	422
+-- MTS	103
+-- heic	59
+-- PNG	26
+-- 3gp	21
+-- gif	17
+-- MPO	12
+-- ico	9
+-- bmp	9
+-- cur	8
+-- MOV	7
+-- webp	6
+-- no_extension	6
+-- MP4	6
+-- 3GP	6
+-- JPEG	3
+-- wmv	2
+-- bat	2
+-- AVI	2
+-- tif	1
+-- MPG	1
+-- 1633350456943327	1
+
+
 --! Extension Check End ----------
 
 SELECT *
@@ -85,6 +123,17 @@ DELETE FROM locations_googlephotos;
 UPDATE sqlite_sequence
 SET seq = 0
 WHERE name = 'locations_googlephotos';
+
+DELETE FROM locations_peoplenames;
+UPDATE sqlite_sequence
+SET seq = 0
+WHERE name = 'locations_peoplenames';
+
+DELETE FROM locations_peoplenamesvideo;
+UPDATE sqlite_sequence
+SET seq = 0
+WHERE name = 'locations_peoplenamesvideo';
+
 -- Update Field ===============
 UPDATE locations_googlephotos
 SET image = REPLACE(
@@ -92,5 +141,20 @@ SET image = REPLACE(
     substr(image, -5),
     '.jpg'
   )
-WHERE image LIKE '%.HEIC' ESCAPE '\'
-   OR image LIKE ' %.heic ' ESCAPE ' \ ';
+WHERE (image LIKE '%.HEIC'
+   OR image LIKE '%.heic');
+
+UPDATE locations_googlephotos
+SET image = REPLACE(
+    REPLACE(image, '/Google Photos/', '/Google Photos/MP4/'),
+    substr(image, -4),
+    '.mp4'
+  )
+WHERE (
+lower(image) like "%.mts" 
+or lower(image) like "%.mov" 
+or lower(image) like "%.3gp"  
+or lower(image) like "%.mpo"  
+or lower(image) like "%.wmv"  
+or lower(image) like "%.avi"
+);

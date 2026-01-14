@@ -11,7 +11,7 @@
       {% endblock %}
     </title>
     {% block favicon_icon %}
-<link rel="shortcut icon" type="image/x-icon" href="{% static 'images/MS_1.svg' %}">
+      <link rel="shortcut icon" type="image/x-icon" href="{% static 'images/MS_1.svg' %}" />
     {% endblock %}
     <meta name="author" content="Mahim Soft" />
     {% tailwind_css %}
@@ -27,11 +27,12 @@
       }
     </style>
     {% block extend_header %}
+
     {% endblock %}
   </head>
   <body>
     {% block navbar %}
-    {% endblock %}
+    {% endblock navbar %}
     <p id="customAlert"></p>
     {% block content %}
 

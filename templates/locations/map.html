@@ -26,7 +26,7 @@
         font-family: sans-serif;
       }
       #map {
-        height: 100%;
+        height: 90%;
         width: 100%;
         z-index: 1;
       }
@@ -111,9 +111,9 @@
       }
     </style>
 {% endblock %}
+{% block navbar %} {% include 'locations/navbar_googlephotos.html' %}{% endblock navbar %}
 
 {% block content %}
-{% block navbar %} {% include 'locations/navbar_googlephotos.html' %}{% endblock navbar %}
     <div id="nav-toggle">
       <i class="fa fa-bars"></i>
     </div>
@@ -204,7 +204,8 @@
                 if (place.address) {
                     popupContent += `<small>${place.address}</small><br>`;
                 }
-                 popupContent += `<small class="gps" style="color: red;">${(place.latitude)}, ${place.longitude}</small>`;
+                 popupContent += `<small class="gps" style="color: red;">
+                  <a href="https://www.google.com/maps?q=${(place.latitude)}, ${place.longitude}" title="Go to Google Maps: ${(place.latitude)}, ${place.longitude}" target="_blank">&#128279; GEO Location</a></small>`;
                 marker.bindPopup(popupContent);
 
                 // Add a permanent tooltip for the name

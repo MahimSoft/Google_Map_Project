@@ -13,14 +13,14 @@ def setup_database(table_columns, table_name, DB_NAME):
     conn.commit()
     return conn
 
-def process_files(table_columns, table_name, DB_NAME):
+def process_files(source_folder, table_columns, table_name, DB_NAME):
     date_format = "%b %d, %Y, %I:%M:%S %p utc"
     conn = setup_database(table_columns, table_name, DB_NAME)
     cursor = conn.cursor()
     
     # 1. First, collect all JSON file paths to set the progress bar length
     all_json_files = []
-    for root, _, files in os.walk(SOURCE_FOLDER):
+    for root, _, files in os.walk(source_folder):
         for file in files:
             if file.endswith('.json'):
                 all_json_files.append(os.path.join(root, file))
@@ -82,9 +82,9 @@ def process_files(table_columns, table_name, DB_NAME):
     print("\nExtraction complete! Database saved as " + DB_NAME)
     
 # Configuration
-SOURCE_FOLDER = 'D:/takeout 20251226/MasudJGTDSL/Google Photos/'
-DB_NAME = 'MasudJGTDSL.sqlite3'
-REMARKS = 'MasudJGTDSL'
+SOURCE_FOLDER = 'D:/takeout 20251226/Mahimsoft/Google Photos/'
+DB_NAME = 'Mahimsoft.sqlite3'
+REMARKS = 'Mahimsoft'
 table_columns = """id INTEGER PRIMARY KEY AUTOINCREMENT, 
                     title TEXT,
                     description TEXT,
@@ -106,4 +106,4 @@ table_name="locations_googlephotos"
 #! To Run: python py_json_to_sqlite3.py
 
 if __name__ == "__main__":
-    process_files(table_columns, table_name="locations_googlephotos", DB_NAME=DB_NAME)
+    process_files(source_folder = SOURCE_FOLDER, table_columns = table_columns, table_name=table_name, DB_NAME=DB_NAME)

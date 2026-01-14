@@ -1,14 +1,16 @@
 {% load static %}
 <div
-  class="navbar bg-blue-400 !bg-opacity-50 text-primary-content mb-1 shadow-lg z-1000 h-8 min-h-fit"
+  class="navbar bg-primary text-primary-content mb-3 shadow-lg z-1000"
   data-theme="dark"
 >
-  <div class="navbar-start h-full">
+  <!-- Navbar Start: Hamburger for mobile, Logo for all h-10 bg-white/20 backdrop-blur-md border-b border-white/10-->
+  <div class="navbar-start">
+    <!-- Mobile Dropdown Menu -->
     <div class="dropdown">
-      <div tabindex="0" role="button" class="btn btn-ghost btn-xs lg:hidden">
+      <div tabindex="0" role="button" class="btn btn-ghost lg:hidden">
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          class="h-4 w-4"
+          class="h-5 w-5"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -21,6 +23,7 @@
           />
         </svg>
       </div>
+      <!-- Mobile Menu Content -->
        <ul
         tabindex="0"
         class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
@@ -29,34 +32,37 @@
     {% block extranav_start %}
     {% endblock extranav_start %}
     </ul>
-  </div>
+    </div>
     <a
-      class="btn btn-ghost btn-sm text-lg font-bold hidden lg:flex md:flex exo2bold"
+      class="btn btn-sm btn-ghost text-lg font-bold hidden lg:flex md:flex lg:align-middle md:align-middle lg:items-center md:items-center exo2bold"
       href="/"
       >
       MahimSoft</a
     >
-    <a class="btn btn-ghost btn-sm text-xl lg:hidden md:hidden CompanyNameFont">MS</a>
+    <a class="btn btn-ghost text-xl lg:hidden md:hidden CompanyNameFont">MS</a>
   </div>
+  <!-- TODO: Navbar Start: End -->
 
-  <div class="navbar-center hidden lg:flex h-full">
+  <div class="navbar-center hidden lg:flex">
     <ul class="menu menu-horizontal p-0 m-0">
     {% include 'navbar_includes/navbar_center.html' %}
     {% block extranav_center %}
     {% endblock extranav_center %}
     </ul>
   </div>
-
-  <div class="navbar-end h-full">
+  <!-- TODO: Navbar Center: End -->
+  <!-- Navbar End: Desktop Menu (hidden on small screens) -->
+  <div class="navbar-end">
     <div class="group dropdown dropdown-end flex">
-      <ul
+ <ul
         tabindex="0"
         class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-12 w-52 p-2 shadow"
       >
-        {% include 'navbar_includes/navbar_end.html' %}
-      </ul>
-      {% block extranav_end %}
-      {% endblock extranav_end %}
+     {% include 'navbar_includes/navbar_end.html' %}
+       </ul>
+       {% block extranav_end %}
+       {% endblock extranav_end %}
     </div>
   </div>
 </div>
+

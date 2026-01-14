@@ -1871,10 +1871,12 @@ def replace_patterns(text, replacements):
 
 
 # result = replace_patterns(text, replacements)
-def display(text, query=False, mysql=False):
-    print((f" {c_h_a_r[444][1]} ").join(c_h_a_r[1258][1]*15))
-    print(f'\033[38;5;208m {CLR.Bg.cyan}{CLR.bold}\033[2:4m Returned Data 📋:{CLR.reset} \033[2;30m {text}')
-    print((f" {c_h_a_r[421][1]} ").join(c_h_a_r[1489][1]*15))
+def display(text, query=False, mysql=False, leading_text="Returned Data 📋", text_clr=CLR.Fg.red, border=True):
+    if border:
+        print((f" {c_h_a_r[444][1]} ").join(c_h_a_r[1258][1]*15))
+    print(f'\033[38;5;208m {CLR.Bg.cyan}{CLR.bold}\033[2:4m {leading_text}:{CLR.reset} {text_clr} {text}{CLR.reset}')
+    if border:
+        print((f" {c_h_a_r[421][1]} ").join(c_h_a_r[1489][1]*15))
     if query:
         query_result_txt = f'\033[38;5;208m {CLR.Bg.magenta}{CLR.bold} Query 📋:{CLR.reset} \033[2;30m\
 {str(text.query).replace(chr(34), "`")};\n\
@@ -1886,6 +1888,7 @@ def display(text, query=False, mysql=False):
         query_result = replace_patterns(query_result_txt,replacements)
         print(query_result)
         print((f" {c_h_a_r[1491][1]} ").join(c_h_a_r[1496][1]*15),"\n")
+        
 def run():
     display(qry)
 

@@ -9,12 +9,11 @@ def setup_database(table_columns, table_name, DB_NAME):
     conn.commit()
     return conn
 
-def create_person_table(table_columns, table_name, DB_NAME):
+def create_person_table(table_columns, table_name, DB_NAME, query):
     conn = setup_database(table_columns, table_name, DB_NAME)
     conn2 = sqlite3.connect("map_db.sqlite3")
     cursor = conn2.cursor()
-    cursor.execute(f'''SELECT people FROM locations_googlephotos WHERE length(people) > 0
-         ''')
+    cursor.execute(query)
     people_list = cursor.fetchall()
     name_list = []
     for item in people_list:
@@ -37,13 +36,29 @@ def create_person_table(table_columns, table_name, DB_NAME):
 
 columns = " name TEXT "
 
+query_image_video = """SELECT people FROM locations_googlephotos WHERE length(people) > 0"""
+
+query_video="""SELECT people FROM locations_googlephotos WHERE length(people) > 0 
+and (
+title like '%.mp4' 
+or title like '%.MOV' 
+or title like '%.MTS' 
+or title like '%.3gp' 
+or title like '%.3GP' 
+or title like '%.MPO' 
+or title like '%.wmv' 
+or title like '%.AVI' 
+or title like '%.MP4' 
+)"""
+         
 if __name__ == "__main__":
     # copy_table('source_db.sqlite3', 'target_db.sqlite3', 'source_table', 'target_table')
     # copy_table('db.sqlite3', 'map_db.sqlite3', 'locations_locationbatch', 'locations_locationbatch')
     # copy_table('db.sqlite3', 'map_db.sqlite3', 'locations_place', 'locations_place')
     create_person_table(table_columns = columns, 
                table_name = 'locations_people_names', 
-               DB_NAME = 'people_names.sqlite3')
+               DB_NAME = 'people_names.sqlite3',
+               query = query_image_video)
 
 # locations_people_names
 

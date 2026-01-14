@@ -44,8 +44,8 @@ if __name__ == "__main__":
     #            source_table='locations_googlephotos', 
     #            target_table = 'locations_googlephotos', 
     #            columns = columns)
-    copy_table(source_db = 'people_names.sqlite3', 
+    copy_table(source_db = 'heic_mp4.sqlite3', 
                target_db = 'map_db.sqlite3', 
-               source_table='locations_people_names', 
-               target_table = 'locations_peoplenames', 
-               columns = columns_2)
+               source_table='locations_googlephotos', 
+               target_table = 'locations_googlephotos', 
+               columns = columns)

@@ -36,8 +36,8 @@ def batch_convert_recursive(src, dest):
 
 # Run the function
 
-SOURCE_FOLDER = 'D:/takeout 20251226/33a33a33a/Google Photos/'
-DEST_FOLDER = 'D:/takeout 20251226/33a33a33a/Google Photos/JPG'
+SOURCE_FOLDER = 'D:/takeout 20251226/MasudJGTDSL/Google Photos/'
+DEST_FOLDER = 'D:/takeout 20251226/MasudJGTDSL/Google Photos/JPG'
 
 #! To Run: python py_heif_to_jpg.py
 

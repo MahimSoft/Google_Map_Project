@@ -1,19 +1,36 @@
 {% extends 'navbar.html' %}
-    
-    {% block extranav %}
-<button onclick="zoomTo('Dhaka')" class="text-xs text-gray hover:text-blue-300 transition-colors uppercase font-medium">
-      Dhaka
-    </button>
-    <button onclick="zoomTo('Sylhet')" class="text-xs text-gray hover:text-blue-300 transition-colors uppercase font-medium">
-      Sylhet
-    </button>
-    <button onclick="zoomTo('Thakurgaon')" class="text-xs text-gray hover:text-blue-300 transition-colors uppercase font-medium">
-      Thakurgaon
-    </button>
-    <button onclick="zoomTo('vietnam')" class="text-xs text-gray hover:text-blue-300 transition-colors uppercase font-medium">
-      vietnam
-    </button>
-    <div class="badge badge-soft badge-success">
-      Nos. of Images : <span id='count' class="text-red-300">{{total_place}}</span>
-    </div>
-    {% endblock extranav %}
+      {% block extranav_start %}
+<li onclick="zoomTo('Dhaka')" >
+      <a class="item" href="#">Dhaka</a>
+    </li>
+    <li onclick="zoomTo('Sylhet')" >
+      <a class="item" href="#">Sylhet</a>
+    </li>
+    <li onclick="zoomTo('Thakurgaon')" >
+      <a class="item" href="#">Thakurgaon</a>
+    </li>
+    <li onclick="zoomTo('vietnam')" >
+      <a class="item" href="#">vietnam</a>
+    </li>
+    {% endblock extranav_start %}
+
+    {% block extranav_center %}
+<li onclick="zoomTo('Dhaka')" >
+      <a class="item" href="#">Dhaka</a>
+    </li>
+    <li onclick="zoomTo('Sylhet')" >
+      <a class="item" href="#">Sylhet</a>
+    </li>
+    <li onclick="zoomTo('Thakurgaon')" >
+      <a class="item" href="#">Thakurgaon</a>
+    </li>
+    <li onclick="zoomTo('vietnam')" >
+      <a class="item" href="#">vietnam</a>
+    </li>
+    {% endblock extranav_center %}
+
+    {% block extranav_end %}
+     <div class="badge badge-soft badge-success">
+      <a class="item" href="#">Nos. of Images : <span id='count' class="text-red-300">{{total_place}}</span></a>
+    </div> 
+    {% endblock extranav_end %}

@@ -34,7 +34,7 @@
       font-family: sans-serif;
     }
     #map {
-      height: 99%;
+      height: 90%;
       width: 99%;
       margin: auto;
       z-index: 1;
@@ -79,7 +79,7 @@
     }
     #nav-toggle {
       position: absolute;
-      top: 50px;
+      top: 37px;
       left: 7px;
       z-index: 1002;
       background: white;
@@ -166,6 +166,15 @@
       Total Points: <span id="count">0</span>
     </p>
   </!-->
+<div class="badge badge-soft badge-success opacity-80 absolute top-9 right-2 z-50">
+      <a class="item" href="#">Nos. of 
+      {% if is_video %}
+        Videos :
+        {% else %}
+        Images : 
+        {% endif %}
+         <span id="count" class="text-red-300">{{total_place}}</span></a>
+</div>
   <div id="map"></div>
 <!-- Metro Map -->
 
@@ -264,7 +273,7 @@
                 }
                 // <a href="https://www.google.com/maps?q=23.8516144,90.3860722">View Location on Google Maps</a>
                 
-                popupContent += `<small class="gps" style="color: red;"><a href="https://www.google.com/maps?q=${place.latitude},${place.longitude}" title="Go to Google Maps" target="_blank">&#128279; ${place.latitude}, ${place.longitude}</a></small>`;
+                popupContent += `<small class="gps" style="color: red;"><a href="https://www.google.com/maps?q=${place.latitude},${place.longitude}" title="Go to Google Maps" target="_blank">&#128279; GEO Location</a></small>`;
                 if (place.comments) {
                     popupContent += `<br><hr><small class="text-amber-700">${place.comments||"No Comments"}</small><br>`;
                 }

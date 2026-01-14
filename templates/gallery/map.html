@@ -25,15 +25,14 @@
   <style>
     html,
     body {
-      height: 80%;
+      height: 90%;
       margin: 0;
       padding: 0;
-    }
-    body {
       font-family: sans-serif;
     }
+
     #map {
-      height: 88%;
+      height: 90%;
       width: 99%;
       margin: auto;
       z-index: 1;
@@ -138,7 +137,10 @@
     }*/
   </style>
 {% endblock %}
-
+    {% block navbar %}
+    {% include 'gallery/navbar_gallery.html' %}
+    {% endblock navbar %}
+    
 {% block content %}
 
   {% if messages %}
@@ -148,7 +150,7 @@
           {% endfor %}
       </ul>
   {% endif %}
-  {% block navbar %} {% include 'gallery/navbar_gallery.html' %}{% endblock navbar %}
+
   <div id="nav-toggle">
     <i class="fa fa-bars"></i>
   </div>
@@ -196,7 +198,7 @@
             "Street Map": streetMap,
             "Satellite": satelliteMap
         };
-
+        L.control.layers(baseMaps, null, { position: 'bottomleft' }).addTo(map);
         // Add Layer Control
         // L.control.layers(baseMaps, null, { position: 'bottomleft' }).addTo(map);
 

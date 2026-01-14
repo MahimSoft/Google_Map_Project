@@ -1,159 +1,26 @@
-<!-- Image thumbnails -->
-<style>
-  /* Style for modal popup */
-  .modal {
-    display: none;
-    /* Hidden by default */
-    position: fixed;
-    /* Stay in place */
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.8);
-    /* Black background with opacity */
-    z-index: 1;
-    padding-top: 50px;
-  }
-  
-  /* Style for modal content (image) */
-  .modal-content {
-    display: block;
-    /* max-width: 82%;
-          max-height: 82%; */
-    /* min-width: 400px;
-              min-height: 400px; */
-    width: auto;
-    height: 550px;
-    margin: auto;
-  }
-  
-  /* Close button */
-  .close {
-    position: absolute;
-    top: 20px;
-    right: 35px;
-    color: white;
-    font-size: 40px;
-    cursor: pointer;
-  }
-  
-  /* Navigation buttons */
-  .prev,
-  .next {
-    position: absolute;
-    top: 50%;
-    color: white;
-    font-size: 40px;
-    padding: 10px;
-    cursor: pointer;
-    user-select: none;
-  }
-  
-  .prev {
-    left: 20px;
-  }
-  
-  .next {
-    right: 20px;
-  }
-  
-  /* Style for image thumbnails */
-  .popup-image {
-    /* width: 300px; */
-  
-    cursor: pointer;
-    /* margin: 10px; */
-  }
-  
-  .numbertext {
-    color: #c5c0c083;
-    font-size: 18px;
-    padding: 8px 12px;
-    position: absolute;
-    top: 0;
-    /* left: 250px; */
-    background-color: rgba(0, 0, 0, 0.2);
-  }
-</style>
-<!-- Modal for full-screen images -->
-<div id="imageModal" class="modal">
-  <span class="close">&times;</span>
-  <!-- Close button -->
-  <h6 id="numbertext" class="numbertext"></h6>
-  <img class="modal-content" id="modalImage" />
-  <h6 id="caption" class="text-center text-warning p-2"></h6>
-  <span class="prev">&#10094;</span>
-  <!-- Left arrow -->
-  <span class="next">&#10095;</span>
-  <!-- Right arrow -->
+
+<div id="slideshow-modal" class="fixed inset-0 z-50 hidden bg-black/95 flex-col items-center justify-center">
+    <button onclick="closeSlideshow()" class="absolute top-6 right-6 text-white hover:text-gray-300 z-50">
+        <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+    </button>
+
+    <button onclick="changeSlide(-1)" class="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/10 p-4 rounded-full transition-all">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+    </button>
+    <button onclick="changeSlide(1)" class="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/10 p-4 rounded-full transition-all">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+    </button>
+
+    <div class="w-full max-w-5xl max-h-[80vh] flex items-center justify-center p-4">
+        <img id="slideshow-img" src="" class="max-w-full max-h-full object-contain hidden shadow-2xl">
+        <video id="slideshow-video" controls class="max-w-full max-h-full hidden shadow-2xl">
+            <source src="" type="video/mp4">
+        </video>
+    </div>
+
+    <div id="slideshow-caption" class="text-white mt-4 text-center">
+        <p id="slideshow-name" class="text-xl font-bold"></p>
+        <p id="slideshow-count" class="text-gray-400 text-sm mt-1"></p>
+    </div>
 </div>
 
-<script>
-  var captionText = document.getElementById('caption')
-  var numberText = document.getElementById('numbertext')
-  var modal = document.getElementById('imageModal')
-  var modalImage = document.getElementById('modalImage')
-  var closeBtn = document.getElementsByClassName('close')[0]
-  var prevBtn = document.getElementsByClassName('prev')[0]
-  var nextBtn = document.getElementsByClassName('next')[0]
-  var images = document.getElementsByClassName('popup-image')
-  var currentIndex = 0
-  
-  // Function to open modal and display clicked image
-  function showModal(index) {
-    modal.style.display = 'block'
-    currentIndex = index
-    modalImage.src = images[currentIndex].srcset
-    captionText.innerHTML = images[currentIndex].alt
-    numberText.innerHTML = images[currentIndex].id
-  }
-  
-  // Loop through all images and add click event listener
-  for (let i = 0; i < images.length; i++) {
-    images[i].onclick = function () {
-      showModal(i)
-      console.log(i)
-    }
-  }
-  
-  // Close modal on close button click
-  closeBtn.onclick = function () {
-    modal.style.display = 'none'
-  }
-  
-  document.addEventListener('keyup', function (event) {
-    if (event.keyCode === 27) {
-      modal.style.display = 'none'
-    }
-  })
-  // Navigate to the previous image
-  prevBtn.onclick = function () {
-    currentIndex = currentIndex === 0 ? images.length - 1 : currentIndex - 1
-    modalImage.src = images[currentIndex].srcset
-    captionText.innerHTML = images[currentIndex].alt
-    numberText.innerHTML = images[currentIndex].id
-  }
-  
-  // Navigate to the next image
-  nextBtn.onclick = function () {
-    currentIndex = currentIndex === images.length - 1 ? 0 : currentIndex + 1
-    modalImage.src = images[currentIndex].srcset
-    captionText.innerHTML = images[currentIndex].alt
-    numberText.innerHTML = images[currentIndex].id
-  }
-  
-  document.addEventListener('keydown', function (event) {
-    if (event.key === 'ArrowLeft') {
-      currentIndex = currentIndex === 0 ? images.length - 1 : currentIndex - 1
-      modalImage.src = images[currentIndex].srcset
-      captionText.innerHTML = images[currentIndex].alt
-      numberText.innerHTML = images[currentIndex].id
-    } else if (event.key === 'ArrowRight') {
-      currentIndex = currentIndex === images.length - 1 ? 0 : currentIndex + 1
-      modalImage.src = images[currentIndex].srcset
-      captionText.innerHTML = images[currentIndex].alt
-      numberText.innerHTML = images[currentIndex].id
-    }
-  })
-</script>

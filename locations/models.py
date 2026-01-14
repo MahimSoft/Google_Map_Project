@@ -70,6 +70,14 @@ class GooglePhotos(models.Model):
         null=True,
         blank=True,
     )
+    video_thumbnail = models.ImageField(
+        upload_to = 'thumbnails',
+        max_length=255,
+        # validators=[validate_file_extension],
+        # default="ContractorsImage/default.png",
+        null=True,
+        blank=True,
+    )
     url = models.URLField(max_length=500, blank=True, null=True)
     local_folder = models.CharField(max_length=255, blank=True, null=True)
     device_type = models.CharField(max_length=255, blank=True, null=True)
@@ -80,6 +88,12 @@ class GooglePhotos(models.Model):
     
 
 class PeopleNames(models.Model):
+    name = models.CharField(max_length=255, blank=True, null=True)
+    
+    def __str__(self):
+        return f"{self.name}"
+    
+class PeopleNamesVideos(models.Model):
     name = models.CharField(max_length=255, blank=True, null=True)
     
     def __str__(self):
