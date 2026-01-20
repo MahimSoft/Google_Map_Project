@@ -1,0 +1,221 @@
+
+{% extends 'base.html' %}
+{% load static %}
+{% load mahimsoft_tags %}
+{% load month_filters %}
+{% block title %}
+  Masud's Photo Album
+{% endblock %}
+
+{% block extend_header %}
+<style>
+  /* Standard Layout Styles */
+  /* .hidden-div { opacity: 0; visibility: hidden; transition: opacity 0.4s ease-in-out; background-color: #f0f0f0; padding: 20px; border: 1px solid #ccc; margin-top: 10px; }
+  .search-container:hover .hidden-div { opacity: 1; visibility: visible; }
+  .topbar { position: fixed; top: -70px; width: auto; transition: transform 0.3s ease; z-index: 50; }
+  .topbar:hover { transform: translateY(70px); } */
+
+  /* Fullscreen & Zoom Logic */
+  .slideshow-active:fullscreen {
+    background-color: black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100vw;
+    height: 100vh;
+  }
+
+  .slide-media {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain; /* Maintains aspect ratio */
+    transition: transform 0.1s ease-out;
+  }
+
+  /* Zoom Styles */
+  .cursor-zoom-in { cursor: zoom-in; }
+  .cursor-zoom-out { cursor: move; } /* Hand cursor for panning */
+  
+  .zoomed {
+    transform: scale(2.5) !important;
+    z-index: 10;
+  }
+
+  /* Video Fullscreen Correction */
+  video.fullscreen-v {
+    width: 100%;
+    max-height: 100vh;
+    background: black;
+  }
+</style>
+{% endblock extend_header %}
+
+{% block content %}
+{% include 'includes/top_25.html' %}
+{% include 'includes/search_form.html' %}
+
+<div x-data="{ 
+    activeSlide: 1, 
+    slides: {{ slides|length }},
+    isFullscreen: false,
+    isZoomed: false,
+    originX: '50%',
+    originY: '50%',
+    /* Page URLs from Django Pagination */
+    nextPageUrl: '{% if page_obj.has_next %}?page={{ page_obj.next_page_number }}{% if request.GET.person_id %}&person_id={{ request.GET.person_id }}{% endif %}{% if request.GET.year %}&year={{ request.GET.year }}{% endif %}{% if request.GET.month %}&month={{ request.GET.month }}{% endif %}{% endif %}',
+    prevPageUrl: '{% if page_obj.has_previous %}?page={{ page_obj.previous_page_number }}{% if request.GET.person_id %}&person_id={{ request.GET.person_id }}{% endif %}{% if request.GET.year %}&year={{ request.GET.year }}{% endif %}{% if request.GET.month %}&month={{ request.GET.month }}{% endif %}{% endif %}',
+
+    init() {
+        document.addEventListener('fullscreenchange', () => {
+            this.isFullscreen = !!document.fullscreenElement;
+            if (!this.isFullscreen) this.isZoomed = false;
+        });
+    },
+
+    stopAllVideos() {
+        this.$refs.mainContainer.querySelectorAll('video').forEach(v => {
+            v.pause();
+            v.currentTime = 0;
+        });
+    },
+
+    handleNav(direction) {
+        this.stopAllVideos();
+        this.isZoomed = false;
+
+        if (direction === 'next') {
+            if (this.activeSlide === this.slides) {
+                // If on last slide, go to next page if URL exists
+                if (this.nextPageUrl) {
+                    window.location.href = this.nextPageUrl;
+                } else {
+                    this.activeSlide = 1; // Loop to beginning if no next page
+                }
+            } else {
+                this.activeSlide++;
+            }
+        } else if (direction === 'prev') {
+            if (this.activeSlide === 1) {
+                // If on first slide, go to previous page if URL exists
+                if (this.prevPageUrl) {
+                    window.location.href = this.prevPageUrl;
+                } else {
+                    this.activeSlide = this.slides; // Loop to end if no previous page
+                }
+            } else {
+                this.activeSlide--;
+            }
+        }
+    },
+
+    handlePan(e) {
+        if (!this.isZoomed) return;
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width) * 100;
+        const y = ((e.clientY - rect.top) / rect.height) * 100;
+        this.originX = `${x}%`;
+        this.originY = `${y}%`;
+    },
+
+    toggleFullscreen() {
+        let container = this.$refs.mainContainer;
+        if (!document.fullscreenElement) {
+            container.requestFullscreen();
+        } else {
+            document.exitFullscreen();
+        }
+    }
+}" class="max-w-4xl mx-auto mt-1 px-2">
+
+    <div x-ref="mainContainer" 
+         class="slideshow-active relative overflow-hidden rounded-xl shadow-lg bg-gray-900 aspect-video"
+         :class="isFullscreen ? 'rounded-none border-0' : ''">
+
+        {% for slide in slides %}
+        <div x-show="activeSlide === {{ forloop.counter }}" 
+             x-transition:enter="transition opacity duration-500"
+             class="relative w-full h-full flex items-center justify-center bg-black"> 
+            
+            {% if not slide.is_video %}
+                <img src="{{ slide.image.url }}" 
+                     @click="if(!isFullscreen) { toggleFullscreen() } else { isZoomed = !isZoomed }"
+                     @mousemove="handlePan($event)"
+                     class="slide-media"
+                     :class="{ 'zoomed': isZoomed, 'cursor-zoom-in': !isZoomed, 'cursor-zoom-out': isZoomed }"
+                     :style="isZoomed ? { transformOrigin: `${originX} ${originY}` } : { transformOrigin: 'center' }">
+            {% else %}
+                <video class="slide-media fullscreen-v" poster="{{slide.video_thumbnail.url}}" controls>
+                    <source src="{{slide.image.url}}" type="video/mp4">
+                    Your browser does not support video.
+                </video>
+            {% endif %}
+
+            <div x-show="!isZoomed" class="absolute bottom-0 p-4 bg-black/50 w-full mx-auto text-white text-md">
+<!--pointer-events-none-->
+<div class="bottom-0 w-full text-white">
+            <p class="text-gray-600 p-0 m-0 w-full flex justify-start">
+    {% if slide.people %}
+    <img src="{% static 'images/people.svg' %}" width="24" height="24" style="position: absolute; background: darksalmon; opacity: 0.6; border-radius: 5px;" alt="people">
+    <span class="people ms-7">{{ slide.people|title|color_text|default:'No description available for this person.' }}</span>
+    {% endif %}
+</p>
+    <hr class="opacity-30 ms-8">
+            <p class="text-white leading-relaxed flex justify-between">
+              <span class="photo-date"><span>📅</span> {{ slide.photo_taken_time|default:"No 'Image Taken Date' of  available for this image." }}</span>
+              <span>
+              {% if slide.is_location %}
+                <small class="gps me-6" style="color: red;"><a href="https://www.google.com/maps?q={{ slide.latitude }},{{ slide.longitude }}" title="Go to Google Maps: {{ slide.latitude }}, {{ slide.longitude }}" target="_blank">&#128279; GEO Location</a></small>
+              {% endif %}
+              <span class="text-white me-4">Slide No.: <span x-text="activeSlide"></span> of <span x-text="slides"></span>/<span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></span></span>
+            </p>
+            
+        </div>
+            </div>
+        </div>
+        
+        {% endfor %}
+
+<button @click="handleNav('prev')" class="absolute left-4 top-1/2 -translate-y-1/2 z-30 bg-white/20 hover:bg-white/80 p-3 rounded-full text-white hover:text-black transition-all">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+        </button>
+
+        <button @click="handleNav('next')" class="absolute right-4 top-1/2 -translate-y-1/2 z-30 bg-white/20 hover:bg-white/80 p-3 rounded-full text-white hover:text-black transition-all">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </button>
+
+    </div>
+</div>
+<div class="flex justify-center items-center mb-0 gap-6">
+    <button onclick='location.href="{% url "locations:google_photos" %}"'  class="bg-green-600 text-white text-sm font-semibold py-1.5 px-4 mt-3 rounded-md hover:bg-green-700 transition-colors shadow-sm">
+                Home
+    </button>
+    <h2 class="mt-3 flex items-center justify-center space-x-2">
+    {% if slides.0.person_name %}
+    <span class="text-amber-700 text-2xl font-bold">
+        {{slides.0.person_name|title}} 
+    </span>
+    {% else %}
+    <span class="text-amber-700 text-2xl font-bold">
+        Total Images: 
+    </span>
+    {% endif %}
+    <span class="text-emerald-600 text-xl font-bold">
+        [{{total_images|intcomma_bd}}]
+    </span>
+    </h2>
+        <span class="flex justify-center items-center">
+        {% include 'includes/pagination.html' %} 
+        {% include 'includes/jump_to_page.html' %}
+        </span>
+    </div>
+{% endblock %}
+
+
+{% block script %}
+<script src="{% static 'js/jumpToPage.js' %}"></script>
+<script>
+    jumpToPageOnEnter({{ page_obj.paginator.num_pages }})
+</script>
+    
+{% endblock script %}
+    

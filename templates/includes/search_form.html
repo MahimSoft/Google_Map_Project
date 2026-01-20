@@ -1,0 +1,64 @@
+<div class="flex justify-start items-center m-0">
+    <!-- Search/Filter Form -->
+    <!-- <div class="search-container mx-auto z-40 topbar">
+        <div class="hidden-div w-full mx-auto mt-3 px-2"> -->
+  
+       <section class="mx-auto my-1 bg-white p-0 rounded-md shadow-sm border border-gray-100">
+    <form method="GET" action="." class="flex flex-wrap md:flex-nowrap items-center gap-2">
+        
+        <div class="flex-1 min-w-[150px]">
+            <label for="person_select" class="sr-only">Name</label>
+            <select id="person_select" name="person_id" 
+                class="block w-full px-3 py-1.5 text-sm border-gray-200 focus:ring-indigo-500 focus:border-indigo-500 rounded-md border bg-gray-50 cursor-pointer">
+                <option value="">All People</option>
+                {% for person in people %}
+                <option value="{{ person.id }}" {% if request.GET.person_id == person.id|stringformat:"i" %}selected{% endif %}>
+                    {{ person.name|title }}
+                </option>
+                {% endfor %}
+                <option value="10000">Unknown</option>
+            </select>
+        </div>
+
+        <div class="w-32">
+            <label for="year_select" class="sr-only">Year</label>
+            <select id="year_select" name="year" 
+                class="block w-full px-3 py-1.5 text-sm border-gray-200 focus:ring-indigo-500 focus:border-indigo-500 rounded-md border bg-gray-50 cursor-pointer">
+                <option value="0">Any Year</option>
+                {% for y in years_list %}
+                <option value="{{ y }}" {% if request.GET.year == y|stringformat:"i" %}selected{% endif %}>{{ y }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="w-36">
+            <label for="month_select" class="sr-only">Month</label>
+            <select id="month_select" name="month" 
+                class="block w-full px-3 py-1.5 text-sm border-gray-200 focus:ring-indigo-500 focus:border-indigo-500 rounded-md border bg-gray-50 cursor-pointer">
+                <option value="0">Any Month</option>
+                <option value="1" {% if request.GET.month == "1" %}selected{% endif %}>Jan</option>
+                <option value="2" {% if request.GET.month == "2" %}selected{% endif %}>Feb</option>
+                <option value="3" {% if request.GET.month == "3" %}selected{% endif %}>Mar</option>
+                <option value="4" {% if request.GET.month == "4" %}selected{% endif %}>Apr</option>
+                <option value="5" {% if request.GET.month == "5" %}selected{% endif %}>May</option>
+                <option value="6" {% if request.GET.month == "6" %}selected{% endif %}>Jun</option>
+                <option value="7" {% if request.GET.month == "7" %}selected{% endif %}>Jul</option>
+                <option value="8" {% if request.GET.month == "8" %}selected{% endif %}>Aug</option>
+                <option value="9" {% if request.GET.month == "9" %}selected{% endif %}>Sep</option>
+                <option value="10" {% if request.GET.month == "10" %}selected{% endif %}>Oct</option>
+                <option value="11" {% if request.GET.month == "11" %}selected{% endif %}>Nov</option>
+                <option value="12" {% if request.GET.month == "12" %}selected{% endif %}>Dec</option>
+            </select>
+        </div>
+
+        <div class="flex gap-1 pl-2 border-l border-gray-100">
+            <button type="submit" class="btn btn-sm btn-info py-1">
+                Apply
+            </button>
+            <a href="." class="px-3 py-1.5 bg-gray-100 text-gray-500 text-sm font-medium rounded-md hover:bg-gray-200 transition-colors">
+                Clear
+            </a>
+        </div>
+    </form>
+</section>
+</div>

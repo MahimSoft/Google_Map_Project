@@ -83,11 +83,12 @@ def convert_to_mp4(input_root, output_root):
 # Example Usage
 # convert_to_mp4('media/uploads', 'media/processed')
 
-SOURCE_FOLDER = 'D:/takeout 20251226/33a33a33a/Google Photos/'
-DEST_FOLDER = 'D:/takeout 20251226/33a33a33a/Google Photos/MP4'
+
 
 #! To Run: python py_convert_videos.py
 
 if __name__ == "__main__":
+    SOURCE_FOLDER = 'D:/takeout 20251226/33a33a33a/Google Photos/'
+    DEST_FOLDER = 'D:/takeout 20251226/33a33a33a/Google Photos/MP4'
     # convert_to_mp4(input_root = SOURCE_FOLDER, output_root=DEST_FOLDER)
     convert_to_mp4(input_root=SOURCE_FOLDER, output_root=DEST_FOLDER)

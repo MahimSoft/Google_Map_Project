@@ -1,5 +1,6 @@
 from pathlib import Path
-
+from dotenv import dotenv_values, load_dotenv
+config = {**dotenv_values(".env")} 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -41,7 +42,7 @@ if DEBUG:
     INSTALLED_APPS += ["django_browser_reload"]
 
 TAILWIND_APP_NAME = "theme"
-NPM_BIN_PATH = r"C:/Program Files/nodejs/npm.cmd"
+NPM_BIN_PATH = config["NPM_BIN_PATH"]
 
 TEMPLATES_DIR = BASE_DIR / "templates"
 
@@ -142,9 +143,9 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 MEDIA_URL = "/media/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
-# MEDIA_ROOT =  config["MEDIA_ROOT"]
+MEDIA_ROOT =  config["MEDIA_ROOT"]
 # MEDIA_ROOT = BASE_DIR / "media"
-MEDIA_ROOT = "D:/takeout 20251226/"
+# MEDIA_ROOT = "D:/takeout 20251226/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

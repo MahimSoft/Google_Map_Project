@@ -6,7 +6,7 @@
 	.st0{display:none;}
 	.st1{display:inline;}
 	.st2{fill:none;stroke:#000000;stroke-width:6;stroke-miterlimit:10;}
-	.st3{fill:none;}
+	.st3{fill:none;stroke:#FFFFFF;stroke-width:0.5;stroke-miterlimit:10;}
 	.st4{fill:#FBB040;stroke:#FBB040;stroke-width:3;stroke-miterlimit:10;}
 	.st5{fill:#FFFFFF;}
 	.st6{fill:#ED1C24;}
@@ -17,7 +17,7 @@
 </style>
 <g id="Layer_1_00000134961315504858023310000014629862119909649315_" class="st0">
 	
-		<image style="display:inline;overflow:visible;enable-background:new    ;" width="1306" height="1302" id="XMLID_3_" xlink:href="C4EA86B7.jpeg"  transform="matrix(0.2514 0 0 0.2514 14.4781 97.6892)">
+		<image style="display:inline;overflow:visible;enable-background:new    ;" width="1306" height="1302" id="XMLID_3_" xlink:href="7EF8DAFE.jpeg"  transform="matrix(0.2514 0 0 0.2514 14.4781 97.6892)">
 	</image>
 	<g id="XMLID_15_" class="st1">
 		<path id="XMLID_4_" class="st2" d="M-387.3,488.1l-93.9,56c-5.7,3.4-13.1,1.5-16.5-4.2l-56-93.9c-3.4-5.7-1.5-13.1,4.2-16.5

@@ -1,0 +1,16 @@
+<!-- Pagination (includes all filter params) end -->
+{% if is_paginated %}        
+<div class="mt-3 flex items-center justify-center space-x-2">
+    <span class="text-sm text-teal-500 font-bold ms-2 mr-2">Go to:</span>
+    <input type="number" 
+           id="jump-page-input"
+           min="1" 
+           max="{{ page_obj.paginator.num_pages }}" 
+           class="w-16 px-2 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+           placeholder="{{ page_obj.number }}">
+    <button onclick="jumpToPage({{ page_obj.paginator.num_pages }})" 
+            class="btn btn-sm btn-soft btn-accent">
+        Go
+    </button>
+</div>
+        {% endif %}

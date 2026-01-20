@@ -16,12 +16,12 @@
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
         }
         /* Custom select styling for better appearance */
-        select {
+        /* select {
             background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
             background-position: right 0.5rem center;
             background-repeat: no-repeat;
             background-size: 1.5em 1.5em;
-        }
+        } */
         .video-container {
   /* Define a max-width for the container if needed */
   max-width: 800px;
@@ -59,103 +59,30 @@
     {% endblock navbar %}
 
 {% block content %}
-<div class="bg-gray-50 font-sans antialiased max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+<div class="bg-gray-50 font-sans antialiased max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
         <!-- Header Section -->
-        <header class="text-center mb-3">
-            <h1 class="text-4xl font-extrabold text-gray-600 tracking-tight sm:text-5xl">
+        <header class="text-center mb-2">
+            <h1 class="text-3xl font-extrabold text-gray-600 tracking-tight sm:text-4xl">
                 Our Friends and Family {% if people_images.0.is_video %} Video {% else %} Photo {% endif %} Album
             </h1>
-            <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
+            <!-- <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
                 Filter by name and (optional) year/month to find friends and family members.
-            </p>
-            <h3 class="text-xl">
-            Year: <span class="text-red-300">{% if people_images.0.photo_year %}{{people_images.0.photo_year}}{% else %}all, {% endif %}</span> Month: <span class="text-red-300">{% if people_images.0.photo_month %}{{people_images.0.photo_month|month_name}}{% else %}all{% endif %}, </span> Total 
+            </p> -->
+            {% include 'includes/top_25.html' %}
+                
+            <div class="text-md flex justify-between items-center mt-2 bg-blue-300 rounded-md p-1 px-2">
+                {% include 'includes/search_form.html' %}
+                <span>
+            Year: <span class="text-red-500">{% if people_images.0.photo_year %}{{people_images.0.photo_year}}{% else %}all, {% endif %}</span> Month: <span class="text-red-500">{% if people_images.0.photo_month %}{{people_images.0.photo_month|month_name}}{% else %}all{% endif %}, </span> Total 
             {% if people_images.0.is_video %}
                 Videos:
                 {% else %}
                 Images:
             {% endif %} 
-                  <span class="text-red-300">{{total_images|stringformat:"i"}}</span> 
-                 </h3>
+                  <span class="text-red-500">{{total_images|stringformat:"i"}}</span> 
+                  </span> 
+                 </div>
         </header>
-
-        <!-- Search/Filter Form -->
-        <section class="max-w-4xl mx-auto mb-3 bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-            <form method="GET" action="." class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- Name Filter -->
-                <div class="space-y-2">
-                    <label for="person_select" class="block text-sm font-semibold text-gray-700">
-                        Name
-                    </label>
-                    <select 
-                        id="person_select" 
-                        name="person_id" 
-                        class="block w-full px-4 py-3 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-xl border appearance-none bg-white transition-all cursor-pointer"
-                    >
-                        <option value="">All People</option>
-                        {% for person in people %}
-                        <option value="{{ person.id }}" {% if request.GET.person_id == person.id|stringformat:"i" %}selected{% endif %}>
-                            {{ person.name }}
-                        </option>
-                        {% endfor %}
-                        <option value="10000">Unknown People</option>
-                    </select>
-                </div>
-
-                <!-- Year Filter -->
-                <div class="space-y-2">
-                    <label for="year_select" class="block text-sm font-semibold text-gray-700">
-                        Year
-                    </label>
-                    <select 
-                        id="year_select" 
-                        name="year" 
-                        class="block w-full px-4 py-3 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-xl border appearance-none bg-white transition-all cursor-pointer"
-                    >
-                        <option value="0">Any Year</option>
-                        {% for y in years_list %}
-                            <option value="{{ y }}" {% if request.GET.year == y|stringformat:"i" %}selected{% endif %}>{{ y }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <!-- Month Filter -->
-                <div class="space-y-2">
-                    <label for="month_select" class="block text-sm font-semibold text-gray-700">
-                        Month
-                    </label>
-                    <select 
-                        id="month_select" 
-                        name="month" 
-                        class="block w-full px-4 py-3 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-xl border appearance-none bg-white transition-all cursor-pointer"
-                    >
-                        <option value="0">Any Month</option>
-                        <option value="1" {% if request.GET.month == "1" %}selected{% endif %}>January</option>
-                        <option value="2" {% if request.GET.month == "2" %}selected{% endif %}>February</option>
-                        <option value="3" {% if request.GET.month == "3" %}selected{% endif %}>March</option>
-                        <option value="4" {% if request.GET.month == "4" %}selected{% endif %}>April</option>
-                        <option value="5" {% if request.GET.month == "5" %}selected{% endif %}>May</option>
-                        <option value="6" {% if request.GET.month == "6" %}selected{% endif %}>June</option>
-                        <option value="7" {% if request.GET.month == "7" %}selected{% endif %}>July</option>
-                        <option value="8" {% if request.GET.month == "8" %}selected{% endif %}>August</option>
-                        <option value="9" {% if request.GET.month == "9" %}selected{% endif %}>September</option>
-                        <option value="10" {% if request.GET.month == "10" %}selected{% endif %}>October</option>
-                        <option value="11" {% if request.GET.month == "11" %}selected{% endif %}>November</option>
-                        <option value="12" {% if request.GET.month == "12" %}selected{% endif %}>December</option>
-                    </select>
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="md:col-span-3 flex flex-col sm:flex-row gap-3 pt-2">
-                    <button type="submit" class="flex-1 bg-indigo-600 text-white font-bold py-3 px-6 rounded-xl hover:bg-indigo-700 transition-colors shadow-sm focus:ring-4 focus:ring-indigo-200">
-                        Apply Filters
-                    </button>
-                    <a href="." class="px-8 py-3 bg-gray-100 text-gray-600 font-semibold rounded-xl hover:bg-gray-200 transition-colors flex items-center justify-center">
-                        Clear All
-                    </a>
-                </div>
-            </form>
-        </section>
 
         <!-- Image Grid -->
         <div id="image-grid" class="scroll-mt-10 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
@@ -205,8 +132,7 @@
                 </div>
 
                 <div class="p-6">
-<p class="text-gray-600 flex justify-start">
-    
+    <p class="text-gray-600 flex justify-start">
     {% if person.people %}
     <img src="{% static 'images/people.svg' %}" width="24" height="24" style="background: darksalmon; opacity: 0.6; border-radius: 5px; position: absolute;" alt="people">
     <span class="people ms-8">{{ person.people|title|color_text|default:'No description available for this person.' }}</span>
@@ -215,7 +141,7 @@
             </p>
             
             <p class="text-gray-600 leading-relaxed">
-              <span class="photo-date">📅: {{ person.photo_taken_time|default:"No 'Image Taken Date' of  available for this image." }}</span>
+              <span class="photo-date">📅: {{ person.photo_taken_time|date:"d F Y : H:i:s"|default:"No 'Image Taken Date' of  available for this image." }}</span>
               {% if person.is_location %}
                 <small class="gps" style="color: red;"><a href="https://www.google.com/maps?q={{ person.latitude }},{{ person.longitude }}" title="Go to Google Maps: {{ person.latitude }}, {{ person.longitude }}" target="_blank">&#128279; GEO Location</a></small>
               {% endif %}
@@ -236,22 +162,14 @@
             </div>
             {% endfor %}
         </div>
-
-        <!-- Pagination (includes all filter params) -->
-        {% if is_paginated %}
-        <nav class="mt-16 flex items-center justify-center space-x-2">
-            {% if page_obj.has_previous %}
-                <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.person_id %}&person_id={{ request.GET.person_id }}{% else %}&person_id=0{% endif %}{% if request.GET.year %}&year={{ request.GET.year }}{% else %}&year=0{% endif %}{% if request.GET.month %}&month={{ request.GET.month }}{% else %}&month=0{% endif %}#image-grid" class="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">Previous</a>
-            {% endif %}
-            <span class="px-4 py-2 text-sm text-gray-500">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
-            {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}{% if request.GET.person_id %}&person_id={{ request.GET.person_id }}{% else %}&person_id=0{% endif %}{% if request.GET.year %}&year={{ request.GET.year }}{% else %}&year=0{% endif %}{% if request.GET.month %}&month={{ request.GET.month }}{% else %}&month=0{% endif %}#image-grid" class="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">Next</a>
-            {% endif %}
-        </nav>
-        {% endif %}
+        <span class="flex justify-center items-center">
+        {% include 'includes/pagination.html' %} 
+        {% include 'includes/jump_to_page.html' %}
+        </span>
     </div>
     {% include 'slideshow.html' %}
 {% endblock %}
+
 
 
 {% block script %}
@@ -337,6 +255,9 @@
         if (e.key === "ArrowRight") changeSlide(1);
     });
 </script>
-
+<script src="{% static 'js/jumpToPage.js' %}"></script>
+<script>
+    jumpToPageOnEnter({{ page_obj.paginator.num_pages }})
+</script>
 {% endblock script %}
     

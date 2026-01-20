@@ -6,7 +6,7 @@ from django.core.serializers import serialize
 import json
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models.functions import Substr, Concat, RowNumber, Replace, Cast, TruncMonth, Round, ExtractYear, ExtractMonth, Length
-from django.db.models import F, Q, Case, When, Subquery, OuterRef, Value,CharField, BooleanField, IntegerField, ExpressionWrapper, Window
+from django.db.models import F, Q, Case, When, Subquery, OuterRef, Value,CharField, BooleanField, IntegerField, ExpressionWrapper, Window, Count
 from .models import LocationBatch, Place, GooglePhotos, PeopleNames, PeopleNamesVideos
 from .utils import parse_timeline_json, parse_kml, parse_saved_places_json, parse_labeled_places_json
 from django.views.generic import (
@@ -17,6 +17,8 @@ from django.views.generic import (
     UpdateView,
     DeleteView,
 )
+from py_display import display, CLR
+#! display(text, query=False, mysql=False, leading_text="Returned Data 📋", text_clr=CLR.Fg.red, border=True):
 
 # Define colors for each file type
 BATCH_COLORS = {
@@ -143,7 +145,7 @@ def google_photos_map(request):
         row_number=Window(
             expression=RowNumber(),
             partition_by=[F("title")],
-            order_by=[F("title").asc(), F("title")]
+            order_by=[F("title").asc(), -F("people")]
         )
     ).filter(row_number=1, longitude__gt=0, latitude__gt=0)
     
@@ -221,6 +223,7 @@ class PeopleImages(ListView):
 
     def get_queryset(self):
         qs = super().get_queryset()
+
         try:
             person_id = self.request.GET.get("person_id")
             print(int(person_id))
@@ -228,12 +231,18 @@ class PeopleImages(ListView):
                 qs = qs.annotate(
                     people_len=Length(F("people"))
                 ).filter(people_len=0)
-                people_name = None
+                people_name = ""
             else:
-                people_name = PeopleNames.objects.get(id=person_id).name
-                qs = qs.filter(people__icontains=people_name)
+                people_name = PeopleNames.objects.get(id=person_id).name.lower()
+                qs = qs.annotate(
+                    person_name=Value(people_name, output_field=CharField())
+                ).filter(people__icontains=people_name)
+                
         except:
-            people_name = None
+            qs = qs.annotate(
+                    people_len=Length(F("people"))
+                ).filter(people_len__gt=0)
+            people_name = ""
             
         try:
             year = int(self.request.GET.get("year"))
@@ -255,8 +264,13 @@ class PeopleImages(ListView):
         qs = qs.annotate(
         row_number=Window(
         expression=RowNumber(),
-        partition_by=[F("title")],
-        order_by=[F("title").asc(), F("title")]
+        partition_by=[F("photo_taken_time")],
+        order_by=[F("photo_taken_time").asc(), Length(F("people")).desc(), F("title").desc()]
+        ),
+        tittle_count=Window(
+        expression=Count(F("title")),
+        partition_by=[F("title"),F("photo_taken_time")],
+        order_by=[F("title").asc(),F("photo_taken_time").asc(), F("people").desc()]
         ),
         person_name= Value(people_name, output_field=CharField()),
         is_location = Case(
@@ -281,11 +295,38 @@ class PeopleImages(ListView):
         return qs
 
     def get_context_data(self, **kwargs):
+        qs = self.get_queryset()
+        # display(qs, query=True, mysql=False, leading_text="Query 📋", text_clr=CLR.Fg.red, border=True)
+        # display(qs.query)
+        try:
+            person_name = qs.values()[0]["person_name"].lower()
+        except:
+            person_name = ""
+            
         context = super().get_context_data(**kwargs)
-        context["total_images"] = self.get_queryset().count()
+       # ! For pagination -----
+       # Get all GET parameters except 'page'
+        query_params = self.request.GET.copy()
+        # display(query_params)
+        if 'page' in query_params:
+            del query_params['page']
+        
+        # If parameters exist, format them as &key=value
+        # If they don't exist, this returns an empty string
+        context['extra_url_params'] = f"&{query_params.urlencode()}" if query_params else ""
+        # ! For pagination end -----
+        #! Top 25 ======
+        top_25 = PeopleNames.objects.exclude(Q(name__icontains="Jashim Uddin Ahmed") | 
+    Q(name__icontains="Shoeb Ahmed Matin")).order_by('-num_of_images')[:13]
+        context["top_25"] = top_25
+        context["self_url"] = "people_images"
+        #! Top 25 end ======
+        context["total_images"] = qs.count()
         context["people"] = PeopleNames.objects.all()
-        context["years_list"] = GooglePhotos.objects.annotate(year=Substr("photo_taken_time", 1, 4)
-                                                        ).values_list("year", flat=True).distinct().order_by("-year")
+        # context["people_name"] = people_name
+        context["years_list"] = GooglePhotos.objects.annotate(
+            year=Substr("photo_taken_time", 1, 4)
+            ).filter(people__icontains=person_name).values_list("year", flat=True).distinct().order_by("-year")
         return context
 
     
@@ -314,12 +355,12 @@ class PeopleVideos(ListView):
                 qs = qs.annotate(
                     people_len=Length(F("people"))
                 ).filter(people_len=0)
-                people_name = None
+                people_name = ""
             else:
-                people_name = PeopleNamesVideos.objects.get(id=person_id).name
+                people_name = PeopleNamesVideos.objects.get(id=person_id).name.lower()
                 qs = qs.filter(people__icontains=people_name)
         except:
-            people_name = None
+            people_name = ""
             
         try:
             year = int(self.request.GET.get("year"))
@@ -341,8 +382,8 @@ class PeopleVideos(ListView):
         qs = qs.annotate(
                 row_number=Window(
                 expression=RowNumber(),
-                partition_by=[F("title")],
-                order_by=[F("title").asc(), F("title")]
+                partition_by=[F("photo_taken_time")],
+                order_by=[F("photo_taken_time").desc(), Length(F("people")).desc(), F("title").asc(),]
                 ),
                 person_name= Value(people_name, output_field=CharField()),
                 is_location = Case(
@@ -354,8 +395,26 @@ class PeopleVideos(ListView):
         return qs
 
     def get_context_data(self, **kwargs):
+        qs = self.get_queryset()
+        try:
+            person_name = qs.values()[0]["person_name"].lower()
+        except:
+            person_name = ""
+            
         context = super().get_context_data(**kwargs)
-        context["total_images"] = self.get_queryset().count()
+        # ! For pagination -----
+       # Get all GET parameters except 'page'
+        query_params = self.request.GET.copy()
+        # display(query_params)
+        if 'page' in query_params:
+            del query_params['page']
+        
+        # If parameters exist, format them as &key=value
+        # If they don't exist, this returns an empty string
+        context['extra_url_params'] = f"&{query_params.urlencode()}" if query_params else ""
+        # ! For pagination end -----
+        
+        context["total_images"] = qs.count()
         context["people"] = PeopleNamesVideos.objects.all()
         context["years_list"] = GooglePhotos.objects.filter((Q(title__endswith='.MTS')
              |Q(title__endswith='.mp4')
@@ -368,7 +427,7 @@ class PeopleVideos(ListView):
              |Q(title__endswith='.AVI')
              )).annotate(
                  year=Substr("photo_taken_time", 1, 4)
-            ).values_list("year", flat=True).distinct().order_by("-year")
+            ).filter(people__icontains=person_name).values_list("year", flat=True).distinct().order_by("-year")
         return context
     
     
@@ -386,10 +445,10 @@ class PeopleVideos_short(ListView):
              ))
         try:
             person_id = self.request.GET.get("person_id")
-            people_name = PeopleNamesVideos.objects.get(id=person_id).name
+            people_name = PeopleNamesVideos.objects.get(id=person_id).name.lower()
             qs = qs.filter(people__icontains=people_name)
         except:
-            people_name = None
+            people_name = ""
             
         try:
             year = int(self.request.GET.get("year"))
@@ -411,8 +470,8 @@ class PeopleVideos_short(ListView):
         qs = qs.annotate(
                 row_number=Window(
                 expression=RowNumber(),
-                partition_by=[F("title")],
-                order_by=[F("title").asc(), F("title")]
+                partition_by=[F("photo_taken_time")],
+                order_by=[F("photo_taken_time").desc(), Length(F("people")).desc(), F("title").asc()]
                 ),
                 person_name= Value(people_name, output_field=CharField()),
                 is_location = Case(
@@ -424,12 +483,138 @@ class PeopleVideos_short(ListView):
         return qs
 
     def get_context_data(self, **kwargs):
+        qs = self.get_queryset()
+        try:
+            person_name = qs.values()[0]["person_name"].lower()
+        except:
+            person_name = ""
+            
         context = super().get_context_data(**kwargs)
-        context["total_images"] = self.get_queryset().count()
+       # ! For pagination -----
+       # Get all GET parameters except 'page'
+        query_params = self.request.GET.copy()
+        # display(query_params)
+        if 'page' in query_params:
+            del query_params['page']
+        
+        # If parameters exist, format them as &key=value
+        # If they don't exist, this returns an empty string
+        context['extra_url_params'] = f"&{query_params.urlencode()}" if query_params else ""
+        # ! For pagination end -----
+        
+        context["total_images"] = qs.count()
         context["people"] = PeopleNamesVideos.objects.all()
         context["years_list"] = GooglePhotos.objects.filter((Q(title__endswith='.MP4')
              & Q(device_type='IOS_PHONE')
              )).annotate(
                  year=Substr("photo_taken_time", 1, 4)
-            ).values_list("year", flat=True).distinct().order_by("-year")
+            ).filter(people__icontains=person_name).values_list("year", flat=True).distinct().order_by("-year")
+        return context
+    
+    
+class SlideShowView(ListView):
+    model = GooglePhotos
+    template_name = 'locations/slideshow_new.html'
+    context_object_name = 'slides'
+    paginate_by = 20
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+
+        try:
+            person_id = self.request.GET.get("person_id")
+            print(int(person_id))
+            if int(person_id) == 10000:
+                qs = qs.annotate(
+                    people_len=Length(F("people"))
+                ).filter(people_len=0)
+                people_name = ""
+            else:
+                people_name = PeopleNames.objects.get(id=person_id).name.lower()
+                qs = qs.annotate(
+                    person_name=Value(people_name, output_field=CharField())
+                ).filter(people__icontains=people_name)
+                
+        except:
+            qs = qs.annotate(
+                    people_len=Length(F("people"))
+                ).filter(people_len__gt=0)
+            people_name = ""
+            
+        try:
+            year = int(self.request.GET.get("year"))
+            if year>0:
+                qs = qs.annotate(
+                    photo_year=ExtractYear("photo_taken_time"),
+                             ).filter(photo_year=year)
+        except:
+            year = None
+            
+        try:
+            month = int(self.request.GET.get("month"))
+            if month>0:
+                qs = qs.annotate(photo_month=ExtractMonth("photo_taken_time")
+                             ).filter(photo_month=month)
+        except:
+            month = None
+            
+        qs = qs.annotate(
+        row_number=Window(
+        expression=RowNumber(),
+        partition_by=[F("photo_taken_time")],
+        order_by=[F("photo_taken_time").desc(), Length(F("people")).desc(), F("title").asc()]
+        ),
+        person_name= Value(people_name, output_field=CharField()),
+        is_location = Case(
+        When(longitude__gt=0, then=Value(True)),
+        default=Value(False),
+        output_field=BooleanField()), # MTS, mp4, 3gp, MOV, MP4, 3GP, MPO, wmv, AVI
+        is_video = Case(
+        When((Q(title__endswith='.MTS')
+             |Q(title__endswith='.mp4')
+             |Q(title__endswith='.3gp')
+             |Q(title__endswith='.MOV')
+             |Q(title__endswith='.MP4')
+             |Q(title__endswith='.3GP')
+             |Q(title__endswith='.MPO')
+             |Q(title__endswith='.wmv')
+             |Q(title__endswith='.AVI')
+             ),
+             then=Value(True)),
+        default=Value(False),
+        output_field=BooleanField(),
+    )).filter(row_number=1).order_by('-photo_taken_time')
+        return qs
+    
+    def get_context_data(self, **kwargs):
+        qs = self.get_queryset()
+        try:
+            person_name = qs.values()[0]["person_name"].lower()
+        except:
+            person_name = ""
+            
+        context = super().get_context_data(**kwargs)
+       # ! For pagination -----
+       # Get all GET parameters except 'page'
+        query_params = self.request.GET.copy()
+        # display(query_params)
+        if 'page' in query_params:
+            del query_params['page']
+        
+        # If parameters exist, format them as &key=value
+        # If they don't exist, this returns an empty string
+        context['extra_url_params'] = f"&{query_params.urlencode()}" if query_params else ""
+        # ! For pagination end -----
+                #! Top 25 ======
+        top_25 = PeopleNames.objects.exclude(Q(name__icontains="Jashim Uddin Ahmed") | 
+    Q(name__icontains="Shoeb Ahmed Matin")).order_by('-num_of_images')[:13]
+        context["top_25"] = top_25
+        context["self_url"] = "slides"
+        #! Top 25 end ======
+        context["total_images"] = qs.count()
+        context["people"] = PeopleNames.objects.all()
+        # context["people_name"] = people_name
+        context["years_list"] = GooglePhotos.objects.annotate(
+            year=Substr("photo_taken_time", 1, 4)
+            ).filter(people__icontains=person_name).values_list("year", flat=True).distinct().order_by("-year")
         return context

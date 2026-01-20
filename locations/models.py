@@ -61,7 +61,7 @@ class GooglePhotos(models.Model):
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
     altitude = models.FloatField(null=True, blank=True)
-    people = models.CharField(max_length=255, blank=True, null=True)
+    people = models.CharField(max_length=255, blank=True, null=True, db_index=True)
     image = models.ImageField(
         upload_to = path_and_rename_logo,
         max_length=255,
@@ -89,12 +89,14 @@ class GooglePhotos(models.Model):
 
 class PeopleNames(models.Model):
     name = models.CharField(max_length=255, blank=True, null=True)
+    num_of_images = models.IntegerField(null=True, blank=True) # Google's confidence in the visit
     
     def __str__(self):
         return f"{self.name}"
     
 class PeopleNamesVideos(models.Model):
     name = models.CharField(max_length=255, blank=True, null=True)
+    num_of_videos = models.IntegerField(null=True, blank=True) # Google's confidence in the visit
     
     def __str__(self):
         return f"{self.name}"

@@ -1,4 +1,3 @@
-# utils.py
 import os
 import subprocess
 import time
@@ -15,15 +14,52 @@ from py_display import display
 # end_time = time.time()
 # execution_time = end_time - start_time
 
+def update_data(db_name="map_db.sqlite3"):
+    conn = sqlite3.connect(db_name)
+    cursor = conn.cursor()
+    qry_1 ="""UPDATE locations_googlephotos
+            SET image = REPLACE(
+                REPLACE(image, '/Google Photos/', '/Google Photos/JPG/'),
+                substr(image, -5),
+                '.jpg'
+            )
+            WHERE (image LIKE '%.HEIC'
+            OR image LIKE '%.heic');
+            """
+    cursor.execute(qry_1)
+
+
+    qry_2 ="""UPDATE locations_googlephotos
+        SET image = REPLACE(
+            REPLACE(image, '/Google Photos/', '/Google Photos/MP4/'),
+            substr(image, -4),
+            '.mp4'
+        )
+        WHERE (
+        lower(image) like "%.mts" 
+        or lower(image) like "%.mov" 
+        or lower(image) like "%.3gp"  
+        or lower(image) like "%.mpo"  
+        or lower(image) like "%.wmv"  
+        or lower(image) like "%.avi"
+        );"""
+        
+    cursor.execute(qry_2)
+    conn.commit()
+    conn.close()
+
+
 @time_of_execution        
-def convert_to_mp4(input_root, db_name="map_db.sqlite3"):
+def data_insertion_for_converted_mp4(input_root, db_name="map_db.sqlite3"):
+    update_data(db_name)
     # Connect to the database
     conn = sqlite3.connect(db_name)
     cursor = conn.cursor()
-    conn2 = sqlite3.connect("heic_mp4.sqlite3")
-    cursor2 = conn2.cursor()
+    # conn2 = sqlite3.connect("heic_mp4.sqlite3")
+    # cursor2 = conn2.cursor()
     create_table_query = """CREATE TABLE IF NOT EXISTS locations_googlephotos ("id" integer NOT NULL PRIMARY KEY AUTOINCREMENT, "title" varchar(255) NULL, "description" text NULL, "image_views" integer NOT NULL, "creation_time" datetime NULL, "photo_taken_time" datetime NULL, "latitude" real NULL, "longitude" real NULL, "altitude" real NULL, "people" varchar(255) NULL, "image" varchar(255) NULL, "url" varchar(500) NULL, "local_folder" varchar(255) NULL, "device_type" varchar(255) NULL, "remarks" varchar(255) NULL, "video_thumbnail" varchar(255) NULL);"""
-    cursor2.execute(create_table_query)
+    cursor.execute(create_table_query)
+    # cursor2.execute(create_table_query)
     
     # List to store file paths
     file_list = []
@@ -65,14 +101,14 @@ def convert_to_mp4(input_root, db_name="map_db.sqlite3"):
             local_folder,
             device_type,
             remarks
-            FROM locations_googlephotos WHERE
-            device_type = 'IOS_PHONE' and image = replace("{file.replace('/Google Photos/', '/Google Photos/JPG/').replace('.HEIC', '.jpg').replace('  ', ' ').replace('   ', ' ')}","\\","/");"""
-            # print(qry)
-            
+            FROM locations_googlephotos WHERE device_type = 'IOS_PHONE' and
+            image = replace("{file.replace('/Google Photos/', '/Google Photos/JPG/').replace('.HEIC', '.jpg').replace('  ', ' ').replace('   ', ' ')}","\\","/");"""
+            # device_type = 'IOS_PHONE' and 
+            print(qry)
             cursor.execute(qry)
             rows = cursor.fetchall()
             # print(file.replace('/Google Photos/', '/Google Photos/JPG/').replace('.HEIC', '.jpg'))
-            print(rows)
+            # print(rows)
             # print(rows)
             print("✅")
             insert_query = f"""INSERT INTO locations_googlephotos (
@@ -91,26 +127,29 @@ def convert_to_mp4(input_root, db_name="map_db.sqlite3"):
                                 local_folder,
                                 device_type,
                                 remarks) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"""
-            cursor2.execute(insert_query, rows[0])
+            if len(rows) > 0:
+                cursor.execute(insert_query, rows[0])
         else:
             print("🙁")
             
-    conn2.commit()
-    conn2.close()
+    conn.commit()
+    # conn2.close()
     conn.close()
     total_files = len(file_list)
     
-    display(text=f"{renamed_list[0:10]}", query=False, mysql=False, leading_text="Total Files Found: ", border=False)
-    print(zip_list[0:10])
-    print("Total Files Found: ", total_files)
+    display(text=f"{total_files}", query=False, mysql=False, leading_text="Total Rows Inserted: ", border=False)
+    # print(zip_list[0:10])
+    # print("Total Files Found: ", total_files)
     
     
 
-SOURCE_FOLDER = 'D:/takeout 20251226/33a33a33a/Google Photos/'
-DEST_FOLDER = 'D:/takeout 20251226/33a33a33a/Google Photos/MP4'
-
-#! To Run: python py_heic_relevent_mp4_data.py
+#! To Run: python py_heic_relevant_mp4_data.py
 
 if __name__ == "__main__":
-    # convert_to_mp4(input_root = SOURCE_FOLDER, output_root=DEST_FOLDER)
-    convert_to_mp4(input_root=SOURCE_FOLDER)
+    SOURCE_FOLDER_1 = r'D:/takeout 20251226/MasudJGTDSL/Google Photos/'
+    SOURCE_FOLDER_2 = r'D:/takeout 20251226/33a33a33a/Google Photos/'
+    SOURCE_FOLDER_3 = r'D:/takeout 20251226/Mahimsoft/Google Photos/'
+
+    data_insertion_for_converted_mp4(input_root=SOURCE_FOLDER_1)
+    data_insertion_for_converted_mp4(input_root=SOURCE_FOLDER_2)
+    data_insertion_for_converted_mp4(input_root=SOURCE_FOLDER_3)

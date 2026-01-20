@@ -1,0 +1,5 @@
+<div class="text-center mx-2">
+    {% for person in top_25 %}
+    <button onclick="location.href='/{{self_url}}/?person_id={{person.id}}'" class="btn btn-sm btn-soft {% cycle '' 'btn-primary' 'btn-secondary' 'btn-accent' 'btn-info' 'btn-success' 'btn-warning' 'btn-error' %} p-1.5 my-0.5">{{person.name|title}}</button>
+    {% endfor %}
+</div>

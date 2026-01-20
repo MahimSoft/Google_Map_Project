@@ -283,7 +283,7 @@ def lookup(dictionary, key):
 @register.filter(name='color_text', is_safe=True)
 def color_text(value):
     lst = value.split(',')
-    color_lst = ['red', 'green', 'blue', 'orange', 'purple', 'pink', 'brown', 'gray', 'black']
+    color_lst = ['red', 'green', 'blue', 'orange', 'purple', 'pink', 'brown']
     color_lst_len = len(color_lst)
     col_i = 0
     st = ''

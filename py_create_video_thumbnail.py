@@ -66,8 +66,9 @@ def process_all_thumbnails(db_name="map_db.sqlite3", output_folder="D:/takeout 2
         file_name = os.path.splitext(os.path.basename(video_path))[0]
         output_path = os.path.join(output_folder, f"{id}_{file_name}_thumb.jpg")
         conn.execute(f"UPDATE locations_googlephotos SET video_thumbnail = 'thumbnails/{id}_{file_name}_thumb.jpg' WHERE id = {id}")
-        print(f"Processing: {rs} of {total_files}: {file_name}...")
-        create_thumbnail(f"D:/takeout 20251226/{video_path}", output_path, text)
+        if not os.path.isfile(output_path):
+            print(f"Processing: {rs} of {total_files}: {file_name}...")
+            create_thumbnail(f"D:/takeout 20251226/{video_path}", output_path, text)
         
     conn.commit()
     conn.close()

@@ -37,3 +37,5 @@
     ```
 
 5. py_create_video_thumbnail.py (Before process delete all files from thumbnail folder)
+
+6. py_others.py > locations_peoplenames & 

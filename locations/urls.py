@@ -10,7 +10,9 @@ urlpatterns = [
     path('', views.map_view, name='map_view'), # Root URL shows the map
     path('google_photos/', views.google_photos_map, name='google_photos'),
     path('people_images/', views.PeopleImages.as_view(), name='people_images'), 
+    path('slides/', views.SlideShowView.as_view(), name='slideshow'),
     path('people_videos/', views.PeopleVideos.as_view(), name='people_videos'), 
     path('people_videos_short/', views.PeopleVideos_short.as_view(), name='people_videos_short'), 
     path('metromap/', TemplateView.as_view(template_name="locations/metro_map2.html", content_type="text/html"), name="metromap"),
 ]
+
