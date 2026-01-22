@@ -229,3 +229,17 @@ UPDATE locations_googlephotos
 SET people = replace(people, "Lamiar Ma", "Nasrin Jahan Luna")
 WHERE 
     people like "%Lamiar Ma%";
+
+
+
+SELECT title, description, 
+count() OVER(PARTITION by description ORDER by description) as counts, photo_taken_time 
+from locations_googlephotos 
+WHERE length(trim(description))>1 ORDER by counts DESC;
+
+SELECT * FROM locations_googlephotos WHERE title like "%Morjina%";
+
+SELECT * FROM locations_googlephotos WHERE title like "%AAAA0033.JPG%";
+SELECT * FROM locations_googlephotos WHERE title like "%AAAA0034.JPG%";
+
+-- 11814 11815 12889 12890 13627 

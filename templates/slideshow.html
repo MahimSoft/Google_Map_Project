@@ -1,6 +1,6 @@
 
 <div id="slideshow-modal" class="fixed inset-0 z-50 hidden bg-black/95 flex-col items-center justify-center">
-    <button onclick="closeSlideshow()" class="absolute top-6 right-6 text-white hover:text-gray-300 z-50">
+    <button onclick="closeSlideshow()" class="absolute top-10 right-6 text-white hover:text-gray-300 z-50">
         <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
     </button>
 
@@ -11,15 +11,15 @@
         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
     </button>
 
-    <div class="w-full max-w-5xl max-h-[80vh] flex items-center justify-center p-4">
+    <div class="w-full max-w-6xl max-h-[95vh] flex items-center justify-center p-2">
         <img id="slideshow-img" src="" class="max-w-full max-h-full object-contain hidden shadow-2xl">
         <video id="slideshow-video" controls class="max-w-full max-h-full hidden shadow-2xl">
             <source src="" type="video/mp4">
         </video>
     </div>
 
-    <div id="slideshow-caption" class="text-white mt-4 text-center">
-        <p id="slideshow-name" class="text-xl font-bold"></p>
+    <div id="slideshow-caption" class="text-white mt-0 text-center">
+        <p id="slideshow-name" class="text-xl font-bold hidden"></p>
         <p id="slideshow-count" class="text-gray-400 text-sm mt-1"></p>
     </div>
 </div>

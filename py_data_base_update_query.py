@@ -41,6 +41,13 @@ SET people = replace(people, "Mim-Er Ma", "Shamima Akter")
 WHERE 
     lower(people) like "%mim-er ma%";
 """
+farzana_name = """
+UPDATE locations_googlephotos
+SET people = replace(people, "Farzana", "Farzana Akter Ety")
+WHERE 
+    lower(people) like "%farzana%"
+    AND lower(people) NOT like "%farzana (mim)%";
+"""
 
 gallery_mediaitem_to_locations_googlephotos = """INSERT INTO locations_googlephotos (
     title,
@@ -78,8 +85,9 @@ SELECT
 FROM gallery_mediaitem;
 """
 
-query_list = [maliha_name_1, maliha_name_2, mim_name, lamiar_ma_name, mim_er_ma_name_1, mim_er_ma_name_2, gallery_mediaitem_to_locations_googlephotos]
-query_list2 = [mim_er_ma_name_2]
+query_list = [maliha_name_1, maliha_name_2, mim_name, lamiar_ma_name, mim_er_ma_name_1, 
+              mim_er_ma_name_2,farzana_name, gallery_mediaitem_to_locations_googlephotos]
+query_list2 = [mim_er_ma_name_2, farzana_name]
 
 @time_of_execution
 def update_data(db_name="map_db.sqlite3", query_list=query_list):

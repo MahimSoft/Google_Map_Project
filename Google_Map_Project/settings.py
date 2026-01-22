@@ -12,9 +12,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-qgf3pu3tq@r@rt^m#)j9t-%^2__c^*5o^bmn&h3%hww@_ip5g('
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = int(config["DEBUG"])
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = config["ALLOWED_HOSTS"].split(" ")
 
 
 # Application definition
@@ -137,7 +137,7 @@ USE_TZ = True
 
 # STATIC_URL = 'static/'
 STATIC_URL = "/static/"
-STATIC_ROOT = "/static/"
+STATIC_ROOT = config["STATIC_ROOT"]
 # STATIC_ROOT = config["STATIC_ROOT"]
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 

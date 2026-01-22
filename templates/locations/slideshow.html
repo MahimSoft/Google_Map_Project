@@ -110,7 +110,7 @@
                 class="block w-full px-3 py-1.5 text-sm border-gray-200 focus:ring-indigo-500 focus:border-indigo-500 rounded-md border bg-gray-50 cursor-pointer">
                 <option value="0">Any Year</option>
                 {% for y in years_list %}
-                <option value="{{ y }}" {% if request.GET.year == y|stringformat:"i" %}selected{% endif %}>{{ y }}</option>
+                <option value="{{ y }}" {% if request.GET.year == y|stringformat:'i' %}selected{% endif %}>{{ y }}</option>
                 {% endfor %}
             </select>
         </div>

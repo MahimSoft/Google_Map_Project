@@ -298,3 +298,6 @@ def color_text(value):
     return mark_safe(st)
 
 
+@register.simple_tag
+def increment(current_value):
+    return current_value + 1
