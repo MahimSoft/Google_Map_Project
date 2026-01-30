@@ -1,3 +1,6 @@
+import os
+
+
 table_columns = """id INTEGER PRIMARY KEY AUTOINCREMENT, 
                     title TEXT,
                     description TEXT,
@@ -21,19 +24,5 @@ print(table_columns, "Length = ", len(table_columns))
 print(', '.join(table_columns[1:]))
 
 
-            <button class="btn btn-outline">Default</button>
-            <button class="btn btn-outline ">Primary</button>
-            <button class="btn btn-outline ">Secondary</button>
-            <button class="btn btn-outline ">Accent</button>
-            <button class="btn btn-outline ">Info</button>
-            <button class="btn btn-outline ">Success</button>
-            <button class="btn btn-outline ">Warning</button>
-            <button class="btn btn-outline ">Error</button>
 
-'btn-primary',
-'btn-secondary',
-'btn-accent',
-'btn-info',
-'btn-success',
-'btn-warning',
-'btn-error',
+

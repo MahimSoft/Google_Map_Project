@@ -1,0 +1,396 @@
+
+{% extends 'base.html' %}
+{% load static %}
+{% load mahimsoft_tags %}
+{% load month_filters %}
+{% block title %}
+  Masud's Photo Album
+{% endblock %}
+
+{% block extend_header %}
+<style>
+    .img-card { transition: all 0.3s ease; }
+    .img-card:hover { transform: translateY(-4px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+    .grid-media { width: 100%; height: 400px; object-fit: cover; cursor: pointer; }
+
+  /* Fullscreen & Zoom Logic */
+  .slideshow-active:fullscreen {
+    background-color: black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100vw;
+    height: 100vh;
+  }
+
+  .slide-media {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain; /* Maintains aspect ratio */
+    transition: transform 0.1s ease-out;
+  }
+
+  /* Zoom Styles */
+  .cursor-zoom-in { cursor: zoom-in; }
+  .cursor-zoom-out { cursor: move; } /* Hand cursor for panning */
+  
+  .zoomed {
+    transform: scale(2.5) !important;
+    z-index: 10;
+  }
+
+  /* Video Fullscreen Correction */
+  video.fullscreen-v {
+    width: 100%;
+    max-height: 100vh;
+    background: black;
+  }
+</style>
+{% endblock extend_header %}
+    {% block navbar %}
+    {% include 'locations/navbar_person_images.html' %}
+    {% endblock navbar %}
+{% block content %}
+<header class="text-center max-w-6xl mx-auto mt-1 px-2">
+            <h1 class="text-3xl font-extrabold text-gray-600 tracking-tight sm:text-4xl my-1">
+                {{heading}} {% if people_images.0.is_video %} Video {% else %} Photo {% endif %} Album
+            </h1>
+            <!-- <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
+                Filter by name and (optional) year/month to find friends and family members.
+            </p> -->
+            {% include 'includes/top_25.html' %}
+            <div class="text-md flex justify-between items-center mt-2 bg-blue-300 rounded-md p-0 ps-1 pe-2">
+                {% include 'includes/search_form.html' %}
+                <span>
+            Year: <span class="text-red-500">{% if people_images.0.photo_year %}{{people_images.0.photo_year}}{% else %}all, {% endif %}</span> Month: <span class="text-red-500">{% if people_images.0.photo_month %}{{people_images.0.photo_month|month_name}}{% else %}all{% endif %}, </span> Total 
+            {% if people_images.0.is_video %}
+                Videos:
+                {% else %}
+                Images:
+            {% endif %} 
+                  <span class="text-red-500">{{total_images|stringformat:"i"}}</span> 
+                  </span> 
+                 </div>
+        </header>
+
+<div x-data="{ 
+    activeSlide: 1, 
+    slides: {{ slides|length }},
+    isFullscreen: false,
+    isZoomed: false,
+    originX: '50%',
+    originY: '50%',
+    showFullscreenPrompt: false,
+    isAutoplaying: false,
+    autoplayIntervalId: null,
+    /* Page URLs from Django Pagination */
+    nextPageUrl: '{% if page_obj.has_next %}?page={{ page_obj.next_page_number }}{% if request.GET.person_id %}&person_id={{ request.GET.person_id }}{% endif %}{% if request.GET.year %}&year={{ request.GET.year }}{% endif %}{% if request.GET.month %}&month={{ request.GET.month }}{% endif %}{% endif %}',
+    prevPageUrl: '{% if page_obj.has_previous %}?page={{ page_obj.previous_page_number }}{% if request.GET.person_id %}&person_id={{ request.GET.person_id }}{% endif %}{% if request.GET.year %}&year={{ request.GET.year }}{% endif %}{% if request.GET.month %}&month={{ request.GET.month }}{% endif %}{% endif %}',
+
+    init() {
+        document.addEventListener('fullscreenchange', () => {
+            this.isFullscreen = !!document.fullscreenElement;
+            if (this.isFullscreen) {
+                // Play video if the active slide is a video when entering fullscreen.
+                this.$nextTick(() => this.playVideoForSlide(this.activeSlide));
+            } else {
+                this.isZoomed = false;
+                this.stopAllVideos();
+            }
+        });
+
+        const urlParams = new URLSearchParams(window.location.search);
+        console.log('Checking for fullscreen params...', urlParams.toString());
+        if (urlParams.get('fullscreen') === 'true') {
+            console.log('Fullscreen param found. Showing prompt.');
+            this.showFullscreenPrompt = true;
+            const initialSlide = parseInt(urlParams.get('active_slide'), 10);
+            if (!isNaN(initialSlide) && initialSlide >= 1 && initialSlide <= this.slides) {
+                console.log('Setting active slide to:', initialSlide);
+                this.activeSlide = initialSlide;
+            }
+        }
+    },
+    
+    playVideoForSlide(slideNumber) {
+        let video = this.$el.querySelector(`#video-${slideNumber}`);
+        if (video) {
+            video.play().catch(error => console.log('Autoplay was prevented.', error));
+        }
+    },
+
+    startSlideshow(index) {
+        console.log('startSlideshow called with index:', index);
+        this.activeSlide = index;
+        if (!document.fullscreenElement) {
+            console.log('Requesting fullscreen...');
+            this.$refs.mainContainer.requestFullscreen().catch(err => {
+                console.error('Fullscreen request failed:', err);
+            });
+        }
+    },
+stopAllVideos() {
+    // Target the specific container to ensure we find all video tags
+    const container = this.$refs.mainContainer;
+    if (container) {
+        container.querySelectorAll('video').forEach(v => {
+            v.pause();
+            // Optional: reset to start
+            v.currentTime = 0; 
+        });
+    }
+},
+    {% comment %} stopAllVideos() {
+        // Stop all video playback
+        this.$el.querySelectorAll('video').forEach(v => {
+            v.pause();
+            v.currentTime = 0;
+        });
+    }, {% endcomment %}
+
+    toggleAutoplay() {
+        this.isAutoplaying = !this.isAutoplaying;
+        if (this.isAutoplaying) {
+            this.autoplayIntervalId = setInterval(() => {
+                this.handleNav('next');
+            }, 3000); // Change slide every 3 seconds
+        } else {
+            clearInterval(this.autoplayIntervalId);
+            this.autoplayIntervalId = null;
+        }
+    },
+
+    handleNav(direction, isManual = false) {
+        if (isManual && this.isAutoplaying) {
+            this.toggleAutoplay();
+        }
+        this.stopAllVideos();
+        this.isZoomed = false;
+
+        if (direction === 'next') {
+            if (this.activeSlide === this.slides) {
+                if (this.nextPageUrl) {
+                    window.location.href = this.nextPageUrl + (this.nextPageUrl.includes('?') ? '&' : '?') + 'fullscreen=true&active_slide=1';
+                } else {
+                    this.activeSlide = 1; // Loop to beginning
+                }
+            } else {
+                this.activeSlide++;
+            }
+        } else if (direction === 'prev') {
+            if (this.activeSlide === 1) {
+                if (this.prevPageUrl) {
+                    window.location.href = this.prevPageUrl + (this.prevPageUrl.includes('?') ? '&' : '?') + 'fullscreen=true&active_slide=1';
+                } else {
+                    this.activeSlide = this.slides; // Loop to end
+                }
+            } else {
+                this.activeSlide--;
+            }
+        }
+
+        // Play video on new slide if applicable
+        this.$nextTick(() => this.playVideoForSlide(this.activeSlide));
+    },
+
+    handlePan(e) {
+        if (!this.isZoomed) return;
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width) * 100;
+        const y = ((e.clientY - rect.top) / rect.height) * 100;
+        this.originX = `${x}%`;
+        this.originY = `${y}%`;
+    },
+    
+    async shareMedia(mediaUrl, title) {
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: title || 'Shared from Masud\'s Photo Album',
+                    url: mediaUrl,
+                });
+                console.log('Media shared successfully');
+            } catch (error) {
+                console.error('Error sharing media:', error);
+            }
+        } else {
+            console.warn('Web Share API not supported. You can implement a fallback here.');
+            // Optionally, you could copy the URL to clipboard here.
+            // navigator.clipboard.writeText(mediaUrl).then(() => {
+            //   alert('Link copied to clipboard!');
+            // }).catch(err => {
+            //   console.error('Could not copy text: ', err);
+            // });
+        }
+    }
+}" class="max-w-6xl mx-auto mt-1 px-2">
+
+    <!-- Fullscreen Prompt Modal -->
+    <div x-show="showFullscreenPrompt" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50" style="display: none;">
+        <div class="bg-white p-8 rounded-lg text-center shadow-2xl">
+            <h2 class="text-2xl font-bold mb-4">Continue Slideshow</h2>
+            <p class="mb-6 text-gray-700">Click the button to continue in fullscreen mode.</p>
+            <button @click="startSlideshow(activeSlide); showFullscreenPrompt = false;" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+                Continue
+            </button>
+        </div>
+    </div>
+
+    <div x-ref="mainContainer" class="slideshow-active">
+
+        <!-- Grid View -->
+        <div x-show="!isFullscreen" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {% for slide in slides %}
+            <div @click="startSlideshow({{ forloop.counter }})" 
+                 class="relative cursor-pointer img-card bg-white rounded-2xl overflow-hidden border shadow-sm transition-shadow">
+                {% if not slide.is_video %}
+                    <img src="{{ slide.image.url }}" alt="Photo" class="grid-media">
+                {% else %}
+                    <img src="{{ slide.video_thumbnail.url }}" alt="Video thumbnail" class="grid-media">
+                    <div class="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center">
+                        <svg class="w-10 h-10 text-white opacity-80" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
+                    </div>
+                {% endif %}
+                 <div class="absolute bottom-0 left-0 right-0 p-1 bg-black/60 text-white text-xs truncate text-center">
+    <p class="text-gray-600 flex justify-start">
+    {% if slide.people %}
+    <img src="{% static 'images/people.svg' %}" width="24" height="24" style="background: darksalmon; opacity: 0.6; border-radius: 5px; position: absolute;" alt="people">
+    <span class="people ms-8">{{ slide.people|title|color_text|default:'No description available for this person.' }}</span>
+    {% endif %}
+    <hr class="opacity-30 ms-8">
+            </p>
+            
+            <p class="text-white flex justify-start leading-relaxed mt-2">
+              <span class="photo-date me-2">📅: {{ slide.photo_taken_time|date:"d F Y : H:i:s"|default:"No 'Image Taken Date' of  available for this image." }}</span>
+              {% if slide.is_location %}
+                <small class="gps" style="color: red;"><a href="https://www.google.com/maps?q={{ slide.latitude }},{{ slide.longitude }}" title="Go to Google Maps: {{ slide.latitude }}, {{ slide.longitude }}" target="_blank">&#128279; GEO Location</a></small>
+              {% endif %}
+            </p>
+            <div class="mt-2 mx-1 flex items-center justify-between">
+              <div class="flex items-center space-x-2">
+                <a href="#" class="text-indigo-600 font-semibold hover:text-indigo-800 transition-colors">View Profile &rarr;</a>
+                <a href="{% url 'locations:download_media' slide.id %}" class="text-gray-400 hover:text-gray-600" title="Download">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                </a>
+                <button @click.stop="shareMedia('{{ slide.image.url }}', '{{ slide.title }}')" class="text-gray-400 hover:text-gray-600" title="Share">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10.938 3.175a.674.674 0 0 1 1.138-.488l6.526 6.215c.574.547.554 1.47-.043 1.991l-6.505 5.676a.674.674 0 0 1-1.116-.508V13.49s-6.985-1.258-9.225 2.854c-.209.384-1.023.518-.857-1.395.692-3.52 2.106-9.017 10.082-9.017z" clip-rule="evenodd"></path>
+          </svg>
+                  {% comment %} <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.516 3.834m-6.516-3.834L15.316 9.166m0 0a3 3 0 110-2.684m0 2.684a3 3 0 100-2.684m-6.516 2.684a3 3 0 100 2.684M15.316 9.166A3 3 0 1015.316 6.482"></path></svg> {% endcomment %}
+                </button>
+              </div>
+              <span class="text-xs text-gray-400">ID: #{{ slide.id }} ({{ slide.title }})</span>
+            </div>
+
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Fullscreen Slideshow View -->
+        <div x-show="isFullscreen" style="display: none;" 
+             class="relative w-full h-full">
+
+            {% for slide in slides %}
+            <div x-show="activeSlide === {{ forloop.counter }}" 
+                 x-transition:enter="transition opacity duration-300"
+                 class="relative w-full h-full flex items-center justify-center bg-black"> 
+                
+                {% if not slide.is_video %}
+                    <img src="{{ slide.image.url }}" 
+                         alt="Fullscreen image"
+                         @click="isZoomed = !isZoomed"
+                         @mousemove="handlePan($event)"
+                         class="slide-media"
+                         :class="{ 'zoomed': isZoomed, 'cursor-zoom-in': !isZoomed, 'cursor-zoom-out': isZoomed }"
+                         :style="isZoomed ? { transformOrigin: `${originX} ${originY}` } : { transformOrigin: 'center' }">
+                {% else %}
+                    <video :id="`video-${ {{ forloop.counter }} }`" class="slide-media fullscreen-v" poster="{{slide.video_thumbnail.url}}" controls>
+                        <source src="{{slide.image.url}}" type="video/mp4">
+                        Your browser does not support video.
+                    </video>
+                {% endif %}
+
+                <div x-show="!isZoomed" class="absolute bottom-0 p-4 bg-black/50 w-full mx-auto text-white text-md">
+                    <div class="bottom-0 w-full text-white">
+                        <p class="text-gray-600 p-0 m-0 w-full flex justify-start">
+                        {% if slide.people %}
+                        <img src="{% static 'images/people.svg' %}" width="24" height="24" style="position: absolute; background: darksalmon; opacity: 0.6; border-radius: 5px;" alt="people">
+                        <span class="people ms-7">{{ slide.people|title|color_text|default:'No description available for this person.' }}</span>
+                        {% endif %}
+                    </p>
+                        <hr class="opacity-30 ms-8">
+                        <p class="text-white leading-relaxed flex justify-between">
+                        <span class="photo-date"><span>📅</span> {{ slide.photo_taken_time|default:"No 'Image Taken Date' of  available for this image." }}</span>
+                        <span>
+                        {% if slide.is_location %}
+                            <small class="gps me-6" style="color: red;"><a href="https://www.google.com/maps?q={{ slide.latitude }},{{ slide.longitude }}" title="Go to Google Maps: {{ slide.latitude }}, {{ slide.longitude }}" target="_blank">&#128279; GEO Location</a></small>
+                        {% endif %}
+                        <span class="text-white me-4">Slide No.: <span x-text="activeSlide"></span> of <span x-text="slides"></span>/<span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></span></span>
+                        </p>
+                    </div>
+                </div>
+                
+                <button @click="if(isAutoplaying) toggleAutoplay(); document.exitFullscreen()" class="absolute top-4 right-4 z-40 bg-white/20 hover:bg-white/80 p-2 rounded-full text-white hover:text-black transition-all">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+                <a href="{% url 'locations:download_media' slide.id %}" class="absolute top-4 right-16 z-40 bg-white/20 hover:bg-white/80 p-2 rounded-full text-white hover:text-black transition-all" title="Download">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                </a>
+                <button @click="shareMedia('{{ slide.image.url }}', '{{ slide.title }}')" class="absolute top-4 right-28 z-40 bg-white/20 hover:bg-white/80 p-2 rounded-full text-white hover:text-black transition-all" title="Share">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10.938 3.175a.674.674 0 0 1 1.138-.488l6.526 6.215c.574.547.554 1.47-.043 1.991l-6.505 5.676a.674.674 0 0 1-1.116-.508V13.49s-6.985-1.258-9.225 2.854c-.209.384-1.023.518-.857-1.395.692-3.52 2.106-9.017 10.082-9.017z" clip-rule="evenodd"></path>
+          </svg>
+                </button>
+                <button @click="toggleAutoplay()" class="absolute top-4 right-40 z-40 bg-white/20 hover:bg-white/80 p-2 rounded-full text-white hover:text-black transition-all" :title="isAutoplaying ? 'Pause Autoplay' : 'Start Autoplay'">
+                  <template x-if="!isAutoplaying">
+                      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                  </template>
+                  <template x-if="isAutoplaying">
+                      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                  </template>
+                </button>
+            </div>
+            {% endfor %}
+
+            <button @click="handleNav('prev', true)" class="absolute left-4 top-1/2 -translate-y-1/2 z-30 bg-white/20 hover:bg-white/80 p-3 rounded-full text-white hover:text-black transition-all">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            </button>
+
+            <button @click="handleNav('next', true)" class="absolute right-4 top-1/2 -translate-y-1/2 z-30 bg-white/20 hover:bg-white/80 p-3 rounded-full text-white hover:text-black transition-all">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            </button>
+        </div>
+    </div></div>
+
+<div class="flex justify-center items-center mb-0 gap-6">
+    <h2 class="mt-3 flex items-center justify-center space-x-2">
+    {% if slides.0.person_name %}
+    <span class="text-amber-700 text-2xl font-bold">
+        {{slides.0.person_name|title}} 
+    </span>
+    {% else %}
+    <span class="text-amber-700 text-2xl font-bold">
+        Total Images: 
+    </span>
+    {% endif %}
+    <span class="text-emerald-600 text-xl font-bold">
+        [{{total_images|intcomma_bd}}]
+    </span>
+    </h2>
+        <span class="flex justify-center items-center">
+        {% include 'includes/pagination.html' %} 
+        {% include 'includes/jump_to_page.html' %}
+        </span>
+    </div>
+{% endblock %}
+
+
+{% block script %}
+<script src="{% static 'js/jumpToPage.js' %}"></script>
+<script>
+    jumpToPageOnEnter({{ page_obj.paginator.num_pages }})
+</script>
+    
+{% endblock script %}
+    

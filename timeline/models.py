@@ -1,5 +1,5 @@
 
-#! Command: python manage.py inspectdb --database=timeline_db > .\timeline\models.py
+#! Command: python manage.py inspectdb --database=timeline_db > .\models1.py
 
 # This is an auto-generated Django model module.
 # You'll have to do the following manually to clean this up:
@@ -17,7 +17,7 @@ class Timeline(models.Model):
     longitudeE7 =  models.CharField(max_length=255, blank=True, null=True)
     accuracy =  models.IntegerField("Accuracy", default=0, blank=True, null=True)
     source =  models.CharField(max_length=255, blank=True, null=True)
-    timestamp =  models.CharField(max_length=255, blank=True, null=True)
+    timestamp =  models.CharField(max_length=255, blank=True, null=True, db_index=True)
     date_time_extracted =  models.DateTimeField(blank=True, null=True)
     year_month =  models.IntegerField("Month", default=0, blank=True, null=True, db_index=True)
     deviceDesignation =  models.CharField(max_length=255, blank=True, null=True)
@@ -37,11 +37,11 @@ class Timeline(models.Model):
     inferredLocation =  models.CharField(max_length=255, blank=True, null=True)
     placeId =  models.CharField(max_length=255, blank=True, null=True)
     activeWifiScan =  models.CharField(max_length=255, blank=True, null=True)
-    latitude =  models.FloatField()
-    longitude =  models.FloatField()
+    latitude =  models.FloatField(db_index=True)
+    longitude =  models.FloatField(db_index=True)
     
     class Meta:
-        managed = False
+        # managed = False
         db_table = 'maps_timeline'
         indexes = [
             models.Index(fields=["date_time_extracted", "accuracy"]),

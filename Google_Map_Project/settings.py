@@ -28,6 +28,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # Extra =============
     "whitenoise",
+    "crispy_forms",
+    "crispy_tailwind",
     # Tailwind ===============
     "tailwind",
     "theme",
@@ -40,6 +42,10 @@ INSTALLED_APPS = [
 if DEBUG:
     # Add django_browser_reload only in DEBUG mode
     INSTALLED_APPS += ["django_browser_reload"]
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "tailwind"
+
+CRISPY_TEMPLATE_PACK = "tailwind"
 
 TAILWIND_APP_NAME = "theme"
 NPM_BIN_PATH = config["NPM_BIN_PATH"]
@@ -93,7 +99,8 @@ DATABASES = {
     },
     'timeline_db': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'F:/SELF_HELP/self_help.sqlite3',
+        'NAME': BASE_DIR / 'map_db.sqlite3',
+        # 'NAME': 'F:/SELF_HELP/self_help.sqlite3',
     }
 }
 

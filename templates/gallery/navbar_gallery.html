@@ -1,32 +1,10 @@
 {% extends 'navbar.html' %}
       {% block extranav_start %}
-<li onclick="zoomTo('Dhaka')" >
-      <a class="item" href="#">Dhaka</a>
-    </li>
-    <li onclick="zoomTo('Sylhet')" >
-      <a class="item" href="#">Sylhet</a>
-    </li>
-    <li onclick="zoomTo('Thakurgaon')" >
-      <a class="item" href="#">Thakurgaon</a>
-    </li>
-    <li onclick="zoomTo('vietnam')" >
-      <a class="item" href="#">vietnam</a>
-    </li>
+{% include 'navbar_includes/navbar_start_lev2_01.html' %}
     {% endblock extranav_start %}
 
     {% block extranav_center %}
-<li onclick="zoomTo('Dhaka')" >
-      <a class="item" href="#">Dhaka</a>
-    </li>
-    <li onclick="zoomTo('Sylhet')" >
-      <a class="item" href="#">Sylhet</a>
-    </li>
-    <li onclick="zoomTo('Thakurgaon')" >
-      <a class="item" href="#">Thakurgaon</a>
-    </li>
-    <li onclick="zoomTo('vietnam')" >
-      <a class="item" href="#">vietnam</a>
-    </li>
+{% include 'navbar_includes/navbar_center_lev2_01.html' %}
     {% endblock extranav_center %}
 
     {% block extranav_end %}

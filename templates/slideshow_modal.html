@@ -1,0 +1,202 @@
+<div id="slideshow-modal-container" style="display: none;" class="fixed inset-0 z-[100] bg-black/95 flex flex-col items-center justify-center backdrop-blur-md">
+    
+    <div class="absolute top-0 left-0 w-full p-6 mt-3 flex justify-between items-start z-[110]">
+        <div class="flex gap-3">
+            <button id="slideshow-fullscreen" class="bg-white/10 text-white p-2 py-1 rounded-lg text-xl">⛶</button>
+            <button id="slideshow-zoom" class="bg-white/10 text-white p-2 py-1 mt-2 rounded-lg">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </button>
+             <button id="slideshow-share" class="bg-white/10 text-white p-2 py-1 rounded-lg">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8m-4-6l-4-4-4 4m4-4v12"></path></svg>
+            </button>
+            <a id="slideshow-download" href="#" download class="bg-blue-600 text-white p-2 py-1 rounded-lg">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            </a>
+        </div>
+        <button id="slideshow-close" class="text-white text-4xl">&times;</button>
+    </div>
+
+    <div class="relative w-full h-screen flex items-center justify-center overflow-hidden">
+        <button id="slideshow-prev" class="absolute left-4 text-white text-5xl z-50">‹</button>
+        <button id="slideshow-next" class="absolute right-4 text-white text-5xl z-50">›</button>
+
+        <img id="slideshow-img-element" style="display: none; transition: transform 0.3s ease, transform-origin 0s;" class="max-h-full max-w-full object-contain">
+        <video id="slideshow-video-element" controls style="display: none;" class="max-h-full max-w-full">
+            <!-- Source will be set dynamically -->
+        </video>
+
+        <div class="absolute bottom-0 left-0 right-0 text-center text-white p-4 bg-black/50">
+            <h2 id="slideshow-name-element" class="text-2xl font-bold"></h2>
+            <p id="slideshow-info-element" class="text-gray-400"></p>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Configuration & State ---
+    const slideTriggers = Array.from(document.querySelectorAll('.js-slideshow-trigger'));
+    const slidesData = slideTriggers.map(trigger => ({
+        url: trigger.dataset.url,
+        isVideo: trigger.dataset.isVideo === 'true',
+        name: trigger.dataset.name,
+        date: trigger.dataset.date,
+    }));
+    let currentSlideIndex = 0;
+    let isZoomed = false;
+
+    // --- DOM Elements ---
+    const modal = document.getElementById('slideshow-modal-container');
+    const imgEl = document.getElementById('slideshow-img-element');
+    const videoEl = document.getElementById('slideshow-video-element');
+    const nameEl = document.getElementById('slideshow-name-element');
+    const infoEl = document.getElementById('slideshow-info-element');
+    const downloadBtn = document.getElementById('slideshow-download');
+    const closeBtn = document.getElementById('slideshow-close');
+    const nextBtn = document.getElementById('slideshow-next');
+    const prevBtn = document.getElementById('slideshow-prev');
+    const zoomBtn = document.getElementById('slideshow-zoom');
+    const fullscreenBtn = document.getElementById('slideshow-fullscreen');
+    const shareBtn = document.getElementById('slideshow-share');
+
+    // --- Functions ---
+    const panOnMouseMove = (e) => {
+        if (!isZoomed) return;
+        const rect = imgEl.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const xPercent = (x / rect.width) * 100;
+        const yPercent = (y / rect.height) * 100;
+        imgEl.style.transformOrigin = `${xPercent}% ${yPercent}%`;
+    };
+
+    const toggleZoom = () => {
+        if (imgEl.style.display === 'none') return; // Don't zoom on videos
+        isZoomed = !isZoomed;
+        if (isZoomed) {
+            imgEl.style.transform = 'scale(2.5)';
+            imgEl.style.cursor = 'zoom-out';
+            imgEl.addEventListener('mousemove', panOnMouseMove);
+        } else {
+            imgEl.style.transform = 'scale(1)';
+            imgEl.style.cursor = 'default';
+            imgEl.removeEventListener('mousemove', panOnMouseMove);
+            imgEl.style.transformOrigin = 'center center'; // Reset origin
+        }
+    };
+
+    const toggleNativeFullscreen = () => {
+        if (!document.fullscreenElement) {
+            modal.requestFullscreen().catch(err => {
+                alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+            });
+        } else {
+            document.exitFullscreen();
+        }
+    };
+
+    const shareOrCopyLink = async () => {
+        const slide = slidesData[currentSlideIndex];
+        const shareData = {
+            title: slide.name,
+            text: `Check out this media: ${slide.name}`,
+            url: window.location.origin + slide.url,
+        };
+
+        if (navigator.share && navigator.canShare(shareData)) {
+            try {
+                await navigator.share(shareData);
+            } catch (err) {
+                console.log('Error sharing:', err);
+            }
+        } else {
+            navigator.clipboard.writeText(shareData.url).then(() => {
+                alert('Link copied to clipboard!');
+            }).catch(err => {
+                console.log('Error copying to clipboard:', err);
+                alert('Could not copy link to clipboard.');
+            });
+        }
+    };
+    
+    const updateSlide = () => {
+        if (slidesData.length === 0 || currentSlideIndex < 0 || currentSlideIndex >= slidesData.length) {
+            return;
+        }
+        const slide = slidesData[currentSlideIndex];
+        
+        if (isZoomed) toggleZoom(); 
+
+        imgEl.style.display = 'none';
+        videoEl.style.display = 'none';
+        videoEl.pause();
+
+        if (slide.isVideo) {
+            videoEl.src = slide.url;
+            videoEl.load();
+            videoEl.style.display = 'block';
+            zoomBtn.style.display = 'none';
+            fullscreenBtn.style.display = 'block';
+        } else {
+            imgEl.src = slide.url;
+            imgEl.style.display = 'block';
+            zoomBtn.style.display = 'block';
+            fullscreenBtn.style.display = 'block';
+        }
+
+        nameEl.textContent = slide.name;
+        infoEl.textContent = `Item ${currentSlideIndex + 1} of ${slidesData.length} | ${slide.date}`;
+        downloadBtn.href = slide.url;
+    };
+
+    const openSlideshow = (index) => {
+        currentSlideIndex = index;
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        updateSlide();
+    };
+
+    const closeSlideshow = () => {
+        if (isZoomed) toggleZoom();
+        if (document.fullscreenElement) document.exitFullscreen();
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        videoEl.pause();
+    };
+
+    const nextSlide = () => {
+        currentSlideIndex = (currentSlideIndex + 1) % slidesData.length;
+        updateSlide();
+    };
+
+    const prevSlide = () => {
+        currentSlideIndex = (currentSlideIndex - 1 + slidesData.length) % slidesData.length;
+        updateSlide();
+    };
+
+    // --- Event Listeners ---
+    slideTriggers.forEach((trigger, index) => {
+        trigger.addEventListener('click', () => openSlideshow(index));
+    });
+
+    closeBtn.addEventListener('click', closeSlideshow);
+    nextBtn.addEventListener('click', nextSlide);
+    prevBtn.addEventListener('click', prevSlide);
+    zoomBtn.addEventListener('click', toggleZoom);
+    fullscreenBtn.addEventListener('click', toggleNativeFullscreen);
+    shareBtn.addEventListener('click', shareOrCopyLink);
+    imgEl.addEventListener('click', toggleZoom);
+
+
+    document.addEventListener('keydown', (e) => {
+        if (modal.style.display !== 'flex') return;
+        if (e.key === 'Escape') closeSlideshow();
+        if (e.key === 'ArrowRight') nextSlide();
+        if (e.key === 'ArrowLeft') prevSlide();
+        if (e.key.toLowerCase() === 'f') {
+            e.preventDefault();
+            toggleNativeFullscreen();
+        }
+    });
+});
+</script>

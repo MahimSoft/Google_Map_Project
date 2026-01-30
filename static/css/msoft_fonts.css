@@ -1,0 +1,312 @@
+@charset "UTF-8";
+/* Bangla Fonts */
+@font-face {
+  font-family: BanglaFontNikosh2;
+  src: url("./fonts/nikosh2.ttf");
+}
+@font-face {
+  font-family: SolaimanLipi;
+  src: url("./fonts/SolaimanLipi_20-04-07.ttf");
+}
+@font-face {
+  font-family: BanglaFontSejuti;
+  src: url("./fonts/Fazlay Sejuti Unicode.ttf");
+}
+@font-face {
+  font-family: BanglaFontEid;
+  src: url("./fonts/Eid_Mubarak.ttf");
+}
+@font-face {
+  font-family: BanglaFontEkushey;
+  src: url("./fonts/Ekushey_Belycon_06-09-2018.ttf");
+}
+@font-face {
+  font-family: BanglaFontKero;
+  src: url("./fonts/KEERO___.ttf");
+}
+@font-face {
+  font-family: BanglaFontPadmo;
+  src: url("./fonts/Padmo UNICODE.ttf");
+}
+@font-face {
+  font-family: BanglaFontMadon;
+  src: url("./fonts/Li MadanMohan Unicode.ttf");
+}
+@font-face {
+  font-family: BanglaMnRegular;
+  src: url("./fonts/bangla-mn-regular.ttf");
+}
+
+/* EnglishFont Family */
+@font-face {
+  font-family: PlaywriteAUSA;
+  src: url("./fonts/PlaywriteAUSA-VariableFont_wght.ttf");
+}
+@font-face {
+  font-family: 'Exo2';
+  src: url("./fonts/Exo2-VariableFont_wght.ttf");
+}
+
+@font-face {
+  font-family: CompanyNameFont;
+  src: url("./fonts/RussoOne-Regular.ttf");
+}
+@font-face {
+  font-family: AeroSkyFont;
+  src: url("./fonts/Audiowide-Regular.ttf");
+}
+
+@font-face {
+  font-family: BalletRegular;
+  src: url("./fonts/Ballet-Regular-VariableFont_opsz.ttf");
+}
+
+@font-face {
+  font-family: GrechenFuemen;
+  src: url("./fonts/GrechenFuemen-Regular.ttf");
+}
+
+@font-face {
+  font-family: LoversQuarrel;
+  src: url("./fonts/LoversQuarrel-Regular.ttf");
+}
+@font-face {
+  font-family: MrsSheppards;
+  src: url("./fonts/MrsSheppards-Regular.ttf");
+}
+@font-face {
+  font-family: NothingYouCouldDo;
+  src: url("./fonts/NothingYouCouldDo-Regular.ttf");
+}
+@font-face {
+  font-family: Lobster;
+  src: url("./fonts/Lobster-Regular.ttf");
+}
+
+@font-face {
+  font-family: digital7;
+  src: url("./fonts/digital-7.ttf");
+}
+@font-face {
+  font-family: proxima;
+  src: url("./fonts/proxima-nova.otf");
+}
+@font-face {
+  font-family: HanelaRusty;
+  src: url("./fonts/HanelaRusty-G34Pg.ttf");
+}
+@font-face {
+  font-family: ElefantDisplay_2;
+  src: url("./fonts/ElefantDisplay_2.otf");
+}
+@font-face {
+  font-family: Explora_Regular;
+  src: url("./fonts/Explora-Regular.ttf");
+}
+
+@font-face {
+  font-family: 'OxonaCaps';
+  src: url('./fonts/OxonaCaps-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'OxonaCaps';
+  src: url('./fonts/OxonaCaps-Bold.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'MegatransDisco';
+  src: url('./fonts/MegatransDisco-Regular_demo.otf') format('opentype');
+  font-weight: bold;
+  font-style: normal;
+}
+
+/* Bangla Font Class */
+.b_fontSolaimanLipi {
+  font-family: SolaimanLipi;
+}
+.b_fontNikosh2 {
+  font-family: BanglaFontNikosh2 "Courier New", monospace;
+}
+.b_fontSejuti {
+  font-family: BanglaFontSejuti;
+}
+.b_fonteid {
+  font-family: BanglaFontEid;
+}
+.b_fontekush {
+  font-family: BanglaFontEkushey;
+}
+.b_fontkero {
+  font-family: BanglaFontKero;
+}
+.b_fontpadmo {
+  font-family: BanglaFontPadmo;
+}
+.b_fontmadon {
+  font-family: BanglaFontMadon;
+}
+.b_banglaMnRegular {
+  font-family: BanglaMnRegular;
+}
+
+/* English Font Class */
+.e_PlaywriteAUSA {
+  font-family: PlaywriteAUSA, serif;
+  font-optical-sizing: auto;
+  font-weight: bold;
+  font-style: normal;
+}
+
+.exo2 {
+  font-family: "Exo2", serif;
+  font-optical-sizing: auto;
+  font-weight: normal;
+  font-style: normal;
+}
+
+.exo2bold {
+  font-family: "Exo2", serif;
+  font-optical-sizing: auto;
+  font-weight: bold;
+  font-style: normal;
+}
+.exo2italic {
+  font-family: "Exo2", serif;
+  font-optical-sizing: auto;
+  font-weight: normal;
+  font-style: italic;
+}
+
+.explora_regular {
+  font-family: "Explora_Regular", serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+.CompanyNameFont {
+    font-family: CompanyNameFont;
+  }
+.AeroSkyFont {
+    font-family: AeroSkyFont;
+  }
+
+.BalletRegular {
+    font-family: BalletRegular;
+  }
+
+.GrechenFuemen {
+    font-family: GrechenFuemen;
+  }
+
+.LoversQuarrel {
+    font-family: LoversQuarrel;
+  }
+
+.MrsSheppards {
+    font-family: MrsSheppards;
+  }
+
+.NothingYouCouldDo {
+    font-family: NothingYouCouldDo;
+  }
+.Lobster {
+    font-family: Lobster;
+  }
+
+.digital7 {
+  font-family: digital7;
+}
+.proxima {
+  font-family: "proxima";
+}
+.HanelaRusty {
+  font-family: "HanelaRusty", serif;
+  font-optical-sizing: auto;
+  font-weight: bold;
+  font-style: normal;
+}
+.ElefantDisplay_2 {
+  font-family: "ElefantDisplay_2";
+  font-optical-sizing: auto;
+  font-weight: bold;
+  font-style: initial;
+  /* font-size: 1.5rem;
+  line-height: 1.5rem;
+  text-transform: uppercase; */
+  letter-spacing: 0.3rem;
+}
+
+.oxonacaps {
+  font-family: 'OxonaCaps', sans-serif;
+  font-weight: normal; /* or normal */
+  font-size: 2rem;
+}
+.oxonacapsBold {
+  font-family: 'OxonaCaps', sans-serif;
+  font-weight: bold; /* or normal */
+  font-size: 2rem;
+}
+
+.oxonacaps_ss01 {
+  font-family: 'OxonaCaps', sans-serif;
+  font-feature-settings: 'ss01' 1;
+}
+
+.oxonacaps_title {
+  font-family: 'OxonaCaps', sans-serif;
+  font-feature-settings: 'ss02' 1, 'salt' 1;
+}
+.megatrans_disco {
+  font-family: 'MegatransDisco', sans-serif;
+}
+
+/* 
+When a font advertises **“Character Set • 791 Glyphs • 198 Alternates,”** it’s highlighting the depth and versatility of its design. Here's what each part means:
+
+---
+
+### 🔡 Character Set: 791 Glyphs
+
+- A **glyph** is a visual representation of a character.
+- 791 glyphs means the font includes:
+  - Basic Latin characters (A–Z, a–z, 0–9)
+  - Punctuation and symbols
+  - Extended Latin (e.g., accented characters for European languages)
+  - Possibly ligatures, currency symbols, arrows, and more
+- This large set supports **multilingual text**, **advanced typography**, and **specialized symbols**.
+
+---
+
+### ✨ 198 Alternates
+
+- These are **alternate glyphs**—stylistic or contextual variations of standard characters.
+- Examples include:
+  - Swash versions of letters (e.g., a fancy “A”)
+  - Alternate numerals (e.g., old-style vs. lining figures)
+  - Decorative or geometric caps
+  - Ligatures (e.g., “fi” or “st” as a single glyph)
+- These alternates are accessed via OpenType features like:
+  - `ss01` to `ss20` (stylistic sets)
+  - `salt` (stylistic alternates)
+  - `swsh` (swashes)
+  - `liga` (ligatures)
+
+You can activate them in CSS using:
+
+```css
+.title {
+  font-family: 'YourFontName', sans-serif;
+  font-feature-settings: 'ss01' 1, 'salt' 1;
+}
+```
+
+> Not all browsers support all features equally, so test across platforms.
+
+---
+
+Would you like help previewing these glyphs or integrating specific alternates into your design workflow?
+
+*/

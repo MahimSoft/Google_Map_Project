@@ -165,23 +165,17 @@ WHERE (
     or lower(image) like "%.wmv"
     or lower(image) like "%.avi"
   );
-
 UPDATE locations_googlephotos
 SET people = replace(people, "Maliha Mehjabin", "Maliha Mahjabin");
-
 UPDATE locations_googlephotos
 SET people = replace(people, "Maliha", "Maliha Mahjabin")
 WHERE (
     people like "%maliha%"
     AND people NOT like "%maliha mahjabin%"
   );
-
-  UPDATE locations_googlephotos
+UPDATE locations_googlephotos
 SET people = replace(people, "lamiar ma", "Nasrin Jahan Luna")
-WHERE (
-    people like "%lamiar ma%"
-  );
-
+WHERE (people like "%lamiar ma%");
 DELETE FROM locations_peoplenames
 WHERE name = "Maliha Mehjabin";
 DELETE FROM locations_peoplenamesvideos
@@ -218,28 +212,137 @@ WHERE id in (
         WHERE row_num = 2
       ) a
   );
-
-  SELECT * FROM locations_peoplenames ORDER by locations_peoplenames.num_of_images DESC;
-
-
-SELECT replace(people, "Lamiar Ma", "Nasrin Jahan Luna") as people FROM locations_googlephotos
+SELECT *
+FROM locations_peoplenames
+ORDER by locations_peoplenames.num_of_images DESC;
+SELECT replace(people, "Lamiar Ma", "Nasrin Jahan Luna") as people
+FROM locations_googlephotos
 WHERE people like "%Nasrin Jahan Luna%";
-	
 UPDATE locations_googlephotos
 SET people = replace(people, "Lamiar Ma", "Nasrin Jahan Luna")
-WHERE 
-    people like "%Lamiar Ma%";
-
-
-
-SELECT title, description, 
-count() OVER(PARTITION by description ORDER by description) as counts, photo_taken_time 
-from locations_googlephotos 
-WHERE length(trim(description))>1 ORDER by counts DESC;
-
-SELECT * FROM locations_googlephotos WHERE title like "%Morjina%";
-
-SELECT * FROM locations_googlephotos WHERE title like "%AAAA0033.JPG%";
-SELECT * FROM locations_googlephotos WHERE title like "%AAAA0034.JPG%";
-
+WHERE people like "%Lamiar Ma%";
+SELECT title,
+  description,
+  count() OVER(
+    PARTITION by description
+    ORDER by description
+  ) as counts,
+  photo_taken_time
+from locations_googlephotos
+WHERE length(trim(description)) > 1
+ORDER by counts DESC;
+SELECT *
+FROM locations_googlephotos
+WHERE title like "%Morjina%";
+SELECT *
+FROM locations_googlephotos
+WHERE title like "%AAAA0033.JPG%";
+SELECT *
+FROM locations_googlephotos
+WHERE title like "%AAAA0034.JPG%";
 -- 11814 11815 12889 12890 13627 
+SELECT *
+FROM locations_googlephotos
+WHERE latitude BETWEEN (24.327533 - 0.018) AND (24.327533 + 0.018)
+  AND longitude BETWEEN (91.784940 - 0.025) AND (91.784940 + 0.025)
+  AND (
+    6371 * acos(
+      cos(radians(24.327533)) * cos(radians(latitude)) * cos(radians(longitude) - radians(91.784940)) + sin(radians(24.327533)) * sin(radians(latitude))
+    )
+  ) <= 2;
+  
+SELECT *
+FROM (
+    SELECT *,
+      row_number() OVER(
+        PARTITION by dt_time
+        ORDER by dt_time
+      ) as row_num
+    FROM (
+        SELECT latitude,
+          longitude,
+          strftime('%Y%m%d%H%M', date_time_extracted) as dt_time
+        FROM maps_timeline
+      ) re
+  ) re2
+WHERE row_num = 1
+ORDER by dt_time;
+
+
+UPDATE locations_peoplenames
+SET 
+    latitude = (
+        SELECT b.latitude 
+        FROM map_timeline b 
+        WHERE b.timestamp BETWEEN (photos.timestamp - 600) AND (photos.timestamp + 600)
+        LIMIT 1
+    ),
+    longitude = (
+        SELECT b.longitude 
+        FROM map_timeline b 
+        WHERE b.timestamp BETWEEN (photos.timestamp - 600) AND (photos.timestamp + 600)
+        LIMIT 1
+    ),
+    remarks = 'Location Manipulated'
+WHERE EXISTS (
+    SELECT 1 
+    FROM map_timeline b 
+    WHERE b.timestamp BETWEEN (photos.timestamp - 600) AND (photos.timestamp + 600)
+);
+
+
+
+-- SQLite: 
+CREATE TABLE photo_best_match AS
+SELECT photo_id, latitude, longitude
+FROM (
+    SELECT a.id AS photo_id,
+           b.latitude,
+           b.longitude,
+           ROW_NUMBER() OVER (
+               PARTITION BY a.id
+               ORDER BY ABS(strftime('%s', a.photo_taken_time) - strftime('%s', b.date_time_extracted))
+           ) AS rn
+    FROM locations_googlephotos a
+    JOIN maps_timeline b
+      ON ABS(strftime('%s', a.photo_taken_time) - strftime('%s', b.date_time_extracted)) <= 600
+)
+WHERE rn = 1;
+
+-- PostgreSQL 
+CREATE TABLE locations_googlephotos (
+    id              SERIAL PRIMARY KEY,
+    title           VARCHAR(255),
+    description     TEXT,
+    image_views     INTEGER NOT NULL,
+    creation_time   TIMESTAMP,
+    photo_taken_time TIMESTAMP,
+    latitude        REAL,
+    altitude        REAL,
+    -- people          VARCHAR(255),
+    image           VARCHAR(255),
+    url             VARCHAR(500),
+    local_folder    VARCHAR(255),
+    device_type     VARCHAR(255),
+    remarks         VARCHAR(255),
+    video_thumbnail VARCHAR(255),
+    longitude       REAL
+);
+
+CREATE TABLE photo_best_match AS
+SELECT photo_id, latitude, longitude
+FROM (
+    SELECT a.id AS photo_id,
+           b.latitude,
+           b.longitude,
+           ROW_NUMBER() OVER (
+               PARTITION BY a.id
+               ORDER BY ABS(EXTRACT(EPOCH FROM (a.photo_taken_time - b.date_time_extracted::timestamp)))
+           ) AS rn
+    FROM locations_googlephotos a
+    JOIN maps_timeline b
+      ON ABS(EXTRACT(EPOCH FROM (a.photo_taken_time - b.date_time_extracted::timestamp))) <= 600
+) sub
+WHERE rn = 1;
+
+

@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>
       {% block title %}
-        Masud Self Help
+        Google Maps & Photos
       {% endblock %}
     </title>
     {% block favicon_icon %}
@@ -16,6 +16,7 @@
     <meta name="author" content="Mahim Soft" />
     {% tailwind_css %}
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+     <link href="{% static 'css/msoft_fonts.css' %}" rel="stylesheet">
     <style type="text/tailwindcss">
       @theme {
         --color-clifford: #da373d;
@@ -54,7 +55,9 @@
         Madina: { coords: [24.468793, 39.611083], zoom: 12 },
         Taif: { coords: [21.2583333, 40.3955556], zoom: 12 },
         Sylhet: { coords: [24.90701, 91.871405], zoom: 12 },
-        vietnam: { coords: [21.1319053, 106.44063539999999], zoom: 12 }
+        vietnam: { coords: [21.1319053, 106.44063539999999], zoom: 12 },
+        CoxBazar: { coords: [21.426827, 91.984890], zoom: 12 },
+        SaintMartin: { coords: [20.628719, 92.322527], zoom: 12 }
       }
       
       function zoomTo(city) {

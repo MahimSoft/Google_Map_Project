@@ -2,9 +2,11 @@ from django.db import models
 import os
 from uuid import uuid4
 from django.db.models.functions import Cast, Left, TruncMonth
+from django.templatetags.static import static
 from django.db.models import CharField
 
-def path_and_rename_logo(instance, filename, upload_folder = "images"):
+def path_and_rename_logo(instance, filename):
+    upload_folder = getattr(instance, "upload_folder", "images") 
     upload_to = upload_folder
     ext = filename.split(".")[-1]
     if ext.lower() != "svg":
@@ -53,13 +55,14 @@ class Place(models.Model):
 
 
 class GooglePhotos(models.Model):
+    upload_folder = "images"
     title = models.CharField(max_length=255, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     image_views = models.IntegerField(default=0)
     creation_time = models.DateTimeField(null=True, blank=True)
     photo_taken_time = models.DateTimeField(null=True, blank=True, db_index=True)
-    latitude = models.FloatField(null=True, blank=True)
-    longitude = models.FloatField(null=True, blank=True)
+    latitude = models.FloatField(null=True, blank=True, db_index=True)
+    longitude = models.FloatField(null=True, blank=True, db_index=True)
     altitude = models.FloatField(null=True, blank=True)
     people = models.CharField(max_length=255, blank=True, null=True, db_index=True)
     image = models.ImageField(
@@ -82,6 +85,7 @@ class GooglePhotos(models.Model):
     local_folder = models.CharField(max_length=255, blank=True, null=True)
     device_type = models.CharField(max_length=255, blank=True, null=True)
     remarks = models.CharField(max_length=255, blank=True, null=True)
+    location_source = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
         return f"{self.title}, {self.photo_taken_time or ''}"
@@ -100,3 +104,40 @@ class PeopleNamesVideos(models.Model):
     
     def __str__(self):
         return f"{self.name}"
+    
+
+class LocationAlbumUrls(models.Model):
+    upload_folder = "url_thumbnails"
+    IMAGE_TYPE_CHOICES = [
+        (1, "All"),
+        (2, "People"),
+        (3, "Documents"),
+    ]
+    center_lat = models.FloatField(null=True, blank=True, db_index=True)
+    center_lng = models.FloatField(null=True, blank=True, db_index=True)
+    radius_km = models.FloatField(null=True, blank=True, db_index=True)
+    url_display_text = models.CharField(max_length=255, blank=True, null=True)
+    page_header_text = models.CharField(max_length=255, blank=True, null=True)
+    thumbnail = models.ImageField(
+        upload_to = path_and_rename_logo,
+        max_length=255,
+        # validators=[validate_file_extension],
+        # default="ContractorsImage/default.png",
+        null=True,
+        blank=True,
+    )
+    image_type = models.IntegerField(
+        choices=IMAGE_TYPE_CHOICES,
+        default=1   # <-- default value
+    )
+    
+    @property
+    def thumbnail_url(self):
+        try:
+            thumbnail_url = self.thumbnail.url
+        except:
+            thumbnail_url = static('images/default.jpg')
+        return thumbnail_url
+
+    def __str__(self):
+        return f"{self.url_display_text}"

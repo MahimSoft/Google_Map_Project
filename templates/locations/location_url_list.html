@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load mahimsoft_tags %}
+{% load month_filters %}
+{% load tailwind_filters %}
+{% load crispy_forms_tags %}
+{% load tailwind_field %}
+{% block title %}
+  Location Album
+{% endblock %}
+
+{% block extend_header %}
+{% endblock %}
+{% block navbar %}
+  {% include 'locations/navbar_person_images.html' %}
+{% endblock %}
+{% block content %}
+  <div class="max-w-6xl m-auto">
+    <header class="text-center max-w-6xl mx-auto mt-1 px-2">
+      <h1 class="text-3xl font-extrabold text-gray-600 tracking-tight sm:text-4xl my-1">{{ heading }}</h1>
+    </header>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2">
+      {% for item in urls_list %}
+      <div class="flex justify-between items-center bg-white relative p-2 rounded-lg shadow-md border-1 border-gray-200 command-card">
+<form method="get" action="{% url 'locations:location_album' %}" class="flex justify-between items-center w-xl">
+  <div class="flex justify-start absolute gap-1.5 text-md text-gray-500 bottom-1">
+  <input type="hidden" name="url_id" value="{{ item.id }}">
+  <label>
+    <input type="radio" class="radio radio-xs" name="image_type" 
+    {% if item.image_type == 1 %}
+      checked
+    {% endif %}
+       value="1"> All
+  </label>
+  <label>
+    <input type="radio" class="radio radio-xs" name="image_type"
+        {% if item.image_type == 2 %}
+      checked
+    {% endif %}
+    value="2"> People
+  </label>
+  <label>
+    <input type="radio" class="radio radio-xs" name="image_type"
+        {% if item.image_type == 3 %}
+      checked
+    {% endif %}
+    value="3"> Documents
+  </label>
+</div>
+  <button type="submit" class="btn btn-light flex justify-start items-center mb-5 text-lg w-11/12 min-h-20">
+  <div class="flex justify-start items-center">
+<img src="{{item.thumbnail_url}}" class="max-w-16 rounded-md max-h-16" alt="" />
+<h1 class="text-md text-start font-bold text-gray-600 ml-2 exo2">{{ item.url_display_text }}</h1>
+</div>
+</button>
+</form>
+<a href="{% url 'locations:url_update' item.id %}" target="_blank" class="flex justify-between bg-blue-100 shadow-lg rounded-sm p-1">
+            <svg viewBox="0 0 48 48" width="16" height="16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M26.5858 5.08579C27.3479 4.32371 28.5767 4.30253 29.3646 5.03789L36.8646 12.0379C37.2612 12.408 37.4904 12.9232 37.4997 13.4655C37.5091 14.0078 37.2977 14.5307 36.9142 14.9142L16.9142 34.9142C16.5391 35.2893 16.0304 35.5 15.5 35.5H8.5C7.39543 35.5 6.5 34.6046 6.5 33.5V26C6.5 25.4696 6.71071 24.9609 7.08579 24.5858L26.5858 5.08579ZM28.0479 9.2805L10.5 26.8284V31.5H14.6716L32.622 13.5496L28.0479 9.2805Z"></path>
+              <path d="M7 41C7 40.4477 7.44772 40 8 40H41C41.5523 40 42 40.4477 42 41V43C42 43.5523 41.5523 44 41 44H8C7.44772 44 7 43.5523 7 43V41Z"></path>
+            </svg>
+          </a>
+
+ </div>
+      {% endfor %}
+    </div>
+    <div>
+      <a href="{% url 'locations:url_create' %}" class="badge badge-info mt-7 p-4 hover:badge-outline w-full h-auto">Add New URL</a>
+    </div>
+  </div>
+{% endblock %}

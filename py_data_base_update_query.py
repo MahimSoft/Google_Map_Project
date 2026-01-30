@@ -29,6 +29,13 @@ WHERE
     lower(people) like "%lamiar ma%";
 """
 
+poly_paul_name = """
+UPDATE locations_googlephotos
+SET people = replace(people, "Poly (Wife of Kundu Babu)", "Poly Paul")
+WHERE 
+    lower(people) like "%Poly (Wife of Kundu Babu)%";
+"""
+
 mim_er_ma_name_1 = """
 UPDATE locations_googlephotos
 SET people = replace(people, "Mim-er Ma", "Shamima Akter")
@@ -86,7 +93,7 @@ FROM gallery_mediaitem;
 """
 
 query_list = [maliha_name_1, maliha_name_2, mim_name, lamiar_ma_name, mim_er_ma_name_1, 
-              mim_er_ma_name_2,farzana_name, gallery_mediaitem_to_locations_googlephotos]
+              mim_er_ma_name_2,farzana_name,poly_paul_name, gallery_mediaitem_to_locations_googlephotos]
 query_list2 = [mim_er_ma_name_2, farzana_name]
 
 @time_of_execution

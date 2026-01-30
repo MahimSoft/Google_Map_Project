@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load mahimsoft_tags %}
+{% load month_filters %}
+
+{% block extend_header %}
+<style>
+    .img-card { transition: all 0.3s ease; }
+    .img-card:hover { transform: translateY(-4px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+    .grid-media { width: 100%; height: 400px; object-fit: cover; cursor: pointer; }
+</style>
+{% endblock %}
+    {% block navbar %}
+    {% include 'locations/navbar_person_images.html' %}
+    {% endblock navbar %}
+
+{% block content %}
+<header class="text-center mx-3 mb-1">
+            <h1 class="text-3xl font-extrabold text-gray-600 tracking-tight sm:text-4xl my-1">
+                {{heading}} {% if people_images.0.is_video %} Video {% else %} Photo {% endif %} Album
+            </h1>
+            <!-- <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
+                Filter by name and (optional) year/month to find friends and family members.
+            </p> -->
+            {% include 'includes/top_25.html' %}
+            <div class="text-md flex justify-between items-center mt-2 bg-blue-300 rounded-md p-0 ps-1 pe-2">
+                {% include 'includes/search_form.html' %}
+                <span>
+            Year: <span class="text-red-500">{% if people_images.0.photo_year %}{{people_images.0.photo_year}}{% else %}all, {% endif %}</span> Month: <span class="text-red-500">{% if people_images.0.photo_month %}{{people_images.0.photo_month|month_name}}{% else %}all{% endif %}, </span> Total 
+            {% if people_images.0.is_video %}
+                Videos:
+                {% else %}
+                Images:
+            {% endif %} 
+                  <span class="text-red-500">{{total_images|stringformat:"i"}}</span> 
+                  </span> 
+                 </div>
+        </header>
+<div class="bg-gray-50 max-w-7xl mx-auto px-4 py-4">
+    <div id="image-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {% for person in slides %}
+        <div class="js-slideshow-trigger img-card bg-white rounded-2xl overflow-hidden border shadow-sm"
+             data-url="{{ person.image.url }}"
+             data-is-video="{{ person.is_video|yesno:'true,false' }}"
+             data-name="{{ person.people|title|default:'Unnamed'|escapejs }}"
+             data-date="{{ person.photo_taken_time|date:'d F Y' }}">
+            
+            <div class="relative bg-gray-200">
+                {% if not person.is_video %}
+                    <img src="{{ person.image.url }}" class="grid-media">
+                {% else %}
+                    <div class="relative group">
+                        <img src="{{ person.video_thumbnail.url }}" class="grid-media">
+                        <div class="absolute inset-0 flex items-center justify-center bg-black/20">
+                            <span class="text-white text-4xl">▶</span>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+<div class="p-6">
+    <p class="text-gray-600 flex justify-start">
+    {% if person.people %}
+    <img src="{% static 'images/people.svg' %}" width="24" height="24" style="background: darksalmon; opacity: 0.6; border-radius: 5px; position: absolute;" alt="people">
+    <span class="people ms-8">{{ person.people|title|color_text|default:'No description available for this person.' }}</span>
+    {% endif %}
+    <hr class="opacity-30 ms-8">
+            </p>
+            
+            <p class="text-gray-600 leading-relaxed">
+              <span class="photo-date">📅: {{ person.photo_taken_time|date:"d F Y : H:i:s"|default:"No 'Image Taken Date' of  available for this image." }}</span>
+              {% if person.is_location %}
+                <small class="gps" style="color: red;"><a href="https://www.google.com/maps?q={{ person.latitude }},{{ person.longitude }}" title="Go to Google Maps: {{ person.latitude }}, {{ person.longitude }}" target="_blank">&#128279; GEO Location</a></small>
+              {% endif %}
+            </p>
+            <div class="mt-6 flex items-center justify-between">
+              <a href="#" class="text-indigo-600 font-semibold hover:text-indigo-800 transition-colors">View Profile &rarr;</a>
+              <span class="text-xs text-gray-400">ID: #{{ person.id }} ({{ person.title }})</span>
+            </div>
+                </div>
+        </div>
+        {% endfor %}
+    </div>
+        <span class="flex justify-center items-center">
+        {% include 'includes/pagination.html' %} 
+        {% include 'includes/jump_to_page.html' %}
+        </span>
+</div>
+
+{% include 'slideshow_modal.html' %}
+{% endblock %}
+
+{% block script %}
+
+<script src="{% static 'js/jumpToPage.js' %}"></script>
+<script>
+    jumpToPageOnEnter({{ page_obj.paginator.num_pages }})
+</script>
+{# The main slides data and slideshow script are now handled by slideshow_modal.html and data attributes #}
+{% endblock %}
