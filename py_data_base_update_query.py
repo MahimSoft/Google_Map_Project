@@ -13,18 +13,19 @@ WHERE (
     AND (lower(people) NOT like "%maliha mahjabin%" or lower(people) NOT like "%maliha mehjabin%")
 );
 """
+
 mim_name = """
 UPDATE locations_googlephotos
 SET people = replace(people, "Mim", "Sumayah Islam Mim")
 WHERE (
-    lower(people) like "%maliha%"
-    AND (lower(people) NOT like "%shamima akter%" or lower(people) NOT like "%farzana (mim)%")
+    lower(people) like "%mim%"
+    AND (lower(people) NOT like "%shamima akter%" or lower(people) NOT like "%farzana (mim)%" or lower(people) NOT like "sumayah islam mim")
 );
 """
 
 lamiar_ma_name = """
 UPDATE locations_googlephotos
-SET people = replace(people, "Lamiar Ma", "Nasrin Jahan Luna")
+SET people = replace(people, "lamiar ma", "Nasrin Jahan Luna")
 WHERE 
     lower(people) like "%lamiar ma%";
 """
@@ -33,18 +34,18 @@ poly_paul_name = """
 UPDATE locations_googlephotos
 SET people = replace(people, "Poly (Wife of Kundu Babu)", "Poly Paul")
 WHERE 
-    lower(people) like "%Poly (Wife of Kundu Babu)%";
+    lower(people) like "%poly (wife of kundu babu)%";
 """
 
 mim_er_ma_name_1 = """
 UPDATE locations_googlephotos
-SET people = replace(people, "Mim-er Ma", "Shamima Akter")
+SET people = replace(people, "Mim-Er ma", "Shamima Akter")
 WHERE 
     lower(people) like "%mim-er ma%";
 """
 mim_er_ma_name_2 = """
 UPDATE locations_googlephotos
-SET people = replace(people, "Mim-Er Ma", "Shamima Akter")
+SET people = replace(people, "Mim-er Ma", "shamima akter")
 WHERE 
     lower(people) like "%mim-er ma%";
 """
@@ -94,8 +95,9 @@ FROM gallery_mediaitem;
 
 query_list = [maliha_name_1, maliha_name_2, mim_name, lamiar_ma_name, mim_er_ma_name_1, 
               mim_er_ma_name_2,farzana_name,poly_paul_name, gallery_mediaitem_to_locations_googlephotos]
+# gallery_mediaitem_to_locations_googlephotos
 query_list2 = [mim_er_ma_name_2, farzana_name]
-
+query_list_gallery = [gallery_mediaitem_to_locations_googlephotos]
 @time_of_execution
 def update_data(db_name="map_db.sqlite3", query_list=query_list):
     conn = sqlite3.connect(db_name)

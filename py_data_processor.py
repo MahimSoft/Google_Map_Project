@@ -6,7 +6,7 @@ from tqdm import tqdm
 from locations.decorators import time_of_execution
 from py_copy_delete_file import copy_file, delete_file
 from py_delete_data_from_table import delete_data_from_table
-from py_data_base_update_query import update_data, query_list
+from py_data_base_update_query import update_data, query_list, query_list2, query_list_gallery
 from py_person_data import populate_data_in_person_table
 from py_display import display
 from py_heic_relevant_mp4_data import data_insertion_for_converted_mp4
@@ -65,11 +65,13 @@ def process_files(source_folder, table_columns, table_name, DB_NAME, REMARKS):
                     # Safely extract names if they exist
                     people_names = ", ".join([p.get('name', 'Unknown') for p in people_list if isinstance(p, dict)])
                     image = f"{REMARKS}/Google Photos/{file_path.split('/')[-1].split("\\")[0]}/{item.get('title')}"
+                    video_thumbnail = ''
                     url = item.get('url')
                     origin = item.get('googlePhotosOrigin', {}).get('mobileUpload', {})
                     folder = origin.get('deviceFolder', {}).get('localFolderName')
                     device = origin.get('deviceType')
                     remarks = REMARKS
+                    location_source = ''
                     
                     # Insert into Database
                     table_columns_names = table_columns.replace("\n","").split(",")
@@ -79,7 +81,7 @@ def process_files(source_folder, table_columns, table_name, DB_NAME, REMARKS):
                         VALUES ({'?, ' * (len(table_columns_names)-2)}?)
                     """
                     # print(qry)
-                    cursor.execute(qry, (title, desc, views, c_time, p_time, lat, lon, alt, people_names, image, url, folder, device, remarks))
+                    cursor.execute(qry, (title, desc, views, c_time, p_time, lat, lon, alt, people_names, image,video_thumbnail, url, folder, device, remarks, location_source))
                 
             except (json.JSONDecodeError, AttributeError, TypeError) as e:
                 # Silently skip or log errors for corrupt/mismatched files
@@ -123,19 +125,24 @@ table_columns = """id INTEGER PRIMARY KEY AUTOINCREMENT,
                     altitude REAL, 
                     people TEXT, 
                     image TEXT, 
+                    video_thumbnail TEXT, 
                     url TEXT, 
                     local_folder TEXT, 
                     device_type TEXT, 
-                    remarks TEXT"""
+                    remarks TEXT,
+                    location_source TEXT
+                    """
                     
 table_name_googlephotos="locations_googlephotos"
 
 table_peoplenames="locations_peoplenames"
 table_peoplenamesvideos="locations_peoplenamesvideos"
-columns_person_image_video = " name TEXT, num_of_images INTEGER "
+columns_person_image_video = " name TEXT, num_of_images INTEGER, thumbnail varchar(255), archive bool "
+# columns_person_image_video = " name TEXT, num_of_images INTEGER "
 columns_person_videos = " name TEXT, num_of_videos INTEGER "
 
-query_image_video = """SELECT people FROM locations_googlephotos WHERE length(people) > 0"""
+query_image_video = """SELECT lower(people) as people, '' as thumbnail, 0 as archive FROM locations_googlephotos WHERE length(people) > 0"""
+# query_image_video = """SELECT people FROM locations_googlephotos WHERE length(people) > 0"""
 
 query_video="""SELECT people FROM locations_googlephotos WHERE length(people) > 0 
 and (
@@ -173,9 +180,11 @@ if __name__ == "__main__":
     data_insertion_for_converted_mp4(input_root=SOURCE_FOLDER_2, db_name=DB_NAME_main)
     data_insertion_for_converted_mp4(input_root=SOURCE_FOLDER_3, db_name=DB_NAME_main)
     
-    # update Tables ======
-    update_data(db_name=DB_NAME_main, query_list=query_list)
     
+    # update Tables ======
+    update_data(db_name=DB_NAME_main, query_list=query_list_gallery)
+    # update_data(db_name=DB_NAME_main, query_list=query_list2)
+
     # Person Tables ======
     delete_data_from_table(table_name=table_peoplenames, DB_NAME=DB_NAME_main)
     delete_data_from_table(table_name=table_peoplenamesvideos, DB_NAME=DB_NAME_main)

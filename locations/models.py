@@ -86,17 +86,48 @@ class GooglePhotos(models.Model):
     device_type = models.CharField(max_length=255, blank=True, null=True)
     remarks = models.CharField(max_length=255, blank=True, null=True)
     location_source = models.CharField(max_length=255, blank=True, null=True)
+    
+    @property
+    def video_thumbnail_url(self):
+        try:
+            thumbnail_url = self.video_thumbnail.url
+        except:
+            thumbnail_url = static('images/default.jpg')
+        return thumbnail_url
 
     def __str__(self):
         return f"{self.title}, {self.photo_taken_time or ''}"
     
 
 class PeopleNames(models.Model):
+    upload_folder = "people_thumbnails"
     name = models.CharField(max_length=255, blank=True, null=True)
     num_of_images = models.IntegerField(null=True, blank=True) # Google's confidence in the visit
+    thumbnail = models.ImageField(
+        upload_to = path_and_rename_logo,
+        max_length=255,
+        # validators=[validate_file_extension],
+        # default="ContractorsImage/default.png",
+        null=True,
+        blank=True,
+    )
+    archive = models.BooleanField(default = False)
+    
+    @property
+    def thumbnail_url(self):
+        try:
+            thumbnail_url = self.thumbnail.url
+        except:
+            thumbnail_url = static('images/default.jpg')
+        return thumbnail_url
+    
+    @property
+    def url_display_text(self):
+
+        return self.name.title()
     
     def __str__(self):
-        return f"{self.name}"
+        return f"{self.name.title()}"
     
 class PeopleNamesVideos(models.Model):
     name = models.CharField(max_length=255, blank=True, null=True)
@@ -112,6 +143,17 @@ class LocationAlbumUrls(models.Model):
         (1, "All"),
         (2, "People"),
         (3, "Documents"),
+    ]
+    DIVISION_CHOICES = [
+        ("Barishal", "Barishal"),
+        ("Chattogram", "Chattogram"),
+        ("Dhaka", "Dhaka"),
+        ("Khulna", "Khulna"),
+        ("Mymensingh", "Mymensingh"),
+        ("Rajshahi", "Rajshahi"),
+        ("Rangpur", "Rangpur"),
+        ("Sylhet", "Sylhet"),
+        ("Abroad", "Abroad"),
     ]
     center_lat = models.FloatField(null=True, blank=True, db_index=True)
     center_lng = models.FloatField(null=True, blank=True, db_index=True)
@@ -130,6 +172,7 @@ class LocationAlbumUrls(models.Model):
         choices=IMAGE_TYPE_CHOICES,
         default=1   # <-- default value
     )
+    division = models.CharField(max_length=50, choices=DIVISION_CHOICES, default="Sylhet")
     
     @property
     def thumbnail_url(self):
@@ -138,6 +181,9 @@ class LocationAlbumUrls(models.Model):
         except:
             thumbnail_url = static('images/default.jpg')
         return thumbnail_url
-
+    
+    class Meta:
+        ordering = ("division",)
+    
     def __str__(self):
         return f"{self.url_display_text}"

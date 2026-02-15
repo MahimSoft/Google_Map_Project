@@ -3,7 +3,9 @@ import time
 import subprocess
 from send2trash import send2trash
 from locations.decorators import time_of_execution
+from tqdm import tqdm
 from py_display import display
+from py_convert_seconds_to_hmsm import convert_seconds_to_hmsm
 
 @time_of_execution
 def extract_and_delete(source_dir, destination_dir, winrar_path, delete_permanently=False):
@@ -20,7 +22,7 @@ def extract_and_delete(source_dir, destination_dir, winrar_path, delete_permanen
         print("No archives found.")
         return
 
-    for filename in archives:
+    for filename in  tqdm(archives, desc=f"Extracting file", unit="file"):
         filepath = os.path.join(source_dir, filename)
         sl += 1
         
@@ -31,19 +33,19 @@ def extract_and_delete(source_dir, destination_dir, winrar_path, delete_permanen
         command = [winrar_path, "x", "-ibck", "-y", filepath, destination_dir]
         
         try:
-            print(f"{sl} of {total_files} Extracting: {filename}...")
+            # print(f"{sl} of {total_files} Extracting: {filename}...")
             start_time = time.time()
             # Wait for WinRAR to finish
             subprocess.run(command, check=True)
             end_time = time.time()
             execution_time = end_time - start_time
-            display(text=f"{execution_time:.2f} seconds.", query=False, mysql=False, leading_text="Extraction completed in", border=False)
+            display(text=convert_seconds_to_hmsm(execution_time), query=False, mysql=False, leading_text="Extraction completed in (H:M:S.mmm)", border=False)
             if delete_permanently:
                 os.remove(filepath)
-                print(f"Permanently deleted: {filename}")
+                # print(f"Permanently deleted: {filename}")
             else:         
                 # Move to Recycle Bin
-                print(f"Moving to Recycle Bin: {filename}")
+                # print(f"Moving to Recycle Bin: {filename}")
                 send2trash(filepath)
                 
         except subprocess.CalledProcessError as e:
@@ -56,9 +58,9 @@ def extract_and_delete(source_dir, destination_dir, winrar_path, delete_permanen
 if __name__ == "__main__":
     # --- Configuration ---
     winrar_path = r"C:\Program Files\WinRAR\WinRAR.exe"
-    source_dir = r"E:\Takeout_20251229"
+    source_dir = r"E:\Takeout_20260205\33a33a33a"
     # Set destination_dir to source_dir for "Extract Here"
-    destination_dir = r"E:\Takeout_20251229" 
+    destination_dir = r"E:\Takeout_20260205\33a33a33a" 
     delete_permanently = False  # False moves to Recycle Bin (requires extra lib), True deletes
     # --- End Configuration ---
     

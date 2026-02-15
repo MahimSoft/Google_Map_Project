@@ -14,16 +14,24 @@ def populate_data_in_person_table(table_columns, table_name, DB_NAME, query):
     conn = setup_database(table_columns, table_name, DB_NAME)
     cursor = conn.cursor()
     cursor.execute(query)
+    print(query)
     people_list = cursor.fetchall()
     name_list = []
     for item in people_list:
+        # print(item[0].split(", "))
         name_list += item[0].split(", ")
 
     people_list = list(set(name_list))
     people_list.sort()
-    qry =f"INSERT INTO {table_name} (id, name) VALUES (?,?)"
 
-    cursor.executemany(qry, tuple(enumerate(people_list, start=1)))
+    if table_name == "locations_peoplenames":
+        qry =f"INSERT INTO {table_name} (id, name, num_of_images, archive) VALUES (?,?,'',0)"
+    else:
+        qry =f"INSERT INTO {table_name} (id, name) VALUES (?,?)"
+        
+    tpl = tuple(enumerate(people_list, start=1))
+    # print(tpl)
+    cursor.executemany(qry, tpl)
     conn.commit()  
     cursor.execute(f"SELECT * FROM {table_name};")
     people_list_from_db = cursor.fetchall()
@@ -75,9 +83,9 @@ def populate_data_in_person_table(table_columns, table_name, DB_NAME, query):
 #! To Run: python py_person_data.py
 
 if __name__ == "__main__":
-    columns_person_image_video = " name TEXT, num_of_images INTEGER "
+    columns_person_image_video = " name TEXT, num_of_images INTEGER, thumbnail varchar(255) NULL, archive bool "
     columns_person_videos = " name TEXT, num_of_videos INTEGER "
-    query_image_video = """SELECT lower(people) as people FROM locations_googlephotos WHERE length(people) > 0"""
+    query_image_video = """SELECT lower(people) as people, Null as thumbnail, 0 as archive FROM locations_googlephotos WHERE length(people) > 0"""
     query_video="""SELECT lower(people) as people FROM locations_googlephotos WHERE length(people) > 0 
                     and (
                     title like '%.mp4' 

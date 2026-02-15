@@ -11,24 +11,44 @@
 
 {% block extend_header %}
   <style>
-  #div_id_image_type label{
-    display: inline-block!important;
-    margin-right: 10px!important;
-}
+    #div_id_image_type {
+      display: inline-block !important;
+      margin-right: 10px !important;
+      border: 1px solid gray;
+      border-radius: 5px; /* Applies a 25px radius to all four corners */
+      padding: 10px;
+    }
+    
+    #div_id_image_type label {
+      display: inline-block !important;
+      margin-right: 10px !important;
+    }
+    
+    #div_id_division {
+      display: inline-block !important;
+      margin-right: 10px !important;
+      border: 1px solid gray;
+      border-radius: 5px; /* Applies a 25px radius to all four corners */
+      padding: 10px;
+    }
+    #div_id_division label {
+      display: inline-block !important;
+      margin-right: 10px !important;
+    }
   </style>
 {% endblock %}
 {% block navbar %}
   {% include 'locations/navbar_person_images.html' %}
 {% endblock %}
 {% block content %}
-<div class="max-w-6xl m-auto">
-  <header class="text-center max-w-6xl mx-auto w- mt-1 px-2">
-    <h1 class="text-3xl font-extrabold text-gray-600 tracking-tight sm:text-4xl my-1">{{ heading }}</h1>
-  </header>
-      <div class="border-1 rounded-xl border-gray-600 mt-6">
-        <div class="card-body">
-            {% crispy form %}
-        </div>
+  <div class="max-w-6xl m-auto">
+    <header class="text-center max-w-6xl mx-auto w- mt-1 px-2">
+      <h1 class="text-3xl font-extrabold text-gray-600 tracking-tight sm:text-4xl my-1">{{ heading }}</h1>
+    </header>
+    <div class="border-1 rounded-xl border-gray-600 mt-6">
+      <div class="card-body">
+        {% crispy form %}
+      </div>
     </div>
-    </div>
+  </div>
 {% endblock %}

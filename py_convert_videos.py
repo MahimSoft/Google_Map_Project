@@ -4,6 +4,22 @@ import subprocess
 import time
 from locations.decorators import time_of_execution
 from py_display import display
+from send2trash import send2trash
+
+def _move_file_to_trash(file_path):
+    """
+    Moves a file to the trash, handling cases where the file might not exist
+    or other OS errors occur during the trash operation.
+    """
+    normalized_path = os.path.normpath(file_path)
+    if os.path.exists(normalized_path):
+        try:
+            send2trash(normalized_path)
+            print(f"Moved to trash: {normalized_path}")
+        except OSError as e:
+            print(f"Error moving to trash {normalized_path}: {e}")
+    else:
+        print(f"File not found, cannot move to trash: {normalized_path}")
 
 # def time_of_execution(func):
 #     def wrapper(*args, **kwargs):
@@ -68,6 +84,7 @@ def convert_to_mp4(input_root, output_root):
                     try:
                         # check=True will raise an error if the conversion fails
                         subprocess.run(command, check=True, capture_output=True)
+                        _move_file_to_trash(input_path)
                         end_time = time.time()
                         execution_time = end_time - start_time
                         display(text=f"{execution_time:.2f} seconds.", query=False, mysql=False, leading_text="Conversion completed in", border=False)
@@ -76,7 +93,9 @@ def convert_to_mp4(input_root, output_root):
                     except subprocess.CalledProcessError as e:
                         print(f"Error converting {file}: {e.stderr.decode()}")
                 else:
+                    _move_file_to_trash(input_path)
                     print(f"File already exists: {output_path}")
+
 
 
 
@@ -88,7 +107,7 @@ def convert_to_mp4(input_root, output_root):
 #! To Run: python py_convert_videos.py
 
 if __name__ == "__main__":
-    SOURCE_FOLDER = 'D:/takeout 20251226/33a33a33a/Google Photos/'
-    DEST_FOLDER = 'D:/takeout 20251226/33a33a33a/Google Photos/MP4'
+    SOURCE_FOLDER = 'D:/takeout 20251226/MasudJGTDSL/Google Photos/'
+    DEST_FOLDER = 'D:/takeout 20251226/MasudJGTDSL/Google Photos/MP4'
     # convert_to_mp4(input_root = SOURCE_FOLDER, output_root=DEST_FOLDER)
     convert_to_mp4(input_root=SOURCE_FOLDER, output_root=DEST_FOLDER)

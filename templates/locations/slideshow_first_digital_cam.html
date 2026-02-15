@@ -144,7 +144,7 @@
                      :class="{ 'zoomed': isZoomed, 'cursor-zoom-in': !isZoomed, 'cursor-zoom-out': isZoomed }"
                      :style="isZoomed ? { transformOrigin: `${originX} ${originY}` } : { transformOrigin: 'center' }">
             {% else %}
-                <video class="slide-media fullscreen-v" poster="{{slide.video_thumbnail.url}}" controls>
+                <video class="slide-media fullscreen-v" poster="{{slide.video_thumbnail_url}}" controls>
                     <source src="{{slide.image.url}}" type="video/mp4">
                     Your browser does not support video.
                 </video>

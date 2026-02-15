@@ -2,7 +2,12 @@ import sqlite3
 import subprocess
 import os
 from PIL import Image, ImageDraw, ImageFont
+from dotenv import dotenv_values, load_dotenv
 
+config = {**dotenv_values(".env")} 
+root_folder = config["MEDIA_ROOT"]
+ffmpeg_path = config["FFMPEG_PATH"]
+use_logo_path = config["LOGO"]
 
 def add_logo_to_thumbnail(background_img, logo_path, margin=20):
     """
@@ -35,7 +40,7 @@ def add_logo_to_thumbnail(background_img, logo_path, margin=20):
         return background_img
 
 
-def process_all_thumbnails(db_name="map_db.sqlite3", output_folder="D:/takeout 20251226/thumbnails"):
+def process_all_thumbnails(db_name="map_db.sqlite3", output_folder=f"{root_folder}/thumbnails"):
     # Connect to the database
     conn = sqlite3.connect(db_name)
     cursor = conn.cursor()
@@ -57,7 +62,7 @@ def process_all_thumbnails(db_name="map_db.sqlite3", output_folder="D:/takeout 2
     rs=0
     
     for id, video_path, text in rows:
-        if not os.path.exists(f"D:/takeout 20251226/{video_path}"):
+        if not os.path.exists(f"{root_folder}/{video_path}"):
             print(f"File not found, skipping: {video_path}")
             continue
         # Define output path: same folder, change extension to .jpg
@@ -68,7 +73,7 @@ def process_all_thumbnails(db_name="map_db.sqlite3", output_folder="D:/takeout 2
         conn.execute(f"UPDATE locations_googlephotos SET video_thumbnail = 'thumbnails/{id}_{file_name}_thumb.jpg' WHERE id = {id}")
         if not os.path.isfile(output_path):
             print(f"Processing: {rs} of {total_files}: {file_name}...")
-            create_thumbnail(f"D:/takeout 20251226/{video_path}", output_path, text)
+            create_thumbnail(f"{root_folder}/{video_path}", output_path, text)
         
     conn.commit()
     conn.close()
@@ -77,9 +82,9 @@ def create_thumbnail(video_path, output_path, text):
     temp_frame = "temp_raw_frame.jpg"
 
     # 1. Extract frame at 2 seconds for the poster
-    ffmpeg_path = r'C:/ffmpeg/bin/ffmpeg.exe'
+    #! ffmpeg_path = ffmpeg_path
     subprocess.run([
-        ffmpeg_path, '-ss', '00:00:02', '-i', video_path,
+        ffmpeg_path, '-ss', '00:00:01', '-i', video_path,
         '-frames:v', '1', '-q:v', '2', temp_frame, '-y'
     ], capture_output=True)
 
@@ -112,7 +117,7 @@ def create_thumbnail(video_path, output_path, text):
         return
     # ! New code End ======
     
-    img = add_logo_to_thumbnail(img, r"F:\Takeout\Google_Map_Project\static\images\096.png")
+    img = add_logo_to_thumbnail(img, use_logo_path)
     draw = ImageDraw.Draw(img)
 
     # Load font - adjust size based on image width
@@ -137,7 +142,7 @@ def create_thumbnail(video_path, output_path, text):
     
 
     # 3. Save to destination and cleanup
-    img.save(output_path, quality=90)
+    img.save(output_path, quality=95)
     if os.path.exists(temp_frame):
         os.remove(temp_frame)
 #! To Run: python py_create_video_thumbnail.py

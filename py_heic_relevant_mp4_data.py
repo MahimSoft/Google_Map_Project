@@ -57,7 +57,7 @@ def data_insertion_for_converted_mp4(input_root, db_name="map_db.sqlite3"):
     cursor = conn.cursor()
     # conn2 = sqlite3.connect("heic_mp4.sqlite3")
     # cursor2 = conn2.cursor()
-    create_table_query = """CREATE TABLE IF NOT EXISTS locations_googlephotos ("id" integer NOT NULL PRIMARY KEY AUTOINCREMENT, "title" varchar(255) NULL, "description" text NULL, "image_views" integer NOT NULL, "creation_time" datetime NULL, "photo_taken_time" datetime NULL, "latitude" real NULL, "longitude" real NULL, "altitude" real NULL, "people" varchar(255) NULL, "image" varchar(255) NULL, "url" varchar(500) NULL, "local_folder" varchar(255) NULL, "device_type" varchar(255) NULL, "remarks" varchar(255) NULL, "video_thumbnail" varchar(255) NULL);"""
+    create_table_query = """CREATE TABLE IF NOT EXISTS locations_googlephotos ("id" integer NOT NULL PRIMARY KEY AUTOINCREMENT, "title" varchar(255) NULL, "description" text NULL, "image_views" integer NOT NULL, "creation_time" datetime NULL, "photo_taken_time" datetime NULL, "latitude" real NULL, "longitude" real NULL, "altitude" real NULL, "people" varchar(255) NULL, "image" varchar(255) NULL, "video_thumbnail" varchar(255) NULL, "url" varchar(500) NULL, "local_folder" varchar(255) NULL, "device_type" varchar(255) NULL, "remarks" varchar(255) NULL, "location_source" varchar(255) NULL);"""
     cursor.execute(create_table_query)
     # cursor2.execute(create_table_query)
     
@@ -100,7 +100,8 @@ def data_insertion_for_converted_mp4(input_root, db_name="map_db.sqlite3"):
             url,
             local_folder,
             device_type,
-            remarks
+            remarks,
+            location_source
             FROM locations_googlephotos WHERE device_type = 'IOS_PHONE' and
             image = replace("{file.replace('/Google Photos/', '/Google Photos/JPG/').replace('.HEIC', '.jpg').replace('  ', ' ').replace('   ', ' ')}","\\","/");"""
             # device_type = 'IOS_PHONE' and 
@@ -126,7 +127,8 @@ def data_insertion_for_converted_mp4(input_root, db_name="map_db.sqlite3"):
                                 url,
                                 local_folder,
                                 device_type,
-                                remarks) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"""
+                                remarks,
+                                location_source) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"""
             if len(rows) > 0:
                 cursor.execute(insert_query, rows[0])
         else:

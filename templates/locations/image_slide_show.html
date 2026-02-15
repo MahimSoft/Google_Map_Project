@@ -50,7 +50,9 @@
                     <img src="{{ person.image.url }}" class="grid-media">
                 {% else %}
                     <div class="relative group">
-                        <img src="{{ person.video_thumbnail.url }}" class="grid-media">
+                        
+                        <img src="{{ person.video_thumbnail_url }}" alt="no Image" onerror="{% static 'images/MS_1.svg' %}" class="grid-media">
+                            
                         <div class="absolute inset-0 flex items-center justify-center bg-black/20">
                             <span class="text-white text-4xl">▶</span>
                         </div>

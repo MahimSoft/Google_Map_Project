@@ -9,9 +9,9 @@ import json
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models.functions import (Substr, Concat, RowNumber, Replace, Cast, TruncMonth, 
                                         Round, ExtractYear, ExtractMonth, ACos, Cos, Radians, Sin,
-                                        Length, LTrim, RTrim, Trim)
+                                        Length, LTrim, RTrim,Lower, Trim)
 
-from .forms import UrlCreateForm
+from .forms import UrlCreateForm, PeopleUpdateForm
 # ! For GPS ================
 # from django.contrib.gis.db.models.functions import Distance
 # from django.contrib.gis.geos import Point
@@ -704,9 +704,9 @@ class ImageWithDescription(ListView):
         qs = qs.annotate(
         description_len=Length(Trim(F("description"))),
         row_number = Window(
-        expression=RowNumber(),
-        partition_by=[F("photo_taken_time")],
-        order_by=[F("photo_taken_time").asc(), Trim(F("description")).desc()]
+            expression=RowNumber(),
+            partition_by=[Lower(Concat(F("photo_taken_time"),F("title")))],
+            order_by=[Lower(Concat(Trim(F("photo_taken_time")),F("title"))).desc()],
         ),
         is_location = Case(
         When(longitude__gt=0, then=Value(True)),
@@ -799,11 +799,11 @@ class LocationAlbum(ListView):
         video_exts = ['mts', 'mp4', '3gp', 'mov', 'mpo', 'wmv', 'avi']
 
         qs = super().get_queryset().annotate(
-            row_number=Window(
-                expression=RowNumber(),
-                partition_by=[F("title")],
-                order_by=[F("title").asc(), Trim(F("photo_taken_time")).desc()]
-            ),
+        row_number = Window(
+            expression=RowNumber(),
+            partition_by=[Lower(Concat(F("photo_taken_time"),F("title")))],
+            order_by=[Lower(Concat(Trim(F("photo_taken_time")),F("title"))).desc()],
+        ),
             is_location=Case(
                 When(longitude__gt=0, then=Value(True)),
                 default=Value(False),
@@ -850,7 +850,10 @@ class LocationAlbum(ListView):
             results = results.filter(distance__lte=radius_km, people_len__gt=0).order_by('-photo_taken_time')
         else:
             results = results.filter(distance__lte=radius_km, people_len__lt=1).order_by('-photo_taken_time')
-            
+        
+        for i, item in enumerate(list(results)):
+            # display(item)
+            item.item_number = i - (i//self.paginate_by)*(self.paginate_by)+1
         return results
 
     def get_context_data(self, **kwargs):
@@ -886,60 +889,14 @@ class LocationAlbum(ListView):
         return context
 
 def location_album_urls(request):
-    # ?center_lat=24.312077&center_lng=91.727410&radius_km=12 21.422513, 39.826196
     urls_list = LocationAlbumUrls.objects.all()
     return render(request, 'locations/location_url_list.html', {'urls_list': urls_list,"heading": "Tour Albums"})
 
-# Region
-# import math
-# from django.db.models import F, FloatField
-# from django.db.models.functions import ACos, Cos, Radians, Sin
 
-# def get_nearby_data(center_lat, center_lng, radius_km=2):
-#     # 1. Calculate Bounding Box (Pruning)
-#     # 1 degree of Lat is ~111km
-#     lat_delta = radius_km / 111.0
-#     # 1 degree of Lng varies based on Latitude
-#     lng_delta = radius_km / (111.0 * math.cos(math.radians(center_lat)))
+def people_album_urls(request):
+    people_list = PeopleNames.objects.all().filter(archive=False).order_by("-num_of_images")
+    return render(request, 'locations/location_person_url_list.html', {'urls_list': people_list,"heading": "Photo Albums by Person"})
 
-#     # 2. Query with Bounding Box + Haversine Annotation
-#     return YourModel.objects.filter(
-#         latitude__range=(center_lat - lat_delta, center_lat + lat_delta),
-#         longitude__range=(center_lng - lng_delta, center_lng + lng_delta)
-#     ).annotate(
-#         distance=(
-#             6371 * ACos(
-#                 Cos(Radians(center_lat)) * Cos(Radians(F('latitude'))) *
-#                 Cos(Radians(F('longitude')) - Radians(center_lng)) +
-#                 Sin(Radians(center_lat)) * Sin(Radians(F('latitude')))
-#             )
-#         )
-#     ).filter(distance__lte=radius_km).order_by('distance')
-
-# class LocationAlbum_2(ListView):
-#     model = LocationBatch
-#     template_name = 'locations/location_album.html'
-#     context_object_name = "location_album"
-#     paginate_by = 500
-
-#     def get_queryset(self):
-#         qs = super().get_queryset()
-#         try:
-#             center_lat = self.request.GET.get("center_lat")
-#             center_lng = self.request.GET.get("center_lng")
-#             distance = self.request.GET.get("distance")
-#         except:
-#             center_lat =0
-#             center_lng =0
-#         center = Point(center_lng, center_lat, srid=4326)
-
-#         # This is extremely fast and handles all the math for you
-#         results = qs.filter(
-#             location__distance_lte=(center, D(km=distance))
-#         ).annotate(distance=Distance('location', center)).order_by('distance')            
-
-#         return results
-# Endregion
 
 class UrlCreateView(CreateView):
     template_name = "locations/location_url_add.html"
@@ -976,3 +933,23 @@ class UrlUpdateView(UpdateView):
             self.request, "The URL's information updated successfully."
         )
         return super(UrlUpdateView, self).form_valid(form)
+    
+    
+class PeopleNameUpdateView(UpdateView):
+    model = PeopleNames
+    form_class = PeopleUpdateForm
+    template_name = "locations/location_url_add.html"
+    success_url = "/"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["heading"] = "People Name Update"
+        context["update_tag"] = True
+        context["redirect_url"] = f"./{self.kwargs['pk']}"
+        return context
+
+    def form_valid(self, form):
+        messages.success(
+            self.request, "The URL's information updated successfully."
+        )
+        return super(PeopleNameUpdateView, self).form_valid(form)

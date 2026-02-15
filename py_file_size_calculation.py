@@ -23,6 +23,15 @@ def format_bytes(size_bytes):
     s = round(size_bytes / p, 2)
     return f"{s} {size_name[i]}"
 
+def write_paths_to_file(file_paths, output_filename="file_paths_list.txt"):
+    try:
+        with open(output_filename, 'w', encoding='utf-8') as f:
+            for path in file_paths:
+                f.write(f"{path}\n")
+        print(f"File paths successfully written to {output_filename}")
+    except IOError as e:
+        print(f"Error writing file paths to {output_filename}: {e}")
+
 def calculate_total_size(root_dir, paths):
     total_bytes = 0
     total_not_found = 0
@@ -149,32 +158,50 @@ FROM (
 WHERE `row_number` = 1 ;
 """
 
-
-
-def get_directory_size_fast(path, extensions=['.json', '.jpg', '.mp4', '.mts', '.3gp', '.mov', '.mpo', '.wmv', '.avi']):
-    total = 0
+def _get_files_and_size_recursive(path, extensions, collect_paths):
+    total_size = 0
+    file_paths = []
     with os.scandir(path) as it:
         for entry in it:
             if entry.is_file():
                 for ext in extensions:
-                    if entry.name.lower().endswith(ext):
-                        total += entry.stat().st_size
+                    if entry.name.lower().endswith(ext.lower()):
+                        if collect_paths:
+                            file_paths.append(entry.path)
+                        else:
+                            total_size += entry.stat().st_size
             elif entry.is_dir():
-                total += get_directory_size_fast(entry.path)
-    
-    return format_bytes(total)
+                try:
+                    result = _get_files_and_size_recursive(entry.path, extensions, collect_paths)
+                    if collect_paths:
+                        file_paths.extend(result)
+                    else:
+                        total_size += result
+                except Exception as e:
+                    print("☹️ ", e)
+                    continue  # skip this file and move on
+    return file_paths if collect_paths else total_size
 
-root_dir = r'D:/takeout 20251226'
-root_dir_1 = r'E:\Takeout_20251229\MasudJGTDSL\Maps\Photos and videos'
+
+def get_directory_size_fast(path, extensions=['.json', '.jpg', '.mp4', '.mts', '.3gp', '.mov', '.mpo', '.wmv', '.avi'], create_path_list=False):
+    if create_path_list:
+        return _get_files_and_size_recursive(path, extensions, collect_paths=True)
+    else:
+        return _get_files_and_size_recursive(path, extensions, collect_paths=False)
+
+root_dir = r'D:\takeout 20251226\MasudJGTDSL'
+root_dir_1 = r'E:/Takeout_20260205/Takeout/Google Photos/'
+root_dir_2 = r'D:\takeout 20251226\MasudJGTDSL\Google Photos\MP4'
+root_dir_2 = r'C:/'
 
 #! To Run: python py_file_size_calculation.py
 if __name__ == "__main__":
-    paths = get_file_paths(qry_except_video, db_name="map_db.sqlite3")
-    file_size =calculate_total_size(root_dir, paths)
-    formatted_size = format_bytes(file_size["total_bytes"])
-    total_file = file_size["total_file"]
-    total_not_found = file_size["total_not_found"]
-    not_found_list = file_size["not_found_list"]
+    # paths = get_file_paths(qry_except_video, db_name="map_db.sqlite3")
+    # file_size =calculate_total_size(root_dir, paths)
+    # formatted_size = format_bytes(file_size["total_bytes"])
+    # total_file = file_size["total_file"]
+    # total_not_found = file_size["total_not_found"]
+    # not_found_list = file_size["not_found_list"]
 
     #! display(text, query=False, mysql=False, leading_text="Returned Data 📋", text_clr=CLR.Fg.red, border=True):
     # display(total_file, query=False, mysql=False, leading_text="Total Files", text_clr=CLR.Fg.red, border=False)
@@ -182,4 +209,18 @@ if __name__ == "__main__":
     # display(total_not_found, query=False, mysql=False, leading_text="Files Not Found", text_clr=CLR.Fg.red, border=False)
     # display(not_found_list, query=False, mysql=False, leading_text="List of Files Not Found", text_clr=CLR.Fg.red, border=False)
     extensions=['.jpg', '.mp4', '.mts', '.3gp', '.mov', '.mpo', '.wmv', '.avi']
-    display(get_directory_size_fast(root_dir_1, extensions=extensions))
+    extensions_1=['.mp4','.mts', '.3gp', '.mov', '.mpo', '.wmv', '.avi']
+    extensions_2=['.jpg','jpeg']
+    extensions_3=['.json']
+    display(format_bytes(get_directory_size_fast(root_dir_2, extensions=extensions_1)))
+
+    # Example of creating a path list file
+    output_path_filename = "video_paths_list.txt"
+    video_paths = get_directory_size_fast(root_dir_2, extensions=extensions_1, create_path_list=True)
+    write_paths_to_file(video_paths, output_path_filename)
+    display(f"Video paths written to {output_path_filename}", text_clr=CLR.Fg.green, border=False)
+
+    output_path_filename_jpg = "image_paths_list.txt"
+    image_paths = get_directory_size_fast(root_dir_2, extensions=extensions_2, create_path_list=True)
+    write_paths_to_file(image_paths, output_path_filename_jpg)
+    display(f"Image paths written to {output_path_filename_jpg}", text_clr=CLR.Fg.green, border=False)
