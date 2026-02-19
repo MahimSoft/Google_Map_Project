@@ -1,23 +1,26 @@
-{% load static %}
-{% load static tailwind_tags %}
-<!DOCTYPE html>
+{% load static %} {% load static tailwind_tags %}
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>
-      {% block title %}
-        Google Maps & Photos
-      {% endblock %}
-    </title>
+    <title>{% block title %} Google Maps & Photos {% endblock %}</title>
     {% block favicon_icon %}
-      <link rel="shortcut icon" type="image/x-icon" href="{% static 'images/MS_1.svg' %}" />
+    <link
+      rel="shortcut icon"
+      type="image/x-icon"
+      href="{% static 'images/MS_1.svg' %}"
+    />
     {% endblock %}
     <meta name="author" content="Mahim Soft" />
     {% tailwind_css %}
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-     <link href="{% static 'css/msoft_fonts.css' %}" rel="stylesheet">
+    <script
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+      defer
+    ></script>
+    <link href="{% static 'css/msoft_fonts.css' %}" rel="stylesheet" />
     <style type="text/tailwindcss">
+      
       @theme {
         --color-clifford: #da373d;
       }
@@ -27,23 +30,35 @@
         min-height: 100dvh; /* or 100vh */
       }
     </style>
-    {% block extend_header %}
-
-    {% endblock %}
+    {% block extend_header %} {% endblock %}
   </head>
   <body>
-    {% block navbar %}
-    {% endblock navbar %}
+    {% block navbar %} {% endblock navbar %}
     <p id="customAlert"></p>
-    {% block content %}
+    <div class="mt-10">
 
-    {% endblock %}
+      {% block content %} {% endblock %}
+    </div>
     <br />
 
-    {% block extend_footer %}
-
-    {% endblock %}
+    {% block extend_footer %} {% endblock %}
     <script>
+      // Navbar show-hide ====
+      let lastScrollY = window.scrollY;
+      const my_main_navbar = document.getElementById("my_main_navbar");
+
+      window.addEventListener("scroll", () => {
+        if (window.scrollY > lastScrollY) {
+          // Scrolling down → hide navbar
+          my_main_navbar.classList.add("-translate-y-full");
+        } else {
+          // Scrolling up → show navbar
+          my_main_navbar.classList.remove("-translate-y-full");
+        }
+        lastScrollY = window.scrollY;
+        console.log("Message: Scrolled")
+      });
+      // Navbar show-hide End ====
       // Define your locations
       const locations = {
         london: { coords: [51.5074, -0.1278], zoom: 12 },
@@ -56,24 +71,22 @@
         Taif: { coords: [21.2583333, 40.3955556], zoom: 12 },
         Sylhet: { coords: [24.90701, 91.871405], zoom: 12 },
         vietnam: { coords: [21.1319053, 106.44063539999999], zoom: 12 },
-        CoxBazar: { coords: [21.426827, 91.984890], zoom: 12 },
-        SaintMartin: { coords: [20.628719, 92.322527], zoom: 12 }
-      }
-      
+        CoxBazar: { coords: [21.426827, 91.98489], zoom: 12 },
+        SaintMartin: { coords: [20.628719, 92.322527], zoom: 12 },
+      };
+
       function zoomTo(city) {
-        const loc = locations[city]
+        const loc = locations[city];
         if (loc) {
           // .flyTo creates a smooth "flight" animation
           map.flyTo(loc.coords, loc.zoom, {
             duration: 2,
-            easeLinearity: 0.25
-          })
+            easeLinearity: 0.25,
+          });
         }
-      }
+      };
     </script>
 
-    {% block script %}
-
-    {% endblock %}
+    {% block script %} {% endblock %}
   </body>
 </html>

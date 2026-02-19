@@ -113,12 +113,10 @@ def upload_view(request):
             else:
                 messages.warning(request, f"Could not find location data for {image_file.name} from EXIF or companion JSON. Skipping.")
 
-        return redirect('map')
+        return redirect('gallery:gallery_map')
     else:
         form = MediaItemForm()
     return render(request, 'gallery/upload.html', {'form': form})
-
-
 
 def photo_map(request):
     photos = Photo.objects.exclude(latitude__isnull=True)

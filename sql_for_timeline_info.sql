@@ -117,3 +117,21 @@ WHERE EXISTS (
         FROM location_info_from_timeline b
         WHERE b.photo_id = locations_googlephotos.id
     );
+
+
+UPDATE locations_peoplenames
+SET thumbnail = (
+        SELECT b.thumbnail
+        FROM people_name_pre b
+        WHERE lower(trim(b.name))= lower(trim(locations_peoplenames.name))
+    ),
+    archive = (
+        SELECT b.archive
+        FROM people_name_pre b
+        WHERE lower(trim(b.name))= lower(trim(locations_peoplenames.name))
+    )
+WHERE EXISTS (
+        SELECT 1
+        FROM people_name_pre b
+        WHERE lower(trim(b.name))= lower(trim(locations_peoplenames.name))
+    );

@@ -37,12 +37,25 @@ def populate_data_in_person_table(table_columns, table_name, DB_NAME, query):
     people_list_from_db = cursor.fetchall()
     print(people_list_from_db)
     print(len(people_list_from_db))
-    
+
     qry_image_nums = """
-    select count(people) as num_of_images
-    from locations_googlephotos
-    where length(people) > 0 and people like '%{}%'
+    SELECT count(id) as num_of_images
+        FROM (
+        SELECT id,
+            ROW_NUMBER() OVER (
+                PARTITION BY photo_taken_time
+                ORDER BY photo_taken_time DESC,
+                    LENGTH(people) DESC,
+                    title ASC
+            ) AS row_number
+                    FROM locations_googlephotos
+                    WHERE length(people) > 0 and people LIKE '%{}%') qualify WHERE row_number = 1;
     """
+    # qry_image_nums = """
+    # select count(people) as num_of_images
+    # from locations_googlephotos
+    # where length(people) > 0 and people like '%{}%'
+    # """
     
     qry_video_nums = """
     select count(people) as num_of_images

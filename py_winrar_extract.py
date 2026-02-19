@@ -58,9 +58,9 @@ def extract_and_delete(source_dir, destination_dir, winrar_path, delete_permanen
 if __name__ == "__main__":
     # --- Configuration ---
     winrar_path = r"C:\Program Files\WinRAR\WinRAR.exe"
-    source_dir = r"E:\Takeout_20260205\33a33a33a"
+    source_dir = r"E:\Takeout_20260205"
     # Set destination_dir to source_dir for "Extract Here"
-    destination_dir = r"E:\Takeout_20260205\33a33a33a" 
+    destination_dir = r"E:\Takeout_20260205" 
     delete_permanently = False  # False moves to Recycle Bin (requires extra lib), True deletes
     # --- End Configuration ---
     

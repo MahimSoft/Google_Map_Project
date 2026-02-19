@@ -140,7 +140,19 @@ table_peoplenamesvideos="locations_peoplenamesvideos"
 columns_person_image_video = " name TEXT, num_of_images INTEGER, thumbnail varchar(255), archive bool "
 # columns_person_image_video = " name TEXT, num_of_images INTEGER "
 columns_person_videos = " name TEXT, num_of_videos INTEGER "
-
+qry_image_nums = """
+    SELECT count(id) as num_of_images
+        FROM (
+        SELECT id,
+            ROW_NUMBER() OVER (
+                PARTITION BY photo_taken_time
+                ORDER BY photo_taken_time DESC,
+                    LENGTH(people) DESC,
+                    title ASC
+            ) AS row_number
+                    FROM locations_googlephotos
+                    WHERE length(people) > 0 and people LIKE '%{}%') qualify WHERE row_number = 1;
+    """
 query_image_video = """SELECT lower(people) as people, '' as thumbnail, 0 as archive FROM locations_googlephotos WHERE length(people) > 0"""
 # query_image_video = """SELECT people FROM locations_googlephotos WHERE length(people) > 0"""
 

@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     "whitenoise",
     "crispy_forms",
     "crispy_tailwind",
+    "django_cleanup.apps.CleanupConfig",
     # Tailwind ===============
     "tailwind",
     "theme",

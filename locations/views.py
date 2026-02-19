@@ -161,11 +161,6 @@ def google_photos_map(request):
         )
     ).filter(row_number=1, longitude__gt=0, latitude__gt=0)
     
-
-    
-    # print(media_items.count())
-    # print(media_items.values()[1])
-
     target_extensions = ('.mts','.mp4', '.3gp', '.mov', '.mpo', '.wmv', '.avi')
     places_data = []
     for item in media_items:
@@ -327,8 +322,14 @@ class PeopleImages(ListView):
         context['extra_url_params'] = f"&{query_params.urlencode()}" if query_params else ""
         # ! For pagination end -----
         #! Top 25 ======
-        top_25 = PeopleNames.objects.exclude(Q(name__icontains="Jashim Uddin Ahmed") | 
-    Q(name__icontains="Shoeb Ahmed Matin")).order_by('-num_of_images')[:13]
+        top_25 = PeopleNames.objects.exclude(   Q(name__icontains="Jashim Uddin Ahmed") | 
+                                                Q(name__icontains="taufiqul chowdhury") |
+                                                Q(name__icontains="Shoeb Ahmed Matin")|
+                                                Q(name__icontains="Mumin")|
+                                                Q(name__icontains="rahman (jg)")|
+                                                Q(name__icontains="fayzul chowdhury")|
+                                                Q(archive=1)
+    ).order_by('-num_of_images')[:13]
         context["top_25"] = top_25
         context["self_url"] = "people_images"
         #! Top 25 end ======
@@ -619,12 +620,20 @@ class SlideShowView(ListView):
         # If they don't exist, this returns an empty string
         context['extra_url_params'] = f"&{query_params.urlencode()}" if query_params else ""
         # ! For pagination end -----
-                #! Top 25 ======
-        top_25 = PeopleNames.objects.exclude(Q(name__icontains="Jashim Uddin Ahmed") | 
-    Q(name__icontains="Shoeb Ahmed Matin")).order_by('-num_of_images')[:13]
+        
+        #! Top 25 ======
+        top_25 = PeopleNames.objects.exclude(   Q(name__icontains="Jashim Uddin Ahmed") | 
+                                                Q(name__icontains="taufiqul chowdhury") |
+                                                Q(name__icontains="Shoeb Ahmed Matin")|
+                                                Q(name__icontains="Mumin")|
+                                                Q(name__icontains="rahman (jg)")|
+                                                Q(name__icontains="fayzul chowdhury")|
+                                                Q(archive=1)
+    ).order_by('-num_of_images')[:13]
         context["top_25"] = top_25
         context["self_url"] = "slides"
         #! Top 25 end ======
+        print(qs.query)
         context["total_images"] = qs.count()
         context["people"] = PeopleNames.objects.all()
         context["heading"] = "Our Friends and Family"
@@ -772,8 +781,14 @@ class ImageWithDescription(ListView):
         context['extra_url_params'] = f"&{query_params.urlencode()}" if query_params else ""
         # ! For pagination end -----
         #! Top 25 ======
-        top_25 = people.exclude(Q(name__icontains="Jashim Uddin Ahmed") | 
-        Q(name__icontains="Shoeb Ahmed Matin")).order_by('-num_of_images')[:10]
+        top_25 = PeopleNames.objects.exclude(   Q(name__icontains="Jashim Uddin Ahmed") | 
+                                                Q(name__icontains="taufiqul chowdhury") |
+                                                Q(name__icontains="Shoeb Ahmed Matin")|
+                                                Q(name__icontains="Mumin")|
+                                                Q(name__icontains="rahman (jg)")|
+                                                Q(name__icontains="fayzul chowdhury")|
+                                                Q(archive=1)
+    ).order_by('-num_of_images')[:13]
         context["top_25"] = top_25
         context["self_url"] = "image_with_description"
         #! Top 25 end ======
@@ -888,8 +903,44 @@ class LocationAlbum(ListView):
         context["total_images"] = qs.count()
         return context
 
+
+def location_url_image_count(center_lat, center_lng, radius_km, image_type):
+    qs = GooglePhotos.objects.filter(longitude__gt=0).annotate(
+        row_number = Window(
+            expression=RowNumber(),
+            partition_by=[Lower(Concat(F("photo_taken_time"),F("title")))],
+            order_by=[Lower(Concat(Trim(F("photo_taken_time")),F("title"))).desc()],
+        ),
+        people_len=Length(Trim(F("people")))
+        ).filter(row_number=1).exclude(local_folder__icontains="WhatsApp")
+    
+    if image_type==2:
+        qs = qs.filter(people_len__gt=0)
+
+    lat_delta = radius_km / 111.0
+    lng_delta = radius_km / (111.0 * math.cos(math.radians(center_lat)))
+
+    results = qs.filter(
+        latitude__range=(center_lat - lat_delta, center_lat + lat_delta),
+        longitude__range=(center_lng - lng_delta, center_lng + lng_delta)
+    ).annotate(
+        distance=6371 * ACos(
+            Cos(Radians(center_lat)) * Cos(Radians(F('latitude'))) *
+            Cos(Radians(F('longitude')) - Radians(center_lng)) +
+            Sin(Radians(center_lat)) * Sin(Radians(F('latitude')))
+        )
+    ).filter(distance__lte=radius_km)
+    return results.count()
+
+    
 def location_album_urls(request):
     urls_list = LocationAlbumUrls.objects.all()
+    
+    for url in urls_list:
+        url.image_count = location_url_image_count(url.center_lat, url.center_lng, url.radius_km, url.image_type)
+    
+    urls_list = sorted(urls_list, key=lambda u: (u.division, -u.image_count))
+        
     return render(request, 'locations/location_url_list.html', {'urls_list': urls_list,"heading": "Tour Albums"})
 
 

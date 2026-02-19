@@ -29,61 +29,64 @@
       height: 100%;
       margin: 0;
       padding: 0;
-    }
-    body {
       font-family: sans-serif;
     }
+
     #map {
-      height: 90%;
-      width: 99%;
+      height: 750px;
+      height: 85vh;
+      width: 98%;
       margin: auto;
       z-index: 1;
+      border-radius: 8px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
     }
     .controls {
       position: absolute;
-      top: 170px;
-      right: 10px;
-      z-index: 10;
+      top: 80px;
+      right: 20px;
+      z-index: 1000;
       background: white;
-      padding: 18px;
+      padding: 15px;
       border-radius: 8px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
     }
     .btn_map {
       display: block;
       width: 100%;
-      padding: 5px 1px;
+      padding: 8px 12px;
       background: #4285f4;
       color: white;
       text-decoration: none;
       text-align: center;
       border-radius: 4px;
-      margin-bottom: 10px;
+      margin-top: 10px;
+      font-weight: bold;
     }
     #side-nav {
       position: absolute;
-      top: 100;
-      left: 20;
+      top: 80px;
+      left: 0;
       width: 300px;
-      height: 100%;
+      height: calc(100% - 80px);
       background: white;
       box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
       z-index: 1001;
       transform: translateX(-100%);
       transition: transform 0.3s ease-in-out;
       overflow-y: auto;
-      padding: 10px;
+      padding: 15px;
     }
     #side-nav.open {
       transform: translateX(0);
     }
     #nav-toggle {
       position: absolute;
-      top: 37px;
-      left: 7px;
+      top: 80px;
+      left: 10px;
       z-index: 1002;
       background: white;
-      padding: 8px;
+      padding: 10px;
       border-radius: 4px;
       cursor: pointer;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
@@ -93,14 +96,16 @@
       border: none;
       box-shadow: none;
       font-weight: bold;
-      font-size: 10px;
+      font-size: 11px;
+      color: #333;
+      text-shadow: 0 0 3px white;
     }
     #side-nav h3 {
-      margin-top: 20px;
-      margin-bottom: 10px;
-      font-size: 1.2em;
-      border-bottom: 1px solid #eee;
-      padding-bottom: 5px;
+      margin-top: 15px;
+      margin-bottom: 8px;
+      font-size: 1.1em;
+      border-bottom: 2px solid #4285f4;
+      padding-bottom: 3px;
     }
     #side-nav ul {
       list-style: none;
@@ -109,34 +114,16 @@
     }
     #side-nav li a {
       display: block;
-      padding: 8px 12px;
+      padding: 6px 10px;
       text-decoration: none;
       color: #333;
       border-radius: 4px;
+      font-size: 0.9em;
     }
     #side-nav li a:hover {
-      background-color: #f0f0f0;
+      background-color: #f1f3f4;
+      color: #4285f4;
     }
-
-    /* Metro Maps
-    .metro-station-icon {
-      background: 0 0;
-    }
-    .station-marker {
-      width: 12px;
-      height: 12px;
-      background-color: #fff;
-      border: 3px solid #06c;
-      border-radius: 50%;
-    }
-    .leaflet-popup-content {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, segoe ui, Roboto, Oxygen, Ubuntu, Cantarell, open sans, helvetica neue, sans-serif;
-    }
-    .leaflet-popup-content b {
-      color: #06c;
-      display: block;
-      margin-bottom: 4px;
-    }*/
   </style>
 {% endblock %}
 
@@ -146,7 +133,7 @@
   {% if messages %}
       <ul class="messages">
           {% for message in messages %}
-              <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+              <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
           {% endfor %}
       </ul>
   {% endif %}
@@ -158,45 +145,36 @@
     <!-- Navigation content will be dynamically generated -->
   </div>
 
-  <!--! div class="controls">
-    <p id="customAlert"></p>
-    <h3>Map Image Visualizer</h3>
-    <a href="/upload" class="btn_map">Upload New Data</a>
-    <p>
-      Total Points: <span id="count">0</span>
-    </p>
-  </!-->
-<div class="badge badge-soft badge-success opacity-80 absolute top-9 right-2 z-50">
+<div class="badge badge-soft badge-success opacity-80 absolute top-20 right-2 z-50">
       <a class="item" href="#">Nos. of 
       {% if is_video %}
         Videos :
         {% else %}
         Images : 
         {% endif %}
-         <span id="count" class="text-red-300">{{total_place}}</span></a>
+         <span id="count" class="font-bold">{{total_place}}</span></a>
 </div>
   <div id="map"></div>
-<!-- Metro Map -->
-
-
-    
 {% endblock %}
 
 {% block script %} 
-{% comment %} <script src="{% static 'MetroFiles/leaflet.min.js.download' %}"></script> {% endcomment %}
-<!-- Metro Map -->
   <!-- Scripts -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
-  <!-- Data passed from Django View -->
   <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
 
   <script>
+    var map; // Global map variable
+    var markers;
+    var markerRefs = {};
+
+    document.addEventListener('DOMContentLoaded', function() {
         const placesByType = {{ places_by_type_json|safe }};
         const placesData = {{ places_json|safe }};
+        
         // Initialize Map
-        var map = L.map('map', {zoomControl: false}).setView([20, 0], 2);
+        map = L.map('map', {zoomControl: false}).setView([20, 0], 2);
 
         // Add custom zoom control to bottomright
         L.control.zoom({
@@ -209,7 +187,7 @@
         });
 
         var satelliteMap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+            attribution: 'Tiles &copy; Esri &mdash; Source: Esri'
         });
 
         var baseMaps = {
@@ -224,68 +202,64 @@
         streetMap.addTo(map);
 
         // Initialize Marker Cluster Group
-        var markers = L.markerClusterGroup();
-        var markerRefs = {}; // To store references to markers
-        const date_options = {
-            dateStyle: 'full',
-            timeStyle: 'full',
-            // timeZone: 'Asia/Dhaka' // Ensures the time is correct for Bangladesh Standard Time
-        };
+        markers = L.markerClusterGroup();
 
         const formatter = new Intl.DateTimeFormat('bn-BD', {
-        dateStyle: 'full', // Options: 'full', 'long', 'medium', 'short'
-        timeStyle: 'medium', // Options: 'full', 'long', 'medium', 'short'
-        hour12: true, // Use 24-hour format
-        timeZone: 'Asia/Dhaka' // Specify the timezone for Bangladesh
+            dateStyle: 'full',
+            timeStyle: 'medium',
+            hour12: true,
+            timeZone: 'Asia/Dhaka'
         });
+
         // Loop through Django data and add markers
         placesData.forEach(function(place, index) {
             if (place.latitude && place.longitude) {
-                
                 var icon = L.AwesomeMarkers.icon({
-                    icon: place.icon || 'info-circle',
-                    markerColor: place.color || 'blue',
+                    icon: place.icon || 'camera',
+                    markerColor: place.color || 'red',
                     prefix: 'fa'
                 });
 
                 var marker = L.marker([place.latitude, place.longitude], {icon: icon});
                 
-                var popupContent = `<b>${place.name || "Unknown Location"}</b><br>`;
+                var popupContent = `<div style="min-width: 250px;"><b>${place.name || "Unknown Location"}</b><br>`;
                 if (place.timestamp) {
-                    new_dt = new Date(place.timestamp);
-                    popupContent += `<i>${formatter.format(new_dt)}</i><br>`;
+                    try {
+                        let new_dt = new Date(place.timestamp);
+                        popupContent += `<i>${formatter.format(new_dt)}</i><br>`;
+                    } catch(e) {
+                        popupContent += `<i>${place.timestamp}</i><br>`;
+                    }
                 }
-                if (place.address) {
-                    popupContent += `<small>${place.address}</small><br>`;
-                }
-                // Add image to popup
-                if (place.image_url) {
-                  if (place.is_video) {
-                    popupContent += `<video width="320" height="240" controls>
-                    <source src="${place.image_url}" type="video/mp4">
-                    <source src="movie.webm" type="video/webm">
-                    Your browser does not support the video tag.
-                  </video>`
-                  } else {
-                    popupContent += `<a href="${place.image_url}" title="View Image" target="_blank"><img src="${place.image_url}" style="margin: auto; display: block;" width="250px"></a>
-                    <br>`;
-                  }
-                }
-                // <a href="https://www.google.com/maps?q=23.8516144,90.3860722">View Location on Google Maps</a>
                 
-                popupContent += `<small class="gps" style="color: red;"><a href="https://www.google.com/maps?q=${place.latitude},${place.longitude}" title="Go to Google Maps" target="_blank">&#128279; GEO Location</a></small>`;
+                if (place.image_url) {
+                    if (place.is_video) {
+                        popupContent += `<video width="100%" height="auto" controls style="margin-top: 10px; border-radius: 4px;">
+                            <source src="${place.image_url}" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>`;
+                    } else {
+                        popupContent += `<a href="${place.image_url}" target="_blank">
+                            <img src="${place.image_url}" style="margin: 10px auto; display: block; max-width: 100%; border-radius: 4px;" width="250px">
+                        </a>`;
+                    }
+                }
+                
+                popupContent += `<hr><small><a href="https://www.google.com/maps?q=${place.latitude},${place.longitude}" target="_blank" style="color: #4285f4; text-decoration: none;">&#128279; GEO Location</a></small>`;
+                
                 if (place.comments) {
-                    popupContent += `<br><hr><small class="text-amber-700">${place.comments||"No Comments"}</small><br>`;
+                    popupContent += `<br><small style="color: #666;">${place.comments}</small>`;
                 }
                 if (place.people) {
-                    popupContent += `<br><hr><small class="text-blue-700">${place.people||"Unknown People"}</small><br>`;
+                    popupContent += `<br><small style="color: #4285f4; font-weight: bold;">${place.people}</small>`;
                 }
+                popupContent += `</div>`;
+                
                 marker.bindPopup(popupContent);
 
-                // Add a permanent tooltip for the name
                 if (place.name) {
                     marker.bindTooltip(place.name, {
-                        permanent: true, 
+                        permanent: false, 
                         direction: 'top',
                         offset: [0, -10],
                         className: 'place-label'
@@ -293,62 +267,93 @@
                 }
 
                 markers.addLayer(marker);
-                // Use a unique key for each marker
                 markerRefs[place.name + '_' + index] = marker; 
             }
         });
 
-        // Add clusters to map
         map.addLayer(markers);
         
         // Update stats
-        document.getElementById('count').innerText = placesData.length;
+        const countElement = document.getElementById('count');
+        if (countElement) {
+            countElement.innerText = placesData.length;
+        }
 
-        // Fit bounds to show all markers
+        // Fit bounds
         if (placesData.length > 0) {
-            map.fitBounds(markers.getBounds());
+            try {
+                map.fitBounds(markers.getBounds());
+            } catch(e) {
+                console.error("Error fitting bounds:", e);
+            }
         }
 
         // Side Navigation Logic
         const sideNav = document.getElementById('side-nav');
         const navToggle = document.getElementById('nav-toggle');
         
-        navToggle.addEventListener('click', function() {
-            sideNav.classList.toggle('open');
-        });
-
-        let overallPlaceIndex = 0;
-        for (const type in placesByType) {
-            const group = placesByType[type];
-            const groupDiv = document.createElement('div');
-            groupDiv.innerHTML = `<h3>${type}</h3>`;
-            const placeList = document.createElement('ul');
-
-            group.places.forEach(function(place) {
-                const placeName = place.name;
-                const currentIndex = overallPlaceIndex;
-                const listItem = document.createElement('li');
-                listItem.innerHTML = `<a href="#">${placeName}</a>`;
-                
-                listItem.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const markerKey = placeName + '_' + currentIndex;
-                    const marker = markerRefs[markerKey];
-                    if (marker) {
-                        markers.zoomToShowLayer(marker, function() {
-                            map.setView(marker.getLatLng());
-                            marker.openPopup();
-                        });
-                    }
-                });
-                
-                placeList.appendChild(listItem);
-                overallPlaceIndex++;
+        if (navToggle && sideNav) {
+            navToggle.addEventListener('click', function() {
+                sideNav.classList.toggle('open');
             });
-            groupDiv.appendChild(placeList);
-            sideNav.appendChild(groupDiv);
+
+            // Populate side nav
+            if (Object.keys(placesByType).length === 0 && placesData.length > 0) {
+                const groupDiv = document.createElement('div');
+                groupDiv.innerHTML = `<h3>All Media</h3>`;
+                const placeList = document.createElement('ul');
+                
+                placesData.forEach(function(place, index) {
+                    const listItem = document.createElement('li');
+                    listItem.innerHTML = `<a href="#">${place.name || "Unnamed"}</a>`;
+                    listItem.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const marker = markerRefs[place.name + '_' + index];
+                        if (marker) {
+                            markers.zoomToShowLayer(marker, function() {
+                                map.setView(marker.getLatLng(), 15);
+                                marker.openPopup();
+                            });
+                        }
+                    });
+                    placeList.appendChild(listItem);
+                });
+                groupDiv.appendChild(placeList);
+                sideNav.appendChild(groupDiv);
+            } else {
+                let overallPlaceIndex = 0;
+                for (const type in placesByType) {
+                    const group = placesByType[type];
+                    const groupDiv = document.createElement('div');
+                    groupDiv.innerHTML = `<h3>${type}</h3>`;
+                    const placeList = document.createElement('ul');
+
+                    group.places.forEach(function(place) {
+                        const placeName = place.name;
+                        const currentIndex = overallPlaceIndex;
+                        const listItem = document.createElement('li');
+                        listItem.innerHTML = `<a href="#">${placeName}</a>`;
+                        
+                        listItem.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            const markerKey = placeName + '_' + currentIndex;
+                            const marker = markerRefs[markerKey];
+                            if (marker) {
+                                markers.zoomToShowLayer(marker, function() {
+                                    map.setView(marker.getLatLng(), 15);
+                                    marker.openPopup();
+                                });
+                            }
+                        });
+                        
+                        placeList.appendChild(listItem);
+                        overallPlaceIndex++;
+                    });
+                    groupDiv.appendChild(placeList);
+                    sideNav.appendChild(groupDiv);
+                }
+            }
         }
-    </script>
-
-
-  {% endblock script %}
+    });
+  </script>
+{% endblock script %}

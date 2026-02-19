@@ -10,6 +10,7 @@ cookiecutter==2.6.0
 crispy-tailwind==1.0.3
 Django==5.2.8
 django-browser-reload==1.21.0
+django-cleanup==9.0.0
 django-crispy-forms==2.5
 django-tailwind==4.4.2
 djangorestframework==3.16.1

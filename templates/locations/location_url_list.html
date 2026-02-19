@@ -68,9 +68,9 @@
     value="3"> Documents
   </label>
 </div>
-  <button type="submit" class="btn btn-light flex justify-start items-center mb-5 text-lg w-11/12 min-h-20">
+  <button type="submit" class="btn btn-light flex justify-start items-center p-1 mb-5 text-lg w-11/12 min-h-20">
   <div class="flex justify-start items-center">
-<img src="{{item.thumbnail_url}}" class="max-w-16 rounded-md max-h-16" alt="" />
+<img src="{{item.thumbnail_url}}" class="max-w-14 rounded-md max-h-14" alt="" />
 <h1 class="text-md text-start font-bold text-gray-600 ml-2 exo2">{{ item.url_display_text }}</h1>
 </div>
 </button>
@@ -81,6 +81,7 @@
               <path d="M7 41C7 40.4477 7.44772 40 8 40H41C41.5523 40 42 40.4477 42 41V43C42 43.5523 41.5523 44 41 44H8C7.44772 44 7 43.5523 7 43V41Z"></path>
             </svg>
           </a>
+    <span class="absolute top-0 right-0 badge badge-soft badge-secondary text-xs m-2 font-bold px-1 py-0.5">{{item.image_count|intcomma_bd}}</span>
  </div>
       {% endfor %}
     </div>
