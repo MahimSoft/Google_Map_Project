@@ -31,6 +31,14 @@ INSTALLED_APPS = [
     "crispy_forms",
     "crispy_tailwind",
     "django_cleanup.apps.CleanupConfig",
+    'django_htmx',
+    # allauth ======
+    # 'django.contrib.sites', # Required for sitemaps
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    # 'registration',
+    # allauth End ========
     # Tailwind ===============
     "tailwind",
     "theme",
@@ -61,6 +69,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
     "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
 
@@ -159,3 +168,5 @@ MEDIA_ROOT =  config["MEDIA_ROOT"]
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGIN_REDIRECT_URL = '/'

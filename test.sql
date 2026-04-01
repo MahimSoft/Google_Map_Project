@@ -16,7 +16,6 @@ CREATE TABLE locations_googlephotos (
     video_thumbnail VARCHAR(255),
     longitude REAL
 );
-
 SELECT *
 FROM (
         SELECT "locations_googlephotos"."id" AS "col1",
@@ -49,16 +48,43 @@ FROM (
             END AS "is_location",
             CASE
                 WHEN (
-                    "locations_googlephotos"."title" LIKE "%.MTS" 
-                    OR "locations_googlephotos"."title" LIKE "%.mp4" 
-                    OR "locations_googlephotos"."title" LIKE "%.3gp" 
-                    OR "locations_googlephotos"."title" LIKE "%.MOV" 
-                    OR "locations_googlephotos"."title" LIKE "%.MP4" 
-                    OR "locations_googlephotos"."title" LIKE "%.3GP" 
-                    OR "locations_googlephotos"."title" LIKE "%.MPO" 
-                    OR "locations_googlephotos"."title" LIKE "%.wmv" 
-                    OR "locations_googlephotos"."title" LIKE "%.AVI") 
-                    THEN True ELSE False END AS "is_video" 
-                    FROM "locations_googlephotos" 
-                    WHERE "locations_googlephotos"."people" 
-                    LIKE "%maliha mahjabin%" ORDER BY "locations_googlephotos"."photo_taken_time" DESC ) "qualify" WHERE "row_number" = 1 ORDER BY "col6" DESC
+                    "locations_googlephotos"."title" LIKE "%.MTS"
+                    OR "locations_googlephotos"."title" LIKE "%.mp4"
+                    OR "locations_googlephotos"."title" LIKE "%.3gp"
+                    OR "locations_googlephotos"."title" LIKE "%.MOV"
+                    OR "locations_googlephotos"."title" LIKE "%.MP4"
+                    OR "locations_googlephotos"."title" LIKE "%.3GP"
+                    OR "locations_googlephotos"."title" LIKE "%.MPO"
+                    OR "locations_googlephotos"."title" LIKE "%.wmv"
+                    OR "locations_googlephotos"."title" LIKE "%.AVI"
+                ) THEN True
+                ELSE False
+            END AS "is_video"
+        FROM "locations_googlephotos"
+        WHERE "locations_googlephotos"."people" LIKE "%maliha mahjabin%"
+        ORDER BY "locations_googlephotos"."photo_taken_time" DESC
+    ) "qualify"
+WHERE "row_number" = 1
+ORDER BY "col6" DESC;
+
+SELECT `locations_googlephotos`.`id`,
+    `locations_googlephotos`.`title`,
+    `locations_googlephotos`.`description`,
+    `locations_googlephotos`.`image_views`,
+    `locations_googlephotos`.`creation_time`,
+    `locations_googlephotos`.`photo_taken_time`,
+    `locations_googlephotos`.`latitude`,
+    `locations_googlephotos`.`longitude`,
+    `locations_googlephotos`.`altitude`,
+    `locations_googlephotos`.`people`,
+    `locations_googlephotos`.`image`,
+    `locations_googlephotos`.`video_thumbnail`,
+    `locations_googlephotos`.`url`,
+    `locations_googlephotos`.`local_folder`,
+    `locations_googlephotos`.`device_type`,
+    `locations_googlephotos`.`remarks`,
+    `locations_googlephotos`.`location_source`
+FROM `locations_googlephotos`
+WHERE (
+        (
+            `locations_googlephotos`.`title` LIKE" %.MP4" OR `locations_googlephotos`.`title` LIKE "%.mp4") AND `locations_googlephotos`.`device_type` = "IOS_PHONE");

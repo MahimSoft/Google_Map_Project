@@ -24,7 +24,7 @@ def setup_database(table_columns, table_name, DB_NAME):
     return conn
 
 @time_of_execution
-def process_files(source_folder, table_columns, table_name, DB_NAME, REMARKS):
+def process_files(source_folder, table_columns, table_name, DB_NAME, REMARKS,REMARKS_addition=""):
     date_format = "%b %d, %Y, %I:%M:%S %p utc"
     conn = setup_database(table_columns, table_name, DB_NAME)
     cursor = conn.cursor()
@@ -70,7 +70,7 @@ def process_files(source_folder, table_columns, table_name, DB_NAME, REMARKS):
                     origin = item.get('googlePhotosOrigin', {}).get('mobileUpload', {})
                     folder = origin.get('deviceFolder', {}).get('localFolderName')
                     device = origin.get('deviceType')
-                    remarks = REMARKS
+                    remarks = f"{REMARKS}{REMARKS_addition}"
                     location_source = ''
                     
                     # Insert into Database
@@ -92,7 +92,7 @@ def process_files(source_folder, table_columns, table_name, DB_NAME, REMARKS):
     conn.close()
     display(text=f"Extraction complete! Database saved as {DB_NAME}", query=False, mysql=False, leading_text="", border=False)
     
-# Configuration
+#TODO: Configuration for all data ============
 DB_NAME_main = 'map_db.sqlite3'
 root_folder =config["MEDIA_ROOT"]
 folder_1 ="MasudJGTDSL"
@@ -169,8 +169,7 @@ or title like '%.AVI'
 or title like '%.MP4' 
 )"""
 
-#! To Run: python py_data_processor.py
-if __name__ == "__main__":
+def all_data():
     copy_file(copy_bd_source,copy_bd_destination,entire_folder=False)
     delete_data_from_table(table_name=table_name_googlephotos, DB_NAME=DB_NAME_main)
     
@@ -210,3 +209,62 @@ if __name__ == "__main__":
                                     query = query_video)
     
     process_all_thumbnails(db_name=DB_NAME_main, output_folder=f"{root_folder}/thumbnails")
+    
+def single_folder_data_add():
+    #! Change values ============
+    folder = "albums_added_later"
+    REMARKS_addition = "-Mahimsoft"
+    #! ==========================
+    
+    REMARKS = folder
+    SOURCE_FOLDER = f'{root_folder}/{folder}/Google Photos/'
+    DEST_VIDEO_FOLDER = f'{root_folder}/{folder}/Google Photos/MP4'
+    
+    copy_file(copy_bd_source,copy_bd_destination,entire_folder=False)
+    process_files(source_folder = SOURCE_FOLDER, 
+                  table_columns = table_columns, 
+                  table_name=table_name_googlephotos, DB_NAME=DB_NAME_main, REMARKS=REMARKS, REMARKS_addition = REMARKS_addition)
+    
+    convert_to_mp4(input_root=SOURCE_FOLDER, output_root=DEST_VIDEO_FOLDER)
+    data_insertion_for_converted_mp4(input_root=SOURCE_FOLDER, db_name=DB_NAME_main)
+    
+    delete_data_from_table(table_name=table_peoplenames, DB_NAME=DB_NAME_main)
+    delete_data_from_table(table_name=table_peoplenamesvideos, DB_NAME=DB_NAME_main)
+    
+    populate_data_in_person_table(table_columns = columns_person_image_video, 
+                                    table_name = table_peoplenames, 
+                                    DB_NAME = DB_NAME_main,
+                                    query = query_image_video)
+    populate_data_in_person_table(table_columns = columns_person_videos, 
+                                    table_name = table_peoplenamesvideos, 
+                                    DB_NAME = DB_NAME_main,
+                                    query = query_video)
+
+    process_all_thumbnails(db_name=DB_NAME_main, output_folder=f"{root_folder}/thumbnails")
+
+#! To Run: python py_data_processor.py
+
+if __name__ == "__main__":
+    single_folder_data_add()
+    # all_data()
+
+
+#FIXME: Update People Thumbnails =========
+"""
+UPDATE locations_peoplenames
+SET thumbnail = (
+        SELECT b.thumbnail
+        FROM people_name_pre b
+        WHERE lower(trim(b.name))= lower(trim(locations_peoplenames.name))
+    ),
+    archive = (
+        SELECT b.archive
+        FROM people_name_pre b
+        WHERE lower(trim(b.name))= lower(trim(locations_peoplenames.name))
+    )
+WHERE EXISTS (
+        SELECT 1
+        FROM people_name_pre b
+        WHERE lower(trim(b.name))= lower(trim(locations_peoplenames.name))
+    );
+"""

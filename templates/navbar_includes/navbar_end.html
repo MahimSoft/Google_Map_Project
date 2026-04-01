@@ -1,10 +1,7 @@
  {% load static %}
-
-        <li>
-          <a class="justify-between">
-            Profile
-            <span class="badge">New</span>
-          </a>
-        </li>
-        <li><a>Settings</a></li>
-        <li><a href="#">Logout</a></li>
+        
+        {% if request.user.is_authenticated %}
+        <li><a href="{% url 'account_logout' %}"><img src="{% static 'images/logout-2.svg' %}" class="h-4" alt="logout"></a></li>
+        {% else %}
+        <li><a href="{% url 'account_login' %}"><img src="{% static 'images/login-2.svg' %}" class="h-4" alt="login"></a></li>
+        {% endif %}

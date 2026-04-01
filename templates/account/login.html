@@ -1,0 +1,108 @@
+{% extends "account/base_entrance.html" %}
+{% load i18n %}
+{% load allauth account %}
+{% block head_title %}
+    {% trans "Sign In" %}
+{% endblock head_title %}
+
+{% block content %}
+
+    {% element h1 %}
+        {% trans "Sign In" %}
+    {% endelement %}
+    {% if not SOCIALACCOUNT_ONLY %}
+        {% setvar link %}
+            <a href="#">
+            {% endsetvar %}
+            {% setvar end_link %}
+            </a>
+        {% endsetvar %}
+        {% element p %}
+            {% blocktranslate %}If you have not created an account yet, then please <button class="btn btn-sm btn-warning">{{ link }}sign up{{ end_link }}</button> first.{% endblocktranslate %}
+        {% endelement %}
+        {% url 'account_login' as login_url %}
+        {% element form form=form method="post" action=login_url tags="entrance,login" %}
+            {% slot body %}
+                {% csrf_token %}
+                {% element fields form=form unlabeled=True %}
+                {% endelement %}
+                {{ redirect_field }}
+    <!-- FIXME: Added for showPasswordToggle -->
+<style>
+  .fade-icon {
+    transition: opacity 0.3s ease;
+  }
+</style>
+
+<script>
+  const input_div = document.getElementById("id_password_helptext");
+
+  const eye_open_svg =`<svg viewBox="0 0 48 48" width="18px" height="18px" class="fade-icon">
+    <path d="M41.4 23.71a.9.9 0 0 1 0 .58c-.63 1.92-2.2 4.89-4.82 7.51A17.35 17.35 0 0 1 24 37.11c-5.42 0-9.55-2.28-12.58-5.3a20.44 20.44 0 0 1-4.82-7.52.9.9 0 0 1 0-.58c.63-1.92 2.2-4.89 4.82-7.51A17.35 17.35 0 0 1 24 10.89c5.42 0 9.55 2.28 12.58 5.3a20.44 20.44 0 0 1 4.82 7.52ZM24 41c13.83 0 20.82-11.7 21.96-16.81a.85.85 0 0 0 0-.38C44.82 18.71 37.83 7 24 7S3.18 18.7 2.04 23.81a.85.85 0 0 0 0 .38C3.18 29.29 10.17 41 24 41Z"></path>
+    <path d="M24 27.21a3.21 3.21 0 1 1 0-6.42 3.21 3.21 0 0 1 0 6.42Zm0 4.29a7.5 7.5 0 1 0 0-15 7.5 7.5 0 0 0 0 15Z"></path>
+  </svg>`;
+
+  const eye_close_svg = `<svg viewBox="0 0 48 48" width="18px" height="18px" class="fade-icon" xmlns="http://www.w3.org/2000/svg">
+    <path d="M38.88 41.7a1 1 0 0 0 1.41 0l1.42-1.4a1 1 0 0 0 0-1.42l-3.86-3.86a24.57 24.57 0 0 0 6.27-9.69 1 1 0 0 0 0-.66C41 15.8 32.66 9 23 9c-3.27 0-6.35.73-9.12 2.05L9.12 6.29a1 1 0 0 0-1.41 0L6.29 7.71a1 1 0 0 0 0 1.41l32.59 32.59Zm-22-27.66A17.8 17.8 0 0 1 23 13c12.75 0 17 12 17 12s-1.38 3.9-4.93 7.25l-4.54-4.55A7.99 7.99 0 0 0 23 17c-.95 0-1.86.16-2.7.47l-3.43-3.43ZM1.87 24.67a24.64 24.64 0 0 1 5.8-9.23l2.77 2.78C7.25 21.46 6 25 6 25s4.25 12 17 12a18 18 0 0 0 5.42-.8l3.05 3.05A21.2 21.2 0 0 1 23 41c-9.83 0-17.93-6.63-21.13-15.67a1 1 0 0 1 0-.66Z"></path>
+    <path d="M15 25c0-.68.08-1.35.24-1.98l9.74 9.73A8.02 8.02 0 0 1 15 25Z"></path>
+  </svg>`;
+
+  input_div.innerHTML = `
+    <div style="position: relative; float: right; width: 38px; display: flex; justify-content: right; top: -38px; right: 3px;">
+      <button class="btn btn-outline-light btn-sm"
+        id="togglePassword_btn"
+        type="button"
+        onclick="togglePassword()"
+        aria-label="Show password"
+        aria-pressed="false">
+        ${eye_open_svg}
+      </button>
+    </div>` + input_div.innerHTML;
+
+  function togglePassword() {
+    const input = document.getElementById("id_password");
+    const toggle_btn = document.getElementById("togglePassword_btn");
+    const isPassword = input.type === "password";
+
+    input.type = isPassword ? "text" : "password";
+    toggle_btn.setAttribute("aria-label", isPassword ? "Hide password" : "Show password");
+    toggle_btn.setAttribute("aria-pressed", isPassword ? "true" : "false");
+    toggle_btn.innerHTML = isPassword ? eye_close_svg : eye_open_svg;
+  }
+</script>
+    <!-- FIXME: Added for showPasswordToggle End -->
+            {% endslot %}
+            {% slot actions %}
+                {% element button type="submit" tags="prominent,login" %}
+                    {% trans "Sign In" %}
+                {% endelement %}
+            {% endslot %}
+        {% endelement %}
+    {% endif %}
+    {% if LOGIN_BY_CODE_ENABLED or PASSKEY_LOGIN_ENABLED %}
+        {% element hr %}
+        {% endelement %}
+        {% element button_group vertical=True %}
+            {% if PASSKEY_LOGIN_ENABLED %}
+                {% element button type="submit" form="mfa_login" id="passkey_login" tags="prominent,login,outline,primary" %}
+                    {% trans "Sign in with a passkey" %}
+                {% endelement %}
+            {% endif %}
+            {% if LOGIN_BY_CODE_ENABLED %}
+                {% element button href=request_login_code_url tags="prominent,login,outline,primary" %}
+                    {% trans "Mail me a sign-in code" %}
+                {% endelement %}
+            {% endif %}
+        {% endelement %}
+    {% endif %}
+    {% if SOCIALACCOUNT_ENABLED %}
+        {% include "socialaccount/snippets/login.html" with page_layout="entrance" %}
+    {% endif %}
+{% endblock content %}
+
+{% block extra_body %}
+    {{ block.super }}
+    {% if PASSKEY_LOGIN_ENABLED %}
+        {% include "mfa/webauthn/snippets/login_script.html" with button_id="passkey_login" %}
+    {% endif %}
+{% endblock %}

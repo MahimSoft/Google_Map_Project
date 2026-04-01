@@ -1,0 +1,119 @@
+{% include 'base.html' %}
+{% load django_htmx %}
+{% block extend_header%}
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+        {% django_htmx_script %}
+    <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+<style>
+    body,
+    html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        background: #fefefe !important;
+    }
+
+    .user_card {
+        /* width: 350px; */
+        margin-top: auto!important;
+        margin-bottom: auto!important;
+        background: #ffffff;
+        position: relative;
+        display: flex;
+        justify-content: center;
+        /* align-items: center; */
+        flex-direction: column;
+        padding: 10px 20px;
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+        -webkit-box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+        -moz-box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+        border-radius: 5px;
+
+    }
+
+    .form_container {
+        margin-top: 10px;
+        margin-bottom: auto;
+    }
+
+    #form-title {
+        color: #fff;
+
+    }
+
+    .login_btn {
+        width: 100%;
+        background: #33ccff !important;
+        color: white !important;
+    }
+
+    .login_btn:focus {
+        box-shadow: none !important;
+        outline: 0px !important;
+    }
+
+    .login_container {
+        padding: 0 1rem;
+    }
+
+    .input-group-text {
+        background: #f7ba5b !important;
+        color: white !important;
+        border: 0 !important;
+        border-radius: 0.25rem 0 0 0.25rem !important;
+    }
+
+    .input_user,
+    .input_pass:focus {
+        box-shadow: none !important;
+        outline: 0px !important;
+    }
+
+    #messages {
+        background-color: grey;
+        color: #fff;
+        padding: 10px;
+        margin-top: 10px;
+    }
+
+    /* Modified By Masud */
+    label {
+        display: none;
+    }
+
+    label[for="id_remember"] {
+        display: inline-block;
+    }
+    label[for^="email"] {
+        display: inline-block;
+    }
+
+    h1 {
+        color: #474747;
+    }
+
+    .form-control {
+        width: 100% !important;
+    }
+
+    a {
+        text-decoration: none !important;
+    }
+</style>
+{% django_htmx_script %}
+    
+{%endblock%}
+    <div class="d-flex justify-content-center form_container w-2xl mx-auto"  hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' class="{% block class %}{% endblock %}">
+        <div class="user_card">
+            {% block content %}
+            {% endblock content %}
+        </div>
+    </div>
+    {% block extend_footer %}
+    {% endblock extend_footer %}
+    
+<script>
+    const footer_cls = document.getElementsByClassName("sticky-bottom")
+    footer_cls[0].innerHTML = ""
+</script>

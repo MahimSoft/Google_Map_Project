@@ -1,4 +1,6 @@
 from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from datetime import datetime, date, timedelta
 from django.contrib import messages
 import os
@@ -48,6 +50,7 @@ BATCH_ICONS = {
     'labeled': 'tag'
 }
 
+@login_required
 def upload_data(request):
     if request.method == 'POST' and request.FILES.get('file'):
         uploaded_file = request.FILES['file']
@@ -88,6 +91,8 @@ def upload_data(request):
 
     return render(request, 'locations/upload.html')
 
+
+@login_required
 def map_view(request):
     # Fetch all places and their batch color, grouped by batch
     batches = LocationBatch.objects.prefetch_related('places').all().order_by(
@@ -135,7 +140,8 @@ def map_view(request):
         'total_place': len(flat_places_list)
     })
     
-    
+
+@login_required    
 def google_photos_map(request):
     try:
         is_video = int(request.GET.get('is_video'))
@@ -157,11 +163,25 @@ def google_photos_map(request):
         row_number=Window(
             expression=RowNumber(),
             partition_by=[F("title")],
-            order_by=[F("title").asc(), -F("people")]
+            order_by=[F("title").asc(),-F("longitude"), -F("people")]
         )
     ).filter(row_number=1, longitude__gt=0, latitude__gt=0)
     
     target_extensions = ('.mts','.mp4', '.3gp', '.mov', '.mpo', '.wmv', '.avi')
+    google_users_color = {'MasudJGTDSL':'red','33a33a33a':'purple','Mahimsoft':'blue'}
+    color_scale = [
+                    '#08306B', # Deep Blue
+                    '#2171B5', # Steel Blue
+                    '#6BAED6', # Sky Blue
+                    '#2CA25F', # Teal
+                    '#66C2A4', # Green
+                    '#B8E186', # Yellow-Green
+                    '#FDD835', # Goldenrod
+                    '#FD8D3C', # Orange
+                    '#E6550D', # Red-Orange
+                    '#A50F15'  # Crimson
+                    ]
+
     places_data = []
     for item in media_items:
         if item.latitude and item.longitude: # Only include items with location data
@@ -170,8 +190,8 @@ def google_photos_map(request):
                 'longitude': item.longitude,
                 'timestamp': item.photo_taken_time.isoformat() if item.photo_taken_time else None, # ISO format for JS Date parsing
                 'name': item.title if item.title else os.path.basename(item.image.name), # Use title or filename
-                'icon': 'camera', # Default icon, can be customized
-                'color': 'red',   # Default color, can be customized
+                'icon': 'video-camera' if item.title.lower().endswith(target_extensions) else 'camera', # Default icon, can be customized
+                'color': 'blue' if item.title.lower().endswith(target_extensions) else google_users_color.get(item.remarks, 'yellow'),   # Default color, can be customized
                 'address': '',    # MediaItem does not have an address field
                 'comments': f"User: {item.remarks}",   # MediaItem does not have an comments field
                 'image_url': item.image.url, # URL to display image in popup
@@ -221,7 +241,7 @@ def google_photos_map(request):
     return render(request, 'locations/google_photos_map.html', context) # Render map.html instead of takeout.html
 
 
-class PeopleImages(ListView):
+class PeopleImages(LoginRequiredMixin,ListView):
     model = GooglePhotos
     template_name = 'locations/image_slide_show.html'
     context_object_name = "slides"
@@ -343,7 +363,7 @@ class PeopleImages(ListView):
         return context
 
     
-class PeopleVideos(ListView):
+class PeopleVideos(LoginRequiredMixin, ListView):
     model = GooglePhotos
     template_name = 'locations/image_slide_show.html'
     context_object_name = "slides"
@@ -445,7 +465,7 @@ class PeopleVideos(ListView):
         return context
     
     
-class PeopleVideos_short(ListView):
+class PeopleVideos_short(LoginRequiredMixin, ListView):
     model = GooglePhotos
     template_name = 'locations/slideshow_alpine_js.html'
     context_object_name = "slides"
@@ -454,9 +474,10 @@ class PeopleVideos_short(ListView):
 
     def get_queryset(self):
         qs = super().get_queryset()
-        qs= qs.filter((Q(title__endswith='.MP4')
+        qs= qs.filter(((Q(title__endswith='.MP4')|Q(title__endswith='.mp4'))
              & Q(device_type='IOS_PHONE')
              ))
+        display(qs, query=True)
         try:
             person_id = self.request.GET.get("person_id")
             people_name = PeopleNamesVideos.objects.get(id=person_id).name.lower()
@@ -527,7 +548,7 @@ class PeopleVideos_short(ListView):
         return context
     
     
-class SlideShowView(ListView):
+class SlideShowView(LoginRequiredMixin, ListView):
     model = GooglePhotos
     template_name = 'locations/slideshow_alpine_js.html'
     context_object_name = 'slides'
@@ -664,51 +685,51 @@ def download_media(request, media_id):
         return response
 
 
-class ImageWithDescription(ListView):
+class ImageWithDescription(LoginRequiredMixin, ListView):
     model = GooglePhotos
     template_name = 'locations/slideshow_alpine_js.html'
     context_object_name = "slides"
-    paginate_by = 75
+    # paginate_by = 75
 
 
     def get_queryset(self):
         qs = super().get_queryset()
-        try:
-            person_id = self.request.GET.get("person_id")
-            print(int(person_id))
-            if int(person_id) == 10000:
-                qs = qs.annotate(
-                    people_len=Length(F("people"))
-                ).filter(people_len=0)
-                people_name = ""
-            else:
-                people_name = PeopleNames.objects.get(id=person_id).name.lower()
-                qs = qs.annotate(
-                    person_name=Value(people_name, output_field=CharField())
-                ).filter(people__icontains=people_name)
+        # try:
+        #     person_id = self.request.GET.get("person_id")
+        #     print(int(person_id))
+        #     if int(person_id) == 10000:
+        #         qs = qs.annotate(
+        #             people_len=Length(F("people"))
+        #         ).filter(people_len=0)
+        #         people_name = ""
+        #     else:
+        #         people_name = PeopleNames.objects.get(id=person_id).name.lower()
+        #         qs = qs.annotate(
+        #             person_name=Value(people_name, output_field=CharField())
+        #         ).filter(people__icontains=people_name)
                 
-        except:
-            qs = qs.annotate(
-                    people_len=Length(F("people"))
-                ).filter(people_len__gt=0)
-            people_name = ""
+        # except:
+        #     qs = qs.annotate(
+        #             people_len=Length(F("people"))
+        #         ).filter(people_len__gt=0)
+        #     people_name = ""
             
-        try:
-            year = int(self.request.GET.get("year"))
-            if year>0:
-                qs = qs.annotate(
-                    photo_year=ExtractYear("photo_taken_time"),
-                             ).filter(photo_year=year)
-        except:
-            year = None
+        # try:
+        #     year = int(self.request.GET.get("year"))
+        #     if year>0:
+        #         qs = qs.annotate(
+        #             photo_year=ExtractYear("photo_taken_time"),
+        #                      ).filter(photo_year=year)
+        # except:
+        #     year = None
             
-        try:
-            month = int(self.request.GET.get("month"))
-            if month>0:
-                qs = qs.annotate(photo_month=ExtractMonth("photo_taken_time")
-                             ).filter(photo_month=month)
-        except:
-            month = None
+        # try:
+        #     month = int(self.request.GET.get("month"))
+        #     if month>0:
+        #         qs = qs.annotate(photo_month=ExtractMonth("photo_taken_time")
+        #                      ).filter(photo_month=month)
+        # except:
+        #     month = None
             
         qs = qs.annotate(
         description_len=Length(Trim(F("description"))),
@@ -735,8 +756,8 @@ class ImageWithDescription(ListView):
              then=Value(True)),
         default=Value(False),
         output_field=BooleanField(),
-    )).filter(Q(description_len__gt=1)
-              & Q(row_number=1)
+    )).filter(remarks="Location Manipulated"
+              
             #   & Q(Q(title__icontains='Morjina') | Q(title__icontains='AAAA0033.JPG')| Q(title__icontains='AAAA0034.JPG'))
               )
         qs = qs.annotate(
@@ -804,7 +825,7 @@ class ImageWithDescription(ListView):
         return context
 
 
-class LocationAlbum(ListView):
+class LocationAlbum(LoginRequiredMixin, ListView):
     model = GooglePhotos
     template_name = 'locations/location_album.html'
     context_object_name = "slides"
@@ -932,7 +953,7 @@ def location_url_image_count(center_lat, center_lng, radius_km, image_type):
     ).filter(distance__lte=radius_km)
     return results.count()
 
-    
+@login_required
 def location_album_urls(request):
     urls_list = LocationAlbumUrls.objects.all()
     
@@ -944,12 +965,13 @@ def location_album_urls(request):
     return render(request, 'locations/location_url_list.html', {'urls_list': urls_list,"heading": "Tour Albums"})
 
 
+@login_required
 def people_album_urls(request):
     people_list = PeopleNames.objects.all().filter(archive=False).order_by("-num_of_images")
     return render(request, 'locations/location_person_url_list.html', {'urls_list': people_list,"heading": "Photo Albums by Person"})
 
 
-class UrlCreateView(CreateView):
+class UrlCreateView(LoginRequiredMixin, CreateView):
     template_name = "locations/location_url_add.html"
     form_class = UrlCreateForm
     success_url = "./"
@@ -966,7 +988,7 @@ class UrlCreateView(CreateView):
         return super(UrlCreateView, self).form_valid(form)
     
 
-class UrlUpdateView(UpdateView):
+class UrlUpdateView(LoginRequiredMixin, UpdateView):
     model = LocationAlbumUrls
     form_class = UrlCreateForm
     template_name = "locations/location_url_add.html"
@@ -986,7 +1008,7 @@ class UrlUpdateView(UpdateView):
         return super(UrlUpdateView, self).form_valid(form)
     
     
-class PeopleNameUpdateView(UpdateView):
+class PeopleNameUpdateView(LoginRequiredMixin, UpdateView):
     model = PeopleNames
     form_class = PeopleUpdateForm
     template_name = "locations/location_url_add.html"

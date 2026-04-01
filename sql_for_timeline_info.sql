@@ -98,7 +98,7 @@ SELECT id,
     longitude
 FROM locations_googlephotos
 WHERE latitude < 1
-    AND local_folder NOT like "%WhatsApp%";
+    AND local_folder NOT like "%WhatsApp%" AND not length(trim(description))>0;
 DELETE FROM location_info_from_timeline;
 UPDATE locations_googlephotos
 SET longitude = (

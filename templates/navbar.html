@@ -55,17 +55,18 @@
     </ul>
   </div>
 
-  <div class="navbar-end h-full">
+  <!-- Navbar End: Desktop Menu (hidden on small screens) -->
+  <div class="navbar-end">
     <div class="group dropdown dropdown-end flex">
-      <ul
-        tabindex="0"
-        class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-12 w-52 p-2 shadow"
-      >
+      <ul>
         {% include 'navbar_includes/navbar_end.html' %}
+        {% block extranav_end %}
+        {% endblock extranav_end %}
       </ul>
-      {% block extranav_end %}
-      {% endblock extranav_end %}
     </div>
   </div>
+
+
+
 </div>
 </div>
