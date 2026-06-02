@@ -212,7 +212,7 @@ def all_data():
     
 def single_folder_data_add():
     #! Change values ============
-    folder = "albums_added_later"
+    folder = "EIDUIL_ADHA_2026"
     REMARKS_addition = "-Mahimsoft"
     #! ==========================
     
@@ -250,7 +250,10 @@ if __name__ == "__main__":
 
 
 #FIXME: Update People Thumbnails =========
-"""
+
+# !Already included in function, No required to run.
+qry = """
+
 UPDATE locations_peoplenames
 SET thumbnail = (
         SELECT b.thumbnail

@@ -2,7 +2,43 @@ from datetime import datetime
 import sqlite3
 from py_delete_data_from_table import delete_data_from_table
 
-
+def copy_previous_people_data(DB_NAME):
+    columns_person_image_video = " name TEXT, num_of_images INTEGER, thumbnail varchar(255) NULL, archive bool "
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute(f"CREATE TABLE IF NOT EXISTS people_name_pre (id INTEGER PRIMARY KEY AUTOINCREMENT, {columns_person_image_video})")
+    delete_data_from_table(" people_name_pre ",DB_NAME)
+    qry =f"INSERT INTO people_name_pre SELECT * FROM locations_peoplenames;"
+    cursor.execute(qry)
+    conn.commit() 
+    conn.close()
+    
+def update_people_thumbnails(DB_NAME):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    
+    sql = """
+            UPDATE locations_peoplenames
+            SET thumbnail = (
+                    SELECT b.thumbnail
+                    FROM people_name_pre b
+                    WHERE lower(trim(b.name))= lower(trim(locations_peoplenames.name))
+                ),
+                archive = (
+                    SELECT b.archive
+                    FROM people_name_pre b
+                    WHERE lower(trim(b.name))= lower(trim(locations_peoplenames.name))
+                )
+            WHERE EXISTS (
+                    SELECT 1
+                    FROM people_name_pre b
+                    WHERE lower(trim(b.name))= lower(trim(locations_peoplenames.name))
+                );
+            """
+    cursor.execute(sql)
+    conn.commit() 
+    conn.close()
+    
 def setup_database(table_columns, table_name, DB_NAME):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
@@ -11,6 +47,7 @@ def setup_database(table_columns, table_name, DB_NAME):
     return conn
 
 def populate_data_in_person_table(table_columns, table_name, DB_NAME, query):
+    copy_previous_people_data(DB_NAME)
     conn = setup_database(table_columns, table_name, DB_NAME)
     cursor = conn.cursor()
     cursor.execute(query)
@@ -87,11 +124,10 @@ def populate_data_in_person_table(table_columns, table_name, DB_NAME, query):
             cursor.execute(f"UPDATE {table_name} SET num_of_videos = {num_of_images} WHERE id = '{item[0]}';")
             
     conn.commit()
-    # conn.commit()          
-    # print(tuple(enumerate(people_list)), len(people_list))
-
     conn.close()
-
+    
+    if table_name == "locations_peoplenames":
+        update_people_thumbnails(DB_NAME)
 
 #! To Run: python py_person_data.py
 
