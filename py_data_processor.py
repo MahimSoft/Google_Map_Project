@@ -212,8 +212,8 @@ def all_data():
     
 def single_folder_data_add():
     #! Change values ============
-    folder = "EIDUIL_ADHA_2026"
-    REMARKS_addition = "-Mahimsoft"
+    folder = "Maliha_20260630"
+    REMARKS_addition = "-From_Maliha_20260630"
     #! ==========================
     
     REMARKS = folder
@@ -253,6 +253,9 @@ if __name__ == "__main__":
 
 # !Already included in function, No required to run.
 qry = """
+DELETE FROM people_name_pre;
+
+INSERT INTO people_name_pre SELECT * FROM locations_peoplenames;
 
 UPDATE locations_peoplenames
 SET thumbnail = (

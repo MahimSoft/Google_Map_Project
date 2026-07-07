@@ -18,6 +18,6 @@ def extract_files(source_dir, destination_dir):
 #! To Run: python py_zipfile_extract.py
 
 if __name__ == "__main__":
-    SOURCE_DIR = r"F:\ZIP TEST"
-    DESTINATION_DIR = r"F:\ZIP TEST"
+    SOURCE_DIR = r"E:\Takeout_20260205\20260707\Maliha_20260630"
+    DESTINATION_DIR = r"E:\Takeout_20260205\20260707\Maliha_20260630"
     extract_files(SOURCE_DIR, DESTINATION_DIR)

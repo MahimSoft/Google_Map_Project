@@ -78,7 +78,7 @@ class PeopleUpdateForm(forms.ModelForm):
             "thumbnail": "Thumbnail",
         }
         widgets = {
-            "thumbnail": forms.FileInput(),
+            "thumbnail": forms.FileInput(attrs={'class': 'file-input file-input-md file-input-success'}),
         }
 
     def __init__(self, *args, **kwargs):
